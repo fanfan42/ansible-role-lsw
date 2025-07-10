@@ -1,0 +1,50 @@
+---
+
+- name: Gather variables for each operating system
+  ansible.builtin.include_vars:
+    file: "{{ lookup('ansible.builtin.fileglob', role_path + '/vars/' + ansible_facts['lsb']['id'] | lower + '.yml') }}"
+  tags: always
+
+- name: Set facts
+  ansible.builtin.import_tasks: set_facts.yml
+  tags: always
+
+- name: Verify if this role can be applied
+  ansible.builtin.import_tasks: preflight.yml
+  tags: always
+
+- name: Install packages
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      tags: install
+  tags:
+    - never
+    - install
+
+- name: Build VM image
+  ansible.builtin.include_tasks:
+    file: build.yml
+    apply:
+      tags: build
+  tags:
+    - never
+    - build
+
+- name: Configure libvirtd and default parameters
+  ansible.builtin.include_tasks:
+    file: configure.yml
+    apply:
+      tags: config
+  tags:
+    - never
+    - config
+
+- name: Create VM
+  ansible.builtin.include_tasks:
+    file: create_vm.yml
+    apply:
+      tags: create
+  tags:
+    - never
+    - create

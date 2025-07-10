@@ -1,0 +1,142 @@
+---
+
+# Can be:
+# - passthrough
+# - gvtg
+# - sriov
+pgs_virt_mode: passthrough
+
+# Passthrough vars
+# Get this var by running this command: lspci | grep VGA
+pgs_passthrough_gpu_pci_base_addr: 01:00
+
+# Build Windows VM vars
+pgs_windows_iso: windows10.iso
+pgs_windows_vm_name: 'vm-{{ ansible_hostname }}'
+# Can be raw or qcow2
+pgs_windows_img_format: raw
+pgs_windows_img_size: 50G
+# Disk only, not a partition
+# WARNING: the disk is wiped
+# Ex: /dev/sda or /dev/nvme0n1
+pgs_windows_disk_device_path: ''
+pgs_windows_build_mem: '{{ (ansible_memtotal_mb / 2) | int }}'
+pgs_windows_build_num_cpu: '{{ (ansible_processor_vcpus / 2) | int }}'
+pgs_windows_build_timeout_minutes: 30
+# Can be 10 or 11
+pgs_windows_version: 10
+pgs_windows_language: fr-FR
+pgs_windows_timezone: 'Romance Standard Time'
+# 040c:00000409 -> US
+# 0409:0000040c -> FR France
+pgs_windows_keyboard: 040c:00000409
+# Generic Licence Key for Windows 10/11 Pro N
+# Either you change it with a valid licence key, either you activate Windows after install
+pgs_windows_licence_key: 2B87N-8KFHP-DKV6R-Y2C8J-PKCKT
+pgs_windows_user: "{{ ansible_env['LOGNAME'] }}"
+pgs_windows_password: ''
+# Can be nvidia or amd or intel (the default if using gvtg or sriov)
+pgs_windows_gpu_driver: intel
+pgs_windows_gpu_install_options:
+  'intel': '-s -norestart'
+  'nvidia': '-s -noreboot'
+  'amd': '/INSTALL /QUIET /NORESTART'
+pgs_windows_app_to_remove:
+  - Microsoft.Microsoft3DViewer
+  - Microsoft.BingSearch
+  - Microsoft.WindowsCalculator
+  - Microsoft.WindowsCamera
+  - Clipchamp.Clipchamp
+  - Microsoft.WindowsAlarms
+  - Microsoft.549981C3F5F10
+  - Microsoft.Windows.DevHome
+  - MicrosoftCorporationII.MicrosoftFamily
+  - Microsoft.WindowsFeedbackHub
+  - Microsoft.GetHelp
+  - Microsoft.Getstarted
+  - microsoft.windowscommunicationsapps
+  - Microsoft.WindowsMaps
+  - Microsoft.MixedReality.Portal
+  - Microsoft.BingNews
+  - Microsoft.WindowsNotepad
+  - Microsoft.MicrosoftOfficeHub
+  - Microsoft.Office.OneNote
+  - Microsoft.OutlookForWindows
+  - Microsoft.Paint
+  - Microsoft.MSPaint
+  - Microsoft.People
+  - Microsoft.Windows.Photos
+  - Microsoft.PowerAutomateDesktop
+  - MicrosoftCorporationII.QuickAssist
+  - Microsoft.SkypeApp
+  - Microsoft.ScreenSketch
+  - Microsoft.MicrosoftSolitaireCollection
+  - Microsoft.MicrosoftStickyNotes
+  - MicrosoftTeams
+  - MSTeams
+  - Microsoft.Todos
+  - Microsoft.WindowsSoundRecorder
+  - Microsoft.Wallet
+  - Microsoft.BingWeather
+  - Microsoft.Xbox.TCUI
+  - Microsoft.XboxApp
+  - Microsoft.XboxGameOverlay
+  - Microsoft.XboxGamingOverlay
+  - Microsoft.XboxIdentityProvider
+  - Microsoft.XboxSpeechToTextOverlay
+  - Microsoft.GamingApp
+  - Microsoft.YourPhone
+  - Microsoft.ZuneMusic
+  - Microsoft.ZuneVideo
+
+pgs_windows_capability_to_remove:
+  - Print.Fax.Scan
+  - Language.Handwriting
+  - Browser.InternetExplorer
+  - MathRecognizer
+  - OneCoreUAP.OneSync
+  - OpenSSH.Client
+  - Microsoft.Windows.MSPaint
+  - App.Support.QuickAssist
+  - Microsoft.Windows.SnippingTool
+  - Language.Speech
+  - Language.TextToSpeech
+  - App.StepsRecorder
+  - Hello.Face.18967
+  - Hello.Face.Migration.18967
+  - Hello.Face.20134
+  - Media.WindowsMediaPlayer
+
+pgs_windows_feature_to_remove:
+  - MediaPlayback
+  - Microsoft-RemoteDesktopConnection
+  - Recall
+  - Microsoft-SnippingTool
+
+# Configuration vars
+pgs_config_is_laptop: true
+# Only for nvidia
+# Can be: integrated, nvidia, hybrid, auto (if on battery or AC power)
+# pgs_optmgr_default_mode: integrated
+# In MB, cannot exceed 3/4 of Host memory or this role will fail
+pgs_config_vm_memory: 8192
+# You need 2 keyboards to set this variable, one for the VM, one for the system/host
+# found in /dev/input/by-id/usb-?-event-kbd
+pgs_config_usb_kbd: ""
+# You need 2 mice to set this variable, one for the VM, one for the system/host
+# found in /dev/input/by-id/usb-?-event-mouse
+pgs_config_usb_mouse: ""
+# If Nvidia GPU GTX family, you will have to set this var to true
+# Also, please follow the guide to create a patched ROM for your card
+pgs_config_gpu_nvidia_gtx: false
+# Only if pgs_windows_disk_device_path is set with a valid disk path
+# If set to true, the PCI controller is passed to the VM. It gives bare-metal performance
+# For SATA controller, it gives all the SATA disks to the VM
+pgs_config_pass_disk_controller: false
+
+# Other vars
+pgs_windows_install_app_from_ninite: false
+pgs_install_looking_glass: false
+# Highly recommended to install to have better performance for a desktop Linux
+# If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
+pgs_install_zen: true

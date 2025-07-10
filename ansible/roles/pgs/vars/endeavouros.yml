@@ -1,0 +1,35 @@
+---
+
+pgs_distro_boot_location: '/efi'
+
+pgs_packages:
+  - packer
+  - edk2-ovmf
+  - qemu-base
+  - qemu-hw-usb-host
+  - libvirt
+  - virt-manager
+  - ebtables
+  - dnsmasq
+  - downgrade
+  - yay
+  - python-lxml
+# Only useful for gvt-g and needed for Windows img build
+  - qemu-ui-gtk
+# Only useful for gvt-g, sr-iov and for looking-glass
+  - qemu-audio-pa
+  - qemu-ui-spice-core
+  - qemu-ui-opengl
+# Build dependencies
+  - python-build
+  - python-installer
+  - python-pyproject-hooks
+
+pgs_zen_packages:
+  - 'linux-zen=6.12.10.zen1'
+  - 'linux-zen-headers=6.12.10.zen1'
+
+# pgs_laptop_packages:
+#   - optimus-manager-git
+# Add this package if you want a graphical interfacv for Optimus
+#  - optimus-manager-qt

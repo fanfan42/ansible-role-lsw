@@ -1,0 +1,49 @@
+---
+
+- name: Install needed packages
+  ansible.builtin.package:
+    name: "{{ pgs_packages }}"
+    state: present
+  become: true
+
+- name: Install pycdlib on EndeavourOS
+  ansible.builtin.command: yay -S --noconfirm --needed python-pycdlib-git
+  register: _install_eos
+  changed_when: "'installing' in _install_eos.stdout.lower() or 'upgrading' in _install_eos.stdout.lower()"
+  when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+
+- name: Install looking-glass on EndeavourOS
+  ansible.builtin.command: yay -S --noconfirm --needed looking-glass
+  register: _install_eos_lg
+  changed_when: "'install' in _install_eos_lg.stdout.lower()"
+  when:
+    - ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - pgs_install_looking_glass
+
+- name: Install Zen Kernel on EndeavourOS
+  ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed
+  register: _install_eos_zen
+  changed_when: "'install' in _install_eos_zen.stdout.lower()"
+  loop: "{{ pgs_zen_packages }}"
+  when:
+    - ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - pgs_install_zen
+  notify:
+    - Reboot
+    - Pause
+  become: true
+
+# - name: Install optimus-manager on EndeavourOS
+#   ansible.builtin.command: yay -S --noconfirm --needed {{ item }}
+#   register: _install_eos_optmgr
+#   changed_when: "'install' in _install_eos_optmgr.stdout.lower()"
+#   loop: pgs_laptop_packages
+#   when:
+#     - ansible_facts['lsb']['id'] == 'EndeavourOS'
+#     - pgs_config_is_laptop
+#     - pgs_windows_gpu_driver == 'nvidia'
+#   become: false
+
+- name: Force all notified handlers to run at this point
+  ansible.builtin.meta: flush_handlers
+  become: true

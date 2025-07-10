@@ -1,0 +1,31 @@
+---
+
+- name: Set IOMMU kernel parameter based on CPU vendor
+  ansible.builtin.set_fact:
+    __iommu_param: >-
+      {{ 'intel_iommu=on' if 'GenuineIntel' in ansible_facts['processor'][1] else 'amd_iommu=on' }}
+
+- name: Get Intel CPU generation
+  ansible.builtin.command: bash {{ role_path }}/files/intelcpuversion.sh
+  register: _intel_generation
+  changed_when: false
+
+- name: Extract CPU generation (Intel only)
+  ansible.builtin.set_fact:
+    __intel_generation: "{{ _intel_generation.stdout | default('0') }}"
+
+- name: Generate dynamic cgroup_device_acl block content
+  ansible.builtin.set_fact:
+    __cgroup_acl_block: |
+      cgroup_device_acl = [
+      {% if pgs_config_usb_kbd != '' %}
+          "{{ pgs_config_usb_kbd }}",
+      {% endif %}
+      {% if pgs_config_usb_mouse != '' %}
+          "{{ pgs_config_usb_mouse }}",
+      {% endif %}
+          "/dev/null", "/dev/full", "/dev/zero",
+          "/dev/random", "/dev/urandom",
+          "/dev/ptmx", "/dev/kvm",
+          "/dev/rtc","/dev/hpet"
+      ]

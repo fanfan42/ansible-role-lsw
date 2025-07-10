@@ -1,0 +1,99 @@
+---
+
+- name: Copy Packer template
+  ansible.builtin.template:
+    src: packer.json.j2
+    dest: '{{ role_path }}/build/packer.json'
+    mode: preserve
+
+- name: Copy Win Unattend template
+  ansible.builtin.template:
+    src: autounattend.xml.j2
+    dest: '{{ role_path }}/build/autounattend.xml'
+    mode: preserve
+
+- name: Verify if packages.iso exists
+  ansible.builtin.stat:
+    path: '{{ role_path }}/build/extra_packages/packages.iso'
+  register: _pkgiso
+
+- name: Generate ISO file for drivers and packages
+  community.general.iso_create:
+    src_files: '{{ role_path }}/build/extra_packages'
+    dest_iso: '{{ role_path }}/build/extra_packages/packages.iso'
+    interchange_level: 3
+  when: not _pkgiso.stat.exists
+
+- name: Delete Windows destination directory if exists
+  ansible.builtin.file:
+    path: '{{ role_path }}/build/windows_img_dir'
+    state: absent
+  become: true
+
+- name: Prepare build for passthrough mode
+  when: pgs_virt_mode == "passthrough"
+  become: true
+  block:
+    - name: Unbind devices before build for passthrough
+      ansible.builtin.shell: |
+        echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > \
+        /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }}/driver/unbind
+      loop: "{{ range(0, (_pci_ids.stdout | split(',') | length)) | list }}"
+      changed_when: true
+    - name: Bind devices to vfio-pci for passthrough
+      ansible.builtin.shell: |
+        echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > /sys/bus/pci/drivers/vfio-pci/bind
+      loop: "{{ range(0, (_pci_ids.stdout | split(',') | length)) | list }}"
+      changed_when: true
+    - name: Init Packer plugin QEMU
+      ansible.builtin.command:
+        cmd: 'packer plugins install github.com/hashicorp/qemu'
+        chdir: '{{ role_path }}/build'
+      changed_when: true
+    - name: Build Windows image for passthrough
+      ansible.builtin.command:
+        cmd: 'packer build packer.json'
+        chdir: '{{ role_path }}/build'
+      environment:
+        PACKER_LOG: "1"
+      changed_when: true
+
+- name: Prepare build for modes not passthrough
+  when: pgs_virt_mode != "passthrough"
+  block:
+    - name: Init Packer plugin QEMU
+      ansible.builtin.command:
+        cmd: 'packer plugins install github.com/hashicorp/qemu'
+        chdir: '{{ role_path }}/build'
+      changed_when: true
+    - name: Build Windows image
+      ansible.builtin.command:
+        cmd: 'packer build packer.json'
+        chdir: '{{ role_path }}/build'
+      environment:
+        PACKER_LOG: "1"
+      changed_when: true
+
+- name: Copy img to disk
+#  notify: Reload Boot
+  ansible.builtin.command:
+    cmd: |
+      qemu-img convert -f {{ pgs_windows_img_format }} -O raw {{ role_path }}/build/windows_img_dir/{{ pgs_windows_vm_name }} {{ pgs_windows_disk_device_path }}
+  when: pgs_windows_disk_device_path != ''
+  changed_when: true
+  become: true
+
+# - name: Remove vfio build configuration for Passthrough Virtualization mode
+#   when: pgs_virt_mode == "passthrough"
+#   become: true
+#   notify:
+#     - Reinstall Kernels
+#   block:
+#     - name: Remove initramfs (dracut) options
+#       ansible.builtin.file:
+#         path: /etc/dracut.conf.d/vfio.conf
+#         state: absent
+#     - name: Remove modprobe.d options for vfio
+#       ansible.builtin.file:
+#         path: /etc/modprobe.d/vfio.conf
+#         state: absent
