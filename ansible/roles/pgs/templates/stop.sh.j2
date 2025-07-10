@@ -1,0 +1,44 @@
+#!/bin/bash
+set -x
+
+# Deisolate host
+systemctl set-property --runtime -- user.slice AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
+systemctl set-property --runtime -- system.slice AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
+systemctl set-property --runtime -- init.scope AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
+
+# Unload VFIO-PCI Kernel Driver
+modprobe -r vfio_pci
+modprobe -r vfio_iommu_type1
+modprobe -r vfio
+
+{% if pgs_virt_mode == 'passthrough' %}
+# Re-Bind GPU to Host
+{% for idx in range(_pci_ids.stdout.split(',') | length) %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
+virsh nodedev-reattach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
+sleep 2
+{% if pgs_windows_gpu_driver == 'nvidia' %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/nvidia-gpu/bind
+{% elif pgs_windows_gpu_driver == 'intel' %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/xe/bind
+{% elif pgs_windows_gpu_driver == 'amd' %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/amdgpu/bind
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% if pgs_config_pass_disk_controller %}
+echo {{ _disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _disk_pci_addr.stdout }}/driver/unbind
+virsh nodedev-reattach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
+{% endif %}
+
+# Restart Display Manager
+systemctl restart display-manager.service
+
+{% if _lg | default(false) %}
+# Delete looking glass shm
+rm /dev/shm/looking-glass
+{% endif %}
+
+# Comment out autologin lines in /etc/lightdm/lightdm.conf
+sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf

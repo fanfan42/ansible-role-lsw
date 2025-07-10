@@ -1,0 +1,31 @@
+---
+
+- name: Reinstall Kernels
+  ansible.builtin.shell:
+    cmd: >-
+      {{
+        'reinstall-kernels'
+        if _systemd_boot.stat.exists
+        else 'grub-mkconfig -o ' + pgs_distro_boot_location + '/grub/grub.cfg && update-grub'
+      }}
+  changed_when: true
+  become: true
+
+- name: Reboot
+  ansible.builtin.shell: |
+    nohup bash -c "sleep 10 && shutdown -r now" >/dev/null 2>&1 &
+  async: 1
+  poll: 0
+  ignore_errors: true
+  become: true
+
+- name: Pause
+  ansible.builtin.pause:
+    seconds: 15
+    prompt: 'The system will now reboot, please re execute the playbook at next startup'
+
+- name: Restart libvirt
+  ansible.builtin.systemd:
+    name: libvirtd
+    state: restarted
+  become: true

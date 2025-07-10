@@ -1,0 +1,111 @@
+#!/bin/bash
+
+declare -A CORE_TO_CPUS
+CORES_SORTED=()
+FIRST_CORE=""
+VCPU_TOTAL=0
+
+load_core_cpu_map() {
+  mapfile -t core_cpu_list < <(lscpu -p=CORE,CPU | grep -v '^#')
+  CORE_TO_CPUS=()
+
+  for ENTRY in "${core_cpu_list[@]}"; do
+    CORE_TO_CPUS["${ENTRY%%,*}"]+="${ENTRY##*,} "
+  done
+
+  CORES_SORTED=($(printf '%s\n' "${!CORE_TO_CPUS[@]}" | sort -n))
+}
+
+get_emulator_core() {
+  FIRST_CORE="${CORES_SORTED[0]}"
+}
+
+get_emulator_cpuset() {
+  echo "${CORE_TO_CPUS[${FIRST_CORE}]}" | tr ' ' ',' | sed 's/,$//'
+}
+
+calculate_vm_vcpus() {
+  VCPU_TOTAL=0
+  for CORE in "${CORES_SORTED[@]}"; do
+    if [[ "${CORE}" != "${FIRST_CORE}" ]]; then
+      for _ in ${CORE_TO_CPUS[$CORE]}; do
+        ((VCPU_TOTAL++))
+      done
+    fi
+  done
+}
+
+case "$1" in
+  cputune)
+    load_core_cpu_map
+    get_emulator_core
+    calculate_vm_vcpus
+    EMULATOR_CPUS=$(get_emulator_cpuset)
+
+    cat <<EOF
+  <vcpu placement="static">${VCPU_TOTAL}</vcpu>
+  <iothreads>1</iothreads>
+  <cputune>
+EOF
+
+    VCPU_INDEX=0
+    for CORE in "${CORES_SORTED[@]}"; do
+      [[ "${CORE}" == "${FIRST_CORE}" ]] && continue
+      for CPU in ${CORE_TO_CPUS[$CORE]}; do
+        echo "    <vcpupin vcpu=\"${VCPU_INDEX}\" cpuset=\"${CPU}\"/>"
+        ((VCPU_INDEX++))
+      done
+    done
+
+    cat <<EOF
+    <emulatorpin cpuset="${EMULATOR_CPUS}"/>
+    <iothreadpin iothread="1" cpuset="${EMULATOR_CPUS}"/>
+  </cputune>
+EOF
+    ;;
+  cpuconf)
+    load_core_cpu_map
+    get_emulator_core
+
+{% raw %}
+    TOTAL_CORES=${#CORE_TO_CPUS[@]}
+{% endraw %}
+    VM_CORES=$((TOTAL_CORES - 1))
+
+    cat <<EOF
+  <cpu mode="host-passthrough" check="none" migratable="on">
+    <topology sockets="1" dies="1" clusters="1" cores="${VM_CORES}" threads="2"/>
+    <cache mode="passthrough"/>
+    <feature policy="require" name="topoext"/>
+  </cpu>
+EOF
+    ;;
+  diskconf)
+    cat <<EOF
+    <disk type="{% if pgs_windows_disk_device_path == '' %}file{% else %}block{% endif %}" device="disk">
+      <driver name="qemu" type="{{ pgs_windows_img_format }}" cache="none" io="threads" discard="unmap"/>
+      <source {% if pgs_windows_disk_device_path == '' %}file="{{ role_path }}/build/windows_img_dir/{{ pgs_windows_vm_name }}{% else %}dev="{{ pgs_windows_disk_device_path }}{% endif %}"/>
+      <target dev="sda" bus="scsi"/>
+      <boot order="1"/>
+      <address type="drive" controller="0" bus="0" target="0" unit="{% if pgs_windows_disk_device_path == '' %}2{% else %}0{% endif %}"/>
+    </disk>
+EOF
+    ;;
+  scsicntrl)
+    load_core_cpu_map
+    get_emulator_core
+    calculate_vm_vcpus
+    cat <<EOF
+    <controller type="scsi" index="0" model="virtio-scsi">
+      <driver iothread="1" queues="${VCPU_TOTAL}"/>
+      <address type="pci" domain="0x0000" bus="0x03" slot="0x00" function="0x0"/>
+    </controller>
+EOF
+    ;;
+  systemd)
+    load_core_cpu_map
+    get_emulator_core
+    EMULATOR_CPUS=$(get_emulator_cpuset)
+    echo "${EMULATOR_CPUS}"
+    ;;
+esac

@@ -1,0 +1,9 @@
+force_drivers+=" vfio vfio_iommu_type1 vfio_pci "
+{% if pgs_windows_gpu_driver == 'nvidia' %}
+modprobe_blacklist+=" nouveau nvidia nvidia_drm nvidia_modeset nvidia_uvm "
+{% elif pgs_windows_gpu_driver == 'amd' %}
+modprobe_blacklist+=" amdgpu radeon "
+{% elif pgs_windows_gpu_driver == 'intel' %}
+modprobe_blacklist+=" i915 xe "
+{% endif %}
+install_items+=" /etc/modprobe.d/vfio.conf "

@@ -1,0 +1,55 @@
+{
+  "builders": [
+    {
+      "type": "qemu",
+      "iso_url": "file:///{{ role_path }}/build/{{ pgs_windows_iso }}",
+      "iso_checksum": "none",
+      "output_directory": "windows_img_dir",
+      "format": "{{ pgs_windows_img_format }}",
+      "vm_name": "{{ pgs_windows_vm_name }}",
+      "accelerator": "kvm",
+      "disk_size": "{{ pgs_windows_img_size }}",
+      "disk_interface": "virtio-scsi",
+      "net_device": "e1000",
+      "floppy_files": [
+        "autounattend.xml"
+      ],
+      "qemuargs": [
+        ["-cpu", "host,migratable=on,hv-time=on,hv-relaxed=on,hv-vapic=on,hv-spinlocks=0x1fff,hv-vpindex=on,hv-runtime=on,hv-synic=on,hv-stimer=on,hv-frequencies=on,hv-tlbflush=on,hv-ipi=on,hv-evmcs=on,hv-avic=on"],
+        ["-drive", "if=none,file=windows_img_dir/{{ pgs_windows_vm_name }},id=drive0,cache=writeback,discard=ignore,format=raw"],
+        ["-drive", "file={{ pgs_windows_iso }},media=cdrom"],
+        ["-drive", "file=/usr/share/edk2/x64/OVMF_CODE.4m.fd,if=pflash,unit=0,format=raw,readonly=on"],
+        ["-drive", "file=windows_img_dir/efivars.fd,if=pflash,unit=1,format=raw"],
+        ["-drive", "file=virtio/virtio-win.iso,media=cdrom"],
+        ["-drive", "file=extra_packages/packages.iso,media=cdrom"],
+        ["-device", "virtio-scsi-pci,id=scsi0"],
+        ["-device", "scsi-hd,bus=scsi0.0,drive=drive0"],
+{% if pgs_virt_mode == 'passthrough' %}
+        ["-device", "driver=pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=true,addr=0x3"],
+        ["-device", "driver=pcie-root-port,port=17,chassis=2,id=pci.2,bus=pcie.0,addr=0x3.0x1"],
+        ["-device", "driver=pcie-root-port,port=18,chassis=3,id=pci.3,bus=pcie.0,addr=0x3.0x2"],
+        ["-device", "driver=pcie-root-port,port=19,chassis=4,id=pci.4,bus=pcie.0,addr=0x3.0x3"],
+        ["-device", "driver=pcie-root-port,port=20,chassis=5,id=pci.5,bus=pcie.0,addr=0x3.0x4"],
+{% for idx in range(_pci_ids.stdout.split(',') | length) %}
+        ["-device", "driver=vfio-pci,host=0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }},id=hostdev{{ idx }},bus=pci.{{ 2 + idx }},addr=0x0"]{% if not loop.last %},{% endif %}
+{% endfor %}
+{% endif %}
+      ],
+      "efi_boot": "true",
+      "efi_firmware_code": "/usr/share/edk2/x64/OVMF_CODE.4m.fd",
+      "efi_firmware_vars": "/usr/share/edk2/x64/OVMF_VARS.4m.fd",
+      "machine_type": "q35",
+      "memory": "{{ pgs_windows_build_mem }}",
+      "cpus": "{{ pgs_windows_build_num_cpu }}",
+      "communicator": "none",
+      "pause_before_connecting": "{{ pgs_windows_build_timeout_minutes }}m",
+      "shutdown_timeout": "{{ (pgs_windows_build_timeout_minutes + 5) | int }}m"
+    }
+  ],
+  "provisioners": [
+  {
+    "type": "shell-local",
+    "inline": ["echo 'Installing Windows... waiting {{ pgs_windows_build_timeout_minutes }} min'; sleep {{ (pgs_windows_build_timeout_minutes * 60) | int}}"]
+  }
+]
+}

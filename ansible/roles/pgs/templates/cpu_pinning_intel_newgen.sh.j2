@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# Compact cpu sets in ranges (eg: 0-1,12)
+function cpuset_to_ranges {
+  local -a CPUS=($(printf "%s\n" "$@" | sort -n))
+  local RANGES=()
+  local START=${CPUS[0]}
+  local PREV=${START}
+{% raw %}
+  for ((i=1; i<${#CPUS[@]}; i++)); do
+{% endraw %}
+    local CUR=${CPUS[i]}
+    if (( CUR == PREV + 1 )); then
+      PREV=${CUR}
+    else
+      if (( START == PREV )); then
+        RANGES+=("$START")
+      else
+        RANGES+=("${START}-${PREV}")
+      fi
+      START=$CUR
+      PREV=$CUR
+    fi
+  done
+  if (( START == PREV )); then
+    RANGES+=("${START}")
+  else
+    RANGES+=("${START}}-${PREV}")
+  fi
+  echo "${RANGES[*]}" | tr ' ' ','
+}
+
+# Change match core -> cpu 
+declare -A CORE_CPUS
+while IFS=',' read -r CORE CPU; do
+  CORE_CPUS[$CORE]+="$CPU "
+done < <(lscpu -p=CORE,CPU | grep -v '^#')
+
+# Identify 1st P-Core and 1st E-CORE
+FIRST_PCORE=""
+FIRST_ECORE=""
+for CORE in $(printf '%s\n' "${!CORE_CPUS[@]}" | sort -n); do
+  CPUS=(${CORE_CPUS[$CORE]})
+{% raw %}
+  COUNT=${#CPUS[@]}
+{% endraw %}
+  if [[ ${COUNT} -eq 2 && -z ${FIRST_PCORE} ]]; then
+    FIRST_PCORE=${CORE}
+    FIRST_PCPUS=("${CPUS[@]}")
+  elif [[ ${COUNT} -eq 1 && -z ${FIRST_ECORE} ]]; then
+    FIRST_ECORE=${CORE}
+    FIRST_ECPU=${CPUS[0]}
+  fi
+  [[ -n ${FIRST_PCORE} && -n ${FIRST_ECORE} ]] && break
+done
+
+# List uniq CPU
+ALL_CPUS=()
+for CPULIST in "${CORE_CPUS[@]}"; do
+  for CPU in ${CPULIST}; do
+    ALL_CPUS+=(${CPU})
+  done
+done
+IFS=$'\n' ALL_CPUS=($(sort -n -u <<<"${ALL_CPUS[*]}"))
+unset IFS
+
+# Host reserved CPUs
+SYSTEM_CPUS=("${FIRST_PCPUS[@]}" "${FIRST_ECPU}")
+
+# Guest reserved CPUs
+VM_CPUS=()
+for CPU in "${ALL_CPUS[@]}"; do
+  if [[ ! " ${SYSTEM_CPUS[*]} " =~ " ${CPU} " ]]; then
+    VM_CPUS+=($CPU)
+  fi
+done
+
+# Total CPUs
+{% raw %}
+VCPU_VM_COUNT=${#VM_CPUS[@]}
+{% endraw %}
+
+# Fonction pour générer le cpuset compacté des CPUs système
+function get_system_cpuset {
+  cpuset_to_ranges "${SYSTEM_CPUS[@]}"
+}
+
+case "$1" in
+  cputune)
+    cat <<EOF
+<vcpu placement='static'>${VCPU_VM_COUNT}</vcpu>
+<iothreads>1</iothreads>
+<cputune>
+EOF
+    for i in "${!VM_CPUS[@]}"; do
+      echo "    <vcpupin vcpu=\"$i\" cpuset=\"${VM_CPUS[$i]}\"/>"
+    done
+    SYSTEM_CPUSET=$(get_system_cpuset)
+    cat <<EOF
+  <emulatorpin cpuset="${SYSTEM_CPUSET}"/>
+  <iothreadpin iothread="1" cpuset="${SYSTEM_CPUSET}"/>
+</cputune>
+EOF
+    ;;
+  cpuconf)
+    cat <<EOF
+  <cpu mode="host-passthrough" check="none" migratable="on">
+    <topology sockets="1" clusters="1" dies="1" cores="${VCPU_VM_COUNT}" threads="1"/>
+    <cache mode="passthrough"/>
+    <feature policy="require" name="topoext"/>
+  </cpu>
+EOF
+    ;;
+  diskconf)
+    cat <<EOF
+    <disk type="{% if pgs_windows_disk_device_path == '' %}file{% else %}block{% endif %}" device="disk">
+      <driver name="qemu" type="{{ pgs_windows_img_format }}" cache="none" io="threads" discard="unmap"/>
+      <source {% if pgs_windows_disk_device_path == '' %}file="{{ role_path }}/build/windows_img_dir/{{ pgs_windows_vm_name }}{% else %}dev="{{ pgs_windows_disk_device_path }}{% endif %}"/>
+      <target dev="sda" bus="scsi"/>
+      <boot order="1"/>
+      <address type="drive" controller="0" bus="0" target="0" unit="{% if pgs_windows_disk_device_path == '' %}2{% else %}0{% endif %}"/>
+    </disk>
+EOF
+    ;;
+  systemd)
+    SYSTEM_CPUSET=$(get_system_cpuset)
+    echo ${SYSTEM_CPUSET}
+    ;;
+  scsicntrl)
+    cat <<EOF
+    <controller type="scsi" index="0" model="virtio-scsi">
+      <driver iothread="1" queues="${VCPU_VM_COUNT}"/>
+      <address type="pci" domain="0x0000" bus="0x03" slot="0x00" function="0x0"/>
+    </controller>
+esac
