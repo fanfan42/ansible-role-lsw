@@ -139,7 +139,7 @@
       <mac address="52:54:00:{% if _lg %}00:24:be{% else %}70:65:8d{% endif %}"/>
       <source network="default"/>
       <model type="virtio"/>
-      <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
+      <address type="pci" domain="0x0000" bus="0x19" slot="0x00" function="0x0"/>
     </interface>
     <serial type="pty">
       <target type="isa-serial" port="0">
@@ -151,36 +151,35 @@
     </console>
     <input type="mouse" bus="ps2"/>
     <input type="keyboard" bus="ps2"/>
-{% if pgs_config_usb_mouse != '' and not _lg %}
+{% if pgs_config_usb_mouse != '' %}
     <input type="mouse" bus="virtio">
       <address type="pci" domain="0x0000" bus="0x1c" slot="0x00" function="0x0"/>
     </input>
 {% endif %}
-{% if pgs_config_usb_kbd != '' and not _lg %}
+{% if pgs_config_usb_kbd != '' %}
     <input type="keyboard" bus="virtio">
       <address type="pci" domain="0x0000" bus="0x1d" slot="0x00" function="0x0"/>
     </input>
 {% endif %}
 {% if _lg %}
-    <graphics type='spice' autoport='yes'>
-      <listen type='address'/>
-      <image compression='off'/>
+    <graphics type="spice" autoport="yes">
+      <listen type="{% if pgs_config_usb_kbd != '' and pgs_config_usb_mouse != '' %}none{% else %}address{% endif %}"/>
     </graphics>
-    <sound model='ich9'>
-      <audio id='1'/>
-      <address type="pci" domain="0x0000" bus="0x00" slot="0x1b" function='0x0'/>
-    </sound>
-    <audio id='1' type='pulseaudio' serverName='/run/user/{{ ansible_effective_user_id }}/pulse/native'>
-      <input mixingEngine='no'/>
-      <output mixingEngine='no'/>
-    </audio>
-{% else %}
-    <audio id="1" type="none"/>
+    <video>
+      <model type="none"/>
+    </video>
 {% endif %}
 {% if _lg %}
-    <video>
-      <model type='none'/>
-    </video>
+    <sound model="ich9">
+      <audio id="1"/>
+      <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
+    </sound>
+    <audio id="1" type="pulseaudio" serverName="/run/user/{{ ansible_effective_user_id }}/pulse/native">
+      <input mixingEngine="no"/>
+      <output mixingEngine="no"/>
+    </audio>
+{% elif pgs_virt_mode == 'passthrough' %}
+    <audio id="1" type="none"/>
 {% endif %}
 {% if pgs_virt_mode == 'passthrough' %}
 {% for idx in range(_pci_ids.stdout.split(',') | length) %}
@@ -191,9 +190,17 @@
 {% if pgs_config_gpu_nvidia_gtx and idx == 0 %}
       <rom file="{{ role_path }}/files/patched-bios.rom"/>
 {% endif %}
-      <address type="pci" domain="0x0000" bus="0x0{{ idx + 5 }}" slot="0x00" function="0x0"/>
+      <address type="pci" domain="0x0000" bus="0x1{{ idx + 5 }}" slot="0x00" function="0x0"/>
     </hostdev>
 {% endfor %}
+{% endif %}
+{% if pgs_virt_mode == 'gvtg' %}
+    <hostdev mode="subsystem" type="mdev" managed="no" model="vfio-pci" display="off">
+      <source>
+        <address uuid="65e0c490-1f9f-47e2-87b4-3f3d14255b2f"/>
+      </source>
+      <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
+    </hostdev>
 {% endif %}
 {% if pgs_config_pass_disk_controller %}
     <hostdev mode="subsystem" type="pci" managed="yes">
@@ -204,26 +211,25 @@
       <address type="pci" domain="0x0000" bus="0x1b" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
-    <watchdog model="itco" action="reset"/>
     <memballoon model="none"/>
 {% if _lg %}
-    <shmem name='looking-glass'>
-      <model type='ivshmem-plain'/>
-      <size unit='M'>64</size>
-      <address type='pci' domain='0x0000' bus='0x19' slot='0x00' function='0x0'/>
+    <shmem name="looking-glass">
+      <model type="ivshmem-plain"/>
+      <size unit="M">64</size>
+      <address type="pci" domain="0x0000" bus="0x1a" slot="0x00" function="0x0"/>
     </shmem>
 {% endif %}
   </devices>
   <qemu:commandline>
-{% if pgs_config_is_laptop %}
+{% if pgs_config_is_laptop and pgs_virt_mode == 'passthrough' %}
     <qemu:arg value="-acpitable"/>
     <qemu:arg value="file={{ role_path }}/files/acpitable.bin"/>
 {% endif %}
-{% if pgs_config_usb_mouse != '' and not _lg %}
+{% if pgs_config_usb_mouse != '' %}
     <qemu:arg value="-object"/>
     <qemu:arg value="input-linux,id=mouse1,evdev={{ pgs_config_usb_mouse }}"/>
 {% endif %}
-{% if pgs_config_usb_kbd != '' and not _lg %}
+{% if pgs_config_usb_kbd != '' %}
     <qemu:arg value="-object"/>
     <qemu:arg value="input-linux,id=kbd1,evdev={{ pgs_config_usb_kbd }},grab_all=on,repeat=on"/>
 {% endif %}

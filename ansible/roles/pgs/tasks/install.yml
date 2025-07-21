@@ -7,18 +7,23 @@
   become: true
 
 - name: Install pycdlib on EndeavourOS
-  ansible.builtin.command: yay -S --noconfirm --needed python-pycdlib-git
+  ansible.builtin.command: yay -S --noconfirm --needed python-wheel python-pycdlib-git
   register: _install_eos
   changed_when: "'installing' in _install_eos.stdout.lower() or 'upgrading' in _install_eos.stdout.lower()"
   when: ansible_facts['lsb']['id'] == 'EndeavourOS'
 
 - name: Install looking-glass on EndeavourOS
+  # community.general.pacman:
+  #   name: '{{ item }}'
+  #   state: present
+  #   executable: yay
   ansible.builtin.command: yay -S --noconfirm --needed looking-glass
   register: _install_eos_lg
   changed_when: "'install' in _install_eos_lg.stdout.lower()"
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
     - pgs_install_looking_glass
+    # - pgs_virt_mode != 'gvtg'
 
 - name: Install Zen Kernel on EndeavourOS
   ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed
@@ -26,12 +31,85 @@
   changed_when: "'install' in _install_eos_zen.stdout.lower()"
   loop: "{{ pgs_zen_packages }}"
   when:
-    - ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - ansible_facts['lsb']['id']  == 'EndeavourOS'
     - pgs_install_zen
+    - pgs_virt_mode != 'gvtg'
   notify:
     - Reboot
     - Pause
   become: true
+
+- name: Install Zen Kernel on EndeavourOS with GVT-g
+  ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed
+  register: _install_eos_zen
+  changed_when: "'install' in _install_eos_zen.stdout.lower()"
+  loop: "{{ pgs_zen_gvtg_packages }}"
+  when:
+    - ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - pgs_install_zen
+    - pgs_virt_mode == 'gvtg'
+  notify:
+    - Reboot
+    - Pause
+  become: true
+
+# - debug:
+#     var: pgs_gvtg_downgrade_date
+
+# - name: Downgrade packages on EndeavourOS when Virtualization mode is GVT-g
+#   when:
+#     - ansible_facts['lsb']['id'] == 'EndeavourOS'
+#     - pgs_virt_mode == 'gvtg'
+#     - pgs_gvtg_downgrade_date != ''
+#   become: true
+#   notify:
+#     - Reboot
+#     - Pause
+#   block:
+#     - name: Check if downgrade already done
+#       ansible.builtin.stat:
+#         path: '{{ role_path }}/files/mirrorlist'
+#       register: _mirrorlist_path
+#     - name: Backup old mirrorlist
+#       ansible.builtin.copy:
+#         src: /etc/pacman.d/mirrorlist
+#         dest: '{{ role_path }}/files/'
+#         mode: preserve
+#       when: not _mirrorlist_path.stat.exists
+#     - name: Copy custom mirrorlist
+#       ansible.builtin.template:
+#         src: mirrorlist.j2
+#         dest: /etc/pacman.d/mirrorlist
+#         mode: "0644"
+#         owner: root
+#         group: root
+#       when: not _mirrorlist_path.stat.exists
+#     - name: Downgrade system
+#       community.general.pacman:
+#         update_cache: true
+#         upgrade: true
+#         update_cache_extra_args: -y -y
+#         upgrade_extra_args: -u -u
+#         # force: true
+#       # register: result
+#       # changed_when: result.packages | length > 0
+#       # ansible.builtin.command: pacman -Syyuu --noconfirm
+#       # changed_when: true
+#       when: not _mirrorlist_path.stat.exists
+#     - name: Create Ignore Pkg config in pacman.conf
+#       ansible.builtin.lineinfile:
+#         path: /etc/pacman.conf
+#         regexp: '^#IgnorePkg'
+#         line: "IgnorePkg={{ pgs_packages | select('search', 'qemu-|virt|edk2-') | join(' ') }}"
+#         create: true
+#       when: not _mirrorlist_path.stat.exists
+#     - name: Give back old mirrorlist
+#       ansible.builtin.copy:
+#         src: '{{ role_path }}/files/mirrorlist'
+#         dest: /etc/pacman.d/mirrorlist
+#         # dest: '{{ role_path }}/files/'
+#         mode: preserve
+#       when: not _mirrorlist_path.stat.exists
 
 # - name: Install optimus-manager on EndeavourOS
 #   ansible.builtin.command: yay -S --noconfirm --needed {{ item }}
@@ -44,6 +122,6 @@
 #     - pgs_windows_gpu_driver == 'nvidia'
 #   become: false
 
-- name: Force all notified handlers to run at this point
-  ansible.builtin.meta: flush_handlers
-  become: true
+# - name: Force all notified handlers to run at this point
+#   ansible.builtin.meta: flush_handlers
+#   become: true

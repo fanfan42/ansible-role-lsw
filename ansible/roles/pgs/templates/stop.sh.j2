@@ -6,12 +6,17 @@ systemctl set-property --runtime -- user.slice AllowedCPUs=0-{{ (ansible_process
 systemctl set-property --runtime -- system.slice AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
 systemctl set-property --runtime -- init.scope AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
 
+{% if pgs_config_pass_disk_controller %}
+echo {{ _disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _disk_pci_addr.stdout }}/driver/unbind
+virsh nodedev-reattach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
+{% endif %}
+
+{% if pgs_virt_mode == 'passthrough' %}
 # Unload VFIO-PCI Kernel Driver
 modprobe -r vfio_pci
 modprobe -r vfio_iommu_type1
 modprobe -r vfio
 
-{% if pgs_virt_mode == 'passthrough' %}
 # Re-Bind GPU to Host
 {% for idx in range(_pci_ids.stdout.split(',') | length) %}
 echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
@@ -25,20 +30,19 @@ echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drive
 echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/amdgpu/bind
 {% endif %}
 {% endfor %}
-{% endif %}
-
-{% if pgs_config_pass_disk_controller %}
-echo {{ _disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _disk_pci_addr.stdout }}/driver/unbind
-virsh nodedev-reattach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
-{% endif %}
 
 # Restart Display Manager
 systemctl restart display-manager.service
+
+# Comment out autologin lines in /etc/lightdm/lightdm.conf
+sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf
+{% endif %}
 
 {% if _lg | default(false) %}
 # Delete looking glass shm
 rm /dev/shm/looking-glass
 {% endif %}
 
-# Comment out autologin lines in /etc/lightdm/lightdm.conf
-sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf
+{% if pgs_virt_mode == 'gvtg' %}
+echo 1 > "/sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
+{% endif %}

@@ -1,22 +1,25 @@
 ---
-
+# /boot for gvtg with arch
+# /efi for classic eos
 pgs_distro_boot_location: '/efi'
 
 pgs_packages:
   - packer
   - edk2-ovmf
   - qemu-base
+  - qemu-common
   - qemu-hw-usb-host
+  - qemu-img
+  - qemu-system-x86
+  - qemu-system-x86-firmware
   - libvirt
   - virt-manager
+  - virt-install
   - ebtables
   - dnsmasq
   - downgrade
   - yay
   - python-lxml
-# Only useful for gvt-g and needed for Windows img build
-  - qemu-ui-gtk
-# Only useful for gvt-g, sr-iov and for looking-glass
   - qemu-audio-pa
   - qemu-ui-spice-core
   - qemu-ui-opengl
@@ -24,10 +27,19 @@ pgs_packages:
   - python-build
   - python-installer
   - python-pyproject-hooks
+  - qemu-ui-gtk
 
 pgs_zen_packages:
   - 'linux-zen=6.12.10.zen1'
   - 'linux-zen-headers=6.12.10.zen1'
+
+pgs_zen_gvtg_packages:
+  - 'linux-zen=6.1.12.zen1'
+  - 'linux-zen-headers=6.1.12.zen1'
+
+# In the format: year/month/date
+# pgs_gvtg_downgrade_date: '2023/08/28' for the date when everything OK
+# pgs_gvtg_downgrade_date: '2023/08/28'
 
 # pgs_laptop_packages:
 #   - optimus-manager-git

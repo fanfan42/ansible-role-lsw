@@ -114,7 +114,7 @@ EOF
   diskconf)
     cat <<EOF
     <disk type="{% if pgs_windows_disk_device_path == '' %}file{% else %}block{% endif %}" device="disk">
-      <driver name="qemu" type="{{ pgs_windows_img_format }}" cache="none" io="threads" discard="unmap"/>
+      <driver name="qemu" type="{{ pgs_windows_img_format }}" cache="none" io="{% if pgs_windows_disk_device_path == '' %}threads{% else %}native{% endif %}" discard="unmap"/>
       <source {% if pgs_windows_disk_device_path == '' %}file="{{ role_path }}/build/windows_img_dir/{{ pgs_windows_vm_name }}{% else %}dev="{{ pgs_windows_disk_device_path }}{% endif %}"/>
       <target dev="sda" bus="scsi"/>
       <boot order="1"/>
