@@ -6,7 +6,7 @@
       {{
         'reinstall-kernels'
         if _systemd_boot.stat.exists
-        else 'grub-mkconfig -o ' + pgs_distro_boot_location + '/grub/grub.cfg && update-grub'
+        else 'grub-mkconfig -o ' + pgs_distro_boot_location + '/grub/grub.cfg'
       }}
   changed_when: true
   become: true

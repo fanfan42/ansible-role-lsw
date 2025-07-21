@@ -49,11 +49,12 @@
       lsblk -no TYPE {{ pgs_windows_disk_device_path }} | head -n1
   register: _is_disk
   changed_when: false
+  when: pgs_windows_disk_device_path != ''
 
 - name: Fail when physical disk path is not good
   ansible.builtin.fail:
     msg: "Path to disk for copying img isn't a disk !!!"
-  when: pgs_windows_disk_device_path != "" and _is_disk.stdout != "disk"
+  when: pgs_windows_disk_device_path != '' and _is_disk.stdout != "disk"
 
 - name: Check if system uses systemd-boot
   ansible.builtin.stat:
@@ -98,14 +99,17 @@
     - Pause
   block:
     - name: Check if IOMMU param already present in GRUB config
-      ansible.builtin.command: "grep -q '{{ __iommu_param }}' /etc/default/grub && echo present || echo absent"
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          grep -q '{{ __iommu_param }}' /etc/default/grub && echo present || echo absent
       register: _grub_check
       changed_when: false
     - name: Add IOMMU param to GRUB_CMDLINE_LINUX if missing
       ansible.builtin.lineinfile:
         path: /etc/default/grub
-        regexp: '^GRUB_CMDLINE_LINUX="(.*)"'
-        line: 'GRUB_CMDLINE_LINUX="\1 {{ __iommu_param }} iommu=pt'
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __iommu_param }} iommu=pt"'
         backrefs: true
       when: _grub_check.stdout == "absent"
 
@@ -149,6 +153,57 @@
         mode: preserve
       become: true
       when: "'build' in ansible_run_tags"
+
+- name: Preflight for GVT-g Virtualization mode
+  when: pgs_virt_mode == "gvtg"
+  notify:
+    - Reinstall Kernels
+    - Reboot
+    - Pause
+  block:
+    - name: Fail when CPU doesn't support GVT-g
+      ansible.builtin.fail:
+        msg: "GVT-g virtualization mode is not supported on this CPU !!!"
+      when: not 'intel' in __iommu_param or (__intel_generation | int) < 6 or (__intel_generation | int) > 10
+    - name: Fail when Looking Glass not enabled
+      ansible.builtin.fail:
+        msg: "Virtualization mode gvtg needs Looking Glass !!!"
+      when: not pgs_install_looking_glass
+    - name: Collect PCI information
+      ansible.builtin.command: lspci -mm
+      register: lspci_output
+      changed_when: false
+    - name: Get PCI address for Intel VGA controller
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          lspci | grep -i Intel | grep VGA | cut -d' ' -f1
+      register: _pci_cpu
+      changed_when: false
+    - name: Get MDEV best type for GVT-g
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          ls -1 /sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/mdev_supported_types/ | head -n1
+      register: _mdev_type
+      changed_when: false
+      ignore_errors: true
+    - name: Copy modprobe options for i915 module
+      ansible.builtin.copy:
+        src: i915.gvtg.conf
+        dest: /etc/modprobe.d/i915.conf
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
+    - name: Copy modules to load at boot
+      ansible.builtin.copy:
+        src: modules.gvtg.conf
+        dest: /etc/modules-load.d/gvtg.conf
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
 
 - name: Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers

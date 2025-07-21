@@ -23,7 +23,7 @@
 - name: Enable and start default network
   community.libvirt.virt_net:
     name: default
-    state: active
+    state: present
     autostart: true
   become: true
 
@@ -77,15 +77,6 @@
   notify: Restart libvirt
   become: true
 
-- name: Copy QEMU hook manager
-  ansible.builtin.copy:
-    src: qemu
-    dest: /etc/libvirt/hooks/qemu
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
 # - name: Copy KVM hook configuration
 #   ansible.builtin.template:
 #     src: kvm.conf.j2
@@ -99,72 +90,65 @@
   register: _host_cpus
   changed_when: false
 
-- name: Create libvirt hooks folders
-  ansible.builtin.file:
-    path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
-    state: directory
-    recurse: true
-    mode: "0755"
-    owner: root
-    group: root
-  loop:
-    - prepare,begin
-    - release,end
+- name: Create scripts for Passthrough VM
   become: true
-
-- name: Create Start script for VM
-  ansible.builtin.template:
-    src: start.sh.j2
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/start.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
-- name: Create Stop script for VM
-  ansible.builtin.template:
-    src: stop.sh.j2
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/stop.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
-- name: Copy CPU performance script
-  ansible.builtin.copy:
-    src: cpu_mode_performance.sh
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
-- name: Copy CPU powersave script
-  ansible.builtin.copy:
-    src: cpu_mode_powersave.sh
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/cpu_mode_powersave.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
-- name: Copy RAM deallocation Hugepages script
-  ansible.builtin.copy:
-    src: dealloc_hugepages.sh
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/dealloc_hugepages.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
-- name: Create RAM allocation Hugepages script
-  ansible.builtin.template:
-    src: alloc_hugepages.sh.j2
-    dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/alloc_hugepages.sh"
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
+  vars:
+    _lg: false
+  when: pgs_virt_mode == 'passthrough'
+  block:
+    - name: Create libvirt hooks folders
+      ansible.builtin.file:
+        path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
+        state: directory
+        recurse: true
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - prepare,begin
+        - release,end
+    - name: Create Start script for VM
+      ansible.builtin.template:
+        src: start.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/start.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create Stop script for VM
+      ansible.builtin.template:
+        src: stop.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/stop.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU performance script
+      ansible.builtin.copy:
+        src: cpu_mode_performance.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU powersave script
+      ansible.builtin.copy:
+        src: cpu_mode_powersave.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/cpu_mode_powersave.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy RAM deallocation Hugepages script
+      ansible.builtin.copy:
+        src: dealloc_hugepages.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/dealloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create RAM allocation Hugepages script
+      ansible.builtin.template:
+        src: alloc_hugepages.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/alloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
 
 - name: Create scripts for Looking Glass VM
   become: true
@@ -200,7 +184,7 @@
     - name: Copy CPU performance script for Looking Glass VM
       ansible.builtin.copy:
         src: cpu_mode_performance.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/cpu_mode_performance.sh"
         mode: "0755"
         owner: root
         group: root
@@ -225,3 +209,12 @@
         mode: "0755"
         owner: root
         group: root
+
+- name: Copy QEMU hook manager
+  ansible.builtin.copy:
+    src: qemu
+    dest: /etc/libvirt/hooks/qemu
+    mode: "0755"
+    owner: root
+    group: root
+  become: true

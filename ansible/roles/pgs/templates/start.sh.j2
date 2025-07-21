@@ -13,22 +13,26 @@ systemctl set-property --runtime -- init.scope AllowedCPUs={{ _host_cpus.stdout 
 systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
 {% endif %}
 
-# Uncomment autologin lines in Display manager
-sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/lightdm/lightdm.conf
-
-systemctl stop display-manager.service
-
-{% if pgs_virt_mode == 'passthrough' %}
-{% for idx in range(_pci_ids.stdout.split(',') | length) %}
-echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
-virsh nodedev-detach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
-{% endfor %}
-{% endif %}
-
 {% if pgs_config_pass_disk_controller %}
 echo {{ _disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _disk_pci_addr.stdout }}/driver/unbind
 virsh nodedev-detach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
 {% endif %}
 
+{% if pgs_virt_mode == 'passthrough' %}
+systemctl stop display-manager.service
+
+# Uncomment autologin lines in Display manager
+sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/lightdm/lightdm.conf
+
+{% for idx in range(_pci_ids.stdout.split(',') | length) %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
+virsh nodedev-detach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
+{% endfor %}
+
 modprobe vfio vfio_pci vfio_iommu_type1
 systemctl start display-manager.service
+{% endif %}
+
+{% if pgs_virt_mode == 'gvtg' %}
+echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > "/sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/mdev_supported_types/{{ _mdev_type.stdout }}/create"
+{% endif %}

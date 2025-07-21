@@ -38,7 +38,7 @@ pgs_windows_password: ''
 # Can be nvidia or amd or intel (the default if using gvtg or sriov)
 pgs_windows_gpu_driver: intel
 pgs_windows_gpu_install_options:
-  'intel': '-s -norestart'
+  'intel': '-s -f'
   'nvidia': '-s -noreboot'
   'amd': '/INSTALL /QUIET /NORESTART'
 pgs_windows_app_to_remove:
@@ -114,7 +114,7 @@ pgs_windows_feature_to_remove:
   - Microsoft-SnippingTool
 
 # Configuration vars
-pgs_config_is_laptop: true
+pgs_config_is_laptop: false
 # Only for nvidia
 # Can be: integrated, nvidia, hybrid, auto (if on battery or AC power)
 # pgs_optmgr_default_mode: integrated

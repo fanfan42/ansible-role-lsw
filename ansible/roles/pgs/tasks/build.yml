@@ -6,7 +6,7 @@
     dest: '{{ role_path }}/build/packer.json'
     mode: preserve
 
-- name: Copy Win Unattend template
+- name: Copy Windows Unattend template
   ansible.builtin.template:
     src: autounattend.xml.j2
     dest: '{{ role_path }}/build/autounattend.xml'
@@ -58,15 +58,22 @@
         PACKER_LOG: "1"
       changed_when: true
 
-- name: Prepare build for modes not passthrough
-  when: pgs_virt_mode != "passthrough"
+- name: Prepare build for GVT-g mode
+  when: pgs_virt_mode == "gvtg"
+  become: true
   block:
+    - name: Create MDEV device
+      ansible.builtin.shell: |
+        echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > \
+        /sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/mdev_supported_types/{{ _mdev_type.stdout }}/create
+      changed_when: true
+      ignore_errors: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
         cmd: 'packer plugins install github.com/hashicorp/qemu'
         chdir: '{{ role_path }}/build'
       changed_when: true
-    - name: Build Windows image
+    - name: Build Windows image for gvtg
       ansible.builtin.command:
         cmd: 'packer build packer.json'
         chdir: '{{ role_path }}/build'

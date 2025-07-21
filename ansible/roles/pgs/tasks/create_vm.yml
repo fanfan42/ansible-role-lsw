@@ -73,6 +73,7 @@
     command: define
     xml: "{{ lookup('template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
+  when: pgs_virt_mode == 'passthrough'
 
 - name: Define the VM with Looking Glass
   vars:
