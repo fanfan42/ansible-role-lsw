@@ -34,8 +34,14 @@ echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drive
 # Restart Display Manager
 systemctl restart display-manager.service
 
-# Comment out autologin lines in /etc/lightdm/lightdm.conf
+# Comment out autologin lines in Display Manager
+{% if _dm.stdout == 'lightdm' %}
 sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf
+{% elif _dm.stdout == 'gdm' %}
+sed -i 's/^AutomaticLoginEnable = true/#  AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
+sed -i 's/^AutomaticLogin = {{ ansible_env['LOGNAME'] }}/#  AutomaticLogin = user1/' /etc/gdm3/daemon.conf
+{% endif %}
+
 {% endif %}
 
 {% if _lg | default(false) %}

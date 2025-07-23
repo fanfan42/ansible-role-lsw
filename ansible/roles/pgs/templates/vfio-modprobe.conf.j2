@@ -1,3 +1,8 @@
+{% if ansible_facts['lsb']['id'] != 'EndeavourOS' %}
+vfio
+vfio_iommu_type1
+vfio_pci
+{% endif %}
 {% if pgs_windows_gpu_driver != 'nvidia' %}
 softdep drm pre: vfio-pci
 {% else %}

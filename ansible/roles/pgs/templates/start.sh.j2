@@ -22,14 +22,21 @@ virsh nodedev-detach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace(
 systemctl stop display-manager.service
 
 # Uncomment autologin lines in Display manager
+{% if _dm.stdout == 'lightdm' %}
 sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/lightdm/lightdm.conf
+{% elif _dm.stdout == 'gdm' %}
+sed -i 's/^#  AutomaticLoginEnable = true/AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
+sed -i 's/^#  AutomaticLogin = user1/AutomaticLogin = {{ ansible_env['LOGNAME'] }}/' /etc/gdm3/daemon.conf
+{% endif %}
 
 {% for idx in range(_pci_ids.stdout.split(',') | length) %}
 echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
 virsh nodedev-detach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
 {% endfor %}
 
-modprobe vfio vfio_pci vfio_iommu_type1
+modprobe vfio
+modprobe vfio_pci
+modprobe vfio_iommu_type1
 systemctl start display-manager.service
 {% endif %}
 

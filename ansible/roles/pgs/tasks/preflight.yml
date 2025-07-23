@@ -3,22 +3,22 @@
 - name: Fail when Distro is not supported
   ansible.builtin.fail:
     msg: "Distribution not supported !!!"
-  when: "ansible_facts['lsb']['id'] not in ['EndeavourOS','Debian','Nobara']"
+  when: ansible_facts['lsb']['id'] not in ['EndeavourOS','Debian','Nobara']
 
 - name: Fail when Virtualization mode is wrong
   ansible.builtin.fail:
     msg: "Virtualization mode not supported, please set pgs_virt_mode on passthrough or gvtg or sriov !!!"
-  when: "pgs_virt_mode not in ['passthrough','gvtg','sriov']"
+  when: pgs_virt_mode not in ['passthrough','gvtg','sriov']
 
 - name: Fail when driver not Nvidia, Intel or AMD
   ansible.builtin.fail:
     msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
-  when: "pgs_windows_gpu_driver not in ['intel','nvidia','amd']"
+  when: pgs_windows_gpu_driver not in ['intel','nvidia','amd']
 
 - name: Fail when VM memory exceeds 3/4 of total memory available on Host
   ansible.builtin.fail:
-    msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
-  when: "pgs_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )"
+    msg: "VM memry (RAM) too high, host also needs memory !!!"
+  when: pgs_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
 
 - name: Check 2nd mouse exists
   ansible.builtin.stat:
@@ -29,7 +29,7 @@
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:
     msg: "Path to second mouse doesn't exist !!!"
-  when: "pgs_config_usb_mouse != '' and not _second_mouse.stat.exists"
+  when: pgs_config_usb_mouse != '' and not _second_mouse.stat.exists
 
 - name: Check 2nd keyboard exists
   ansible.builtin.stat:
@@ -40,7 +40,7 @@
 - name: Fail when path to second keyboard doesnt exist
   ansible.builtin.fail:
     msg: "Path to second keyboard doesn't exist !!!"
-  when: "pgs_config_usb_kbd != '' and not _second_kbd.stat.exists"
+  when: pgs_config_usb_kbd != '' and not _second_kbd.stat.exists
 
 - name: Verify if disk is correct
   ansible.builtin.shell:
@@ -54,7 +54,7 @@
 - name: Fail when physical disk path is not good
   ansible.builtin.fail:
     msg: "Path to disk for copying img isn't a disk !!!"
-  when: pgs_windows_disk_device_path != '' and _is_disk.stdout != "disk"
+  when: pgs_windows_disk_device_path != '' and _is_disk.stdout != 'disk'
 
 - name: Check if system uses systemd-boot
   ansible.builtin.stat:
@@ -64,7 +64,7 @@
 
 - name: Check if system uses GRUB
   ansible.builtin.stat:
-    path: '/etc/default/grub'
+    path: /etc/default/grub
   register: _grub_boot
 
 - name: Configure IOMMU and vfio for systemd-boot
@@ -105,7 +105,7 @@
           grep -q '{{ __iommu_param }}' /etc/default/grub && echo present || echo absent
       register: _grub_check
       changed_when: false
-    - name: Add IOMMU param to GRUB_CMDLINE_LINUX if missing
+    - name: Add IOMMU param to GRUB_CMDLINE_LINUX_DEFAULT if missing
       ansible.builtin.lineinfile:
         path: /etc/default/grub
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
@@ -114,7 +114,7 @@
       when: _grub_check.stdout == "absent"
 
 - name: Preflight for Passthrough Virtualization mode
-  when: pgs_virt_mode == "passthrough"
+  when: pgs_virt_mode == 'passthrough'
   notify:
     - Reinstall Kernels
     - Reboot
@@ -136,7 +136,7 @@
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
-          lspci -nn | awk '/{{ pgs_passthrough_gpu_pci_base_addr }}/{match($0, /\[([0-9a-fA-F]{4}:[0-9a-fA-F]{4})\]/, m); if (m[1]) print m[1]}' | paste -sd,
+          lspci -nn | gawk '/{{ pgs_passthrough_gpu_pci_base_addr }}/{match($0, /\[([0-9a-fA-F]{4}:[0-9a-fA-F]{4})\]/, m); if (m[1]) print m[1]}' | paste -sd,
       register: _pci_ids
       changed_when: false
     - name: Copy initramfs (dracut) options
@@ -145,7 +145,9 @@
         dest: /etc/dracut.conf.d/vfio.conf
         mode: preserve
       become: true
-      when: "'build' in ansible_run_tags"
+      when:
+        - "'build' in ansible_run_tags"
+        - ansible_facts['lsb']['id'] == 'EndeavourOS'
     - name: Copy modprobe.d options for vfio
       ansible.builtin.template:
         src: vfio-modprobe.conf.j2
@@ -155,7 +157,7 @@
       when: "'build' in ansible_run_tags"
 
 - name: Preflight for GVT-g Virtualization mode
-  when: pgs_virt_mode == "gvtg"
+  when: pgs_virt_mode == 'gvtg'
   notify:
     - Reinstall Kernels
     - Reboot

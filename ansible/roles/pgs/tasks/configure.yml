@@ -20,6 +20,12 @@
     state: started
   become: true
 
+# This task doesn't work everytime
+# You may have to run it manually
+# sudo virsh net-start default
+# sudo virsh net-autostart default
+# To see the actual state:
+# sudo virsh net-list --all  
 - name: Enable and start default network
   community.libvirt.virt_net:
     name: default
@@ -27,31 +33,15 @@
     autostart: true
   become: true
 
-# - name: Manage Optimus configuration for Nvidia laptops
-#   when:
-#     - pgs_config_is_laptop
-#     - pgs_windows_gpu_driver == 'nvidia'
-#   block:
-#     - name: Copy Optimus Manager template
-#       ansible.builtin.template:
-#         src: optimus-manager.conf.j2
-#         dest: /etc/optimus-manager/optimus-manager.conf
-#         mode: "0644"
-#         owner: root
-#         group: root
-#     - name: Enable systemd Optimus Manager service
-#       ansible.builtin.systemd:
-#         name: optimus-manager
-#         enabled: true
-#         state: started
-#     - name: Disable Nvidia driver when Optimus integrated mode
-#       ansible.builtin.copy:
-#         src: blacklist.conf
-#         dest: /etc/modprobe.d/blacklist.conf
-#         mode: "0644"
-#         owner: root
-#         group: root
-#       when: pgs_optmgr_default_mode == 'integrated'
+# BUG on Debian, VM doesn't start with no errors in logs
+# https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
+- name: Stop and disable dnsmasq for Debian
+  ansible.builtin.systemd:
+    name: dnsmask
+    enabled: false
+    state: stopped
+  become: true
+  when: ansible_facts['lsb']['id'] == 'Debian'
 
 - name: Replace libvirt QEMU user
   ansible.builtin.replace:
@@ -77,17 +67,17 @@
   notify: Restart libvirt
   become: true
 
-# - name: Copy KVM hook configuration
-#   ansible.builtin.template:
-#     src: kvm.conf.j2
-#     dest: /etc/libvirt/hooks/kvm.conf
-#     mode: "0644"
-#     owner: root
-#     group: root
-
 - name: Get Host CPU set for CPU
   ansible.builtin.command: bash /tmp/cpu_pinning.sh systemd
   register: _host_cpus
+  changed_when: false
+
+- name: Get Display Manager
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      systemctl status --no-pager display-manager | head -n1 | cut -d' ' -f2 | cut -d'.' -f1
+  register: _dm
   changed_when: false
 
 - name: Create scripts for Passthrough VM
@@ -209,6 +199,13 @@
         mode: "0755"
         owner: root
         group: root
+    - name: Create tmpfiles for Looking Glass
+      ansible.builtin.copy:
+        src: lg_tmpfile
+        dest: /etc/tmpfiles.d/10-looking-glass.conf
+        mode: "0644"
+        owner: root
+        group: libvirt
 
 - name: Copy QEMU hook manager
   ansible.builtin.copy:

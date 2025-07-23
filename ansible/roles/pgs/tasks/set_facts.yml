@@ -9,10 +9,12 @@
   ansible.builtin.command: bash {{ role_path }}/files/intelcpuversion.sh
   register: _intel_generation
   changed_when: false
+  when: __iommu_param == 'intel_iommu=on'
 
 - name: Extract CPU generation (Intel only)
   ansible.builtin.set_fact:
     __intel_generation: "{{ _intel_generation.stdout | default('0') }}"
+  when: __iommu_param == 'intel_iommu=on'
 
 - name: Generate dynamic cgroup_device_acl block content
   ansible.builtin.set_fact:
