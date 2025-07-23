@@ -137,6 +137,10 @@ pgs_config_pass_disk_controller: false
 # Other vars
 pgs_windows_install_app_from_ninite: false
 pgs_install_looking_glass: false
+# The best for 1920x1080
+# See other possible values here:
+# https://looking-glass.io/docs/B7/install_libvirt/#determining-memory
+pgs_looking_glass_memory: 64
 # Highly recommended to install to have better performance for a desktop Linux
 # If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 pgs_install_zen: true

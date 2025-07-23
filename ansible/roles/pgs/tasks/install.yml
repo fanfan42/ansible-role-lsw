@@ -35,7 +35,7 @@
   block:
     - name: Get checksum list
       ansible.builtin.set_fact:
-        __pkr_cs: "{{ lookup('ansible.builtin.url', 'https://releases.hashicorp.com/packer/{{ pgs_debian_packer_version }}/packer_{{ pgs_debian_packer_version }}_SHA256SUMS', wantlist=True) | list }}"
+        __pkr_cs: "{{ lookup('ansible.builtin.url', '{{ pgs_debbian_packer_url }}_SHA256SUMS', wantlist=True) | list }}"
       until: __pkr_cs is search('linux_amd64.zip')
       retries: 10
     - name: Get checksum for amd64
@@ -45,7 +45,7 @@
       when: "('linux_amd64.zip') in item"
     - name: Download packer binary to local folder
       ansible.builtin.get_url:
-        url: 'https://releases.hashicorp.com/packer/{{ pgs_debian_packer_version }}/packer_{{ pgs_debian_packer_version }}_linux_amd64.zip'
+        url: '{{ pgs_debbian_packer_url }}_linux_amd64.zip'
         dest: /tmp/packer.zip
         checksum: 'sha256:{{ __pkr_checksum }}'
         mode: "0644"
@@ -163,20 +163,6 @@
   when:
     - ansible_facts['lsb']['id'] == 'Debian'
     - pgs_install_zen
-    - pgs_virt_mode != 'gvtg'
-  notify:
-    - Reboot
-    - Pause
-  become: true
-
-- name: Install Zen Kernel on Debian with GVT-g
-  ansible.builtin.package:
-    name: '{{ pgs_zen_gvtg_packages }}'
-    state: present
-  when:
-    - ansible_facts['lsb']['id'] == 'Debian'
-    - pgs_install_zen
-    - pgs_virt_mode == 'gvtg'
   notify:
     - Reboot
     - Pause

@@ -92,7 +92,7 @@
   when: pgs_windows_disk_device_path != ''
   changed_when: true
   become: true
-  notify: Reinstall Kernels
+  notify: Reinstall boot loader with Windows Disk
 
 - name: Remove vfio build configuration for Passthrough Virtualization mode
   when: pgs_virt_mode == "passthrough"

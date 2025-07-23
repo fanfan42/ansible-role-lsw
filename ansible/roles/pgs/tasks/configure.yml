@@ -25,7 +25,7 @@
 # sudo virsh net-start default
 # sudo virsh net-autostart default
 # To see the actual state:
-# sudo virsh net-list --all  
+# sudo virsh net-list --all
 - name: Enable and start default network
   community.libvirt.virt_net:
     name: default
@@ -37,7 +37,7 @@
 # https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
 - name: Stop and disable dnsmasq for Debian
   ansible.builtin.systemd:
-    name: dnsmask
+    name: dnsmasq
     enabled: false
     state: stopped
   become: true
@@ -72,20 +72,19 @@
   register: _host_cpus
   changed_when: false
 
-- name: Get Display Manager
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      systemctl status --no-pager display-manager | head -n1 | cut -d' ' -f2 | cut -d'.' -f1
-  register: _dm
-  changed_when: false
-
 - name: Create scripts for Passthrough VM
   become: true
   vars:
     _lg: false
   when: pgs_virt_mode == 'passthrough'
   block:
+    - name: Get Display Manager
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          systemctl status --no-pager display-manager | head -n1 | cut -d' ' -f2 | cut -d'.' -f1
+      register: _dm
+      changed_when: false
     - name: Create libvirt hooks folders
       ansible.builtin.file:
         path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"

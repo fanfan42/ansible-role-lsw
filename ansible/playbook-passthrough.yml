@@ -16,7 +16,7 @@
     pgs_windows_install_app_from_ninite: true
     pgs_install_looking_glass: true
     pgs_passthrough_gpu_pci_base_addr: 01:00
-    # pgs_windows_build_timeout_minutes: 26
+    pgs_windows_build_timeout_minutes: 26
     pgs_config_is_laptop: true
     pgs_config_gpu_nvidia_gtx: true
     pgs_config_usb_kbd: "/dev/input/by-id/usb-Metadot_-_Das_Keyboard_Das_Keyboard-event-kbd"
