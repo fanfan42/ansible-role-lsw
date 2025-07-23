@@ -215,8 +215,8 @@
 {% if _lg %}
     <shmem name="looking-glass">
       <model type="ivshmem-plain"/>
-      <size unit="M">64</size>
-      <address type="pci" domain="0x0000" bus="0x1a" slot="0x00" function="0x0"/>
+      <size unit="M">{{ pgs_looking_glass_memory }}</size>
+      <address type="pci" domain="0x0000" bus="0x12" slot="0x00" function="0x0"/>
     </shmem>
 {% endif %}
   </devices>
