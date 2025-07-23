@@ -92,3 +92,8 @@ Playbook file :
 ## How to use the VM
 
 Open libvirt-manager and lauch the VM
+
+## Notes for Debian
+In the pre requisites, you have to install sudo and put yourself in sudo group with root user (/usr/sbin/usermod -a -G sudo $(whoami))
+Also install gawk
+By default, I install Gnome for Desktop Environment. Now, Gnome starts on Wayland by default. At the Login, before typing your password, please ensure that "GNOME on Xorg" is selected in bottom right wheel of the screen

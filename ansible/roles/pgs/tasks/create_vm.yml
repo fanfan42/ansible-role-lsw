@@ -71,7 +71,7 @@
     _lg: false
   community.libvirt.virt:
     command: define
-    xml: "{{ lookup('template', 'libvirt_conf_vm.xml.j2') }}"
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
   when: pgs_virt_mode == 'passthrough'
 
@@ -80,6 +80,6 @@
     _lg: true
   community.libvirt.virt:
     command: define
-    xml: "{{ lookup('template', 'libvirt_conf_vm.xml.j2') }}"
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
   when: pgs_install_looking_glass

@@ -18,8 +18,8 @@
       <feature enabled="no" name="enrolled-keys"/>
       <feature enabled="no" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="raw">/usr/share/edk2/x64/OVMF_CODE.4m.fd</loader>
-    <nvram template="/usr/share/edk2/x64/OVMF_VARS.4m.fd" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
+    <loader readonly="yes" type="pflash" format="raw">{{ pgs_windows_ovmf_code_path }}</loader>
+    <nvram template="{{ pgs_windows_ovmf_vars_path }}" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -174,7 +174,7 @@
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
     </sound>
-    <audio id="1" type="pulseaudio" serverName="/run/user/{{ ansible_effective_user_id }}/pulse/native">
+    <audio id="1" type="pipewire" runtimeDir="/run/user/{{ ansible_effective_user_id }}">
       <input mixingEngine="no"/>
       <output mixingEngine="no"/>
     </audio>
