@@ -27,6 +27,18 @@ sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/l
 {% elif _dm.stdout == 'gdm' %}
 sed -i 's/^#  AutomaticLoginEnable = true/AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
 sed -i 's/^#  AutomaticLogin = user1/AutomaticLogin = {{ ansible_env['LOGNAME'] }}/' /etc/gdm3/daemon.conf
+{% elif _dm.stdout == 'sddm' %}
+if ! grep -q "^User={{ ansible_env['LOGNAME'] }}$" /etc/sddm.conf; then
+    sed -i '/^\[Autologin\]/a User={{ ansible_env['LOGNAME'] }}' /etc/sddm.conf
+fi
+{% endif %}
+
+{% if pgs_windows_gpu_driver == 'nvidia' %}
+sleep 5
+rmmod nvidia_uvm
+rmmod nvidia_drm
+rmmod nvidia_modeset
+rmmod nvidia
 {% endif %}
 
 {% for idx in range(_pci_ids.stdout.split(',') | length) %}

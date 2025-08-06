@@ -1,4 +1,4 @@
-{% if ansible_facts['lsb']['id'] != 'EndeavourOS' %}
+{% if pgs_distro_initramfs_binary != 'dracut' %}
 vfio
 vfio_iommu_type1
 vfio_pci

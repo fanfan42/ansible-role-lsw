@@ -1,7 +1,8 @@
 ---
-# /boot for gvtg with arch
-# /efi for classic eos
-pgs_distro_boot_location: '/efi'
+
+pgs_distro_boot_location: /efi
+pgs_distro_boot_loader: systemd-boot
+pgs_distro_initramfs_binary: dracut
 
 pgs_packages:
   - packer

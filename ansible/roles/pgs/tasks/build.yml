@@ -12,11 +12,6 @@
     dest: '{{ role_path }}/build/autounattend.xml'
     mode: preserve
 
-- name: Verify if packages.iso exists
-  ansible.builtin.stat:
-    path: '{{ role_path }}/build/extra_packages/packages.iso'
-  register: _pkgiso
-
 - name: Generate ISO file for drivers and packages
   community.general.iso_create:
     src_files: '{{ role_path }}/build/extra_packages'
@@ -98,7 +93,8 @@
   when: pgs_virt_mode == "passthrough"
   become: true
   notify:
-    - Reinstall Kernels
+    - Reload Boot Loader
+    - Reload initramfs
   block:
     - name: Remove initramfs (dracut) options
       ansible.builtin.file:

@@ -16,9 +16,9 @@
       ],
       "qemuargs": [
         ["-cpu", "host,migratable=on,hv-time=on,hv-relaxed=on,hv-vapic=on,hv-spinlocks=0x1fff,hv-vpindex=on,hv-runtime=on,hv-synic=on,hv-stimer=on,hv-frequencies=on,hv-tlbflush=on,hv-ipi=on,hv-evmcs=on,hv-avic=on"],
-        ["-drive", "if=none,file=windows_img_dir/{{ pgs_windows_vm_name }},id=drive0,cache=writeback,discard=ignore,format=raw"],
+        ["-drive", "if=none,file=windows_img_dir/{{ pgs_windows_vm_name }},id=drive0,cache=writeback,discard=ignore,format={{ pgs_windows_img_format }}"],
         ["-drive", "file={{ pgs_windows_iso }},media=cdrom"],
-        ["-drive", "file={{ pgs_windows_ovmf_code_path }},if=pflash,unit=0,format=raw,readonly=on"],
+        ["-drive", "file={{ pgs_windows_ovmf_code_path }},if=pflash,unit=0,format={% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %},readonly=on"],
         ["-drive", "file=windows_img_dir/efivars.fd,if=pflash,unit=1,format=raw"],
         ["-drive", "file=virtio/virtio-win.iso,media=cdrom"],
         ["-drive", "file=extra_packages/packages.iso,media=cdrom"],
