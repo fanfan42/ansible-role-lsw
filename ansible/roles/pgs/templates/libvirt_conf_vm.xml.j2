@@ -18,8 +18,8 @@
       <feature enabled="no" name="enrolled-keys"/>
       <feature enabled="no" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="raw">{{ pgs_windows_ovmf_code_path }}</loader>
-    <nvram template="{{ pgs_windows_ovmf_vars_path }}" templateFormat="raw" format="raw">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
+    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{{ pgs_windows_ovmf_code_path }}</loader>
+    <nvram template="{{ pgs_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
     <acpi/>

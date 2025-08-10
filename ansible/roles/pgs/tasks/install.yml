@@ -22,20 +22,14 @@
     state: present
   become: true
 
-- name: Check if packer already installed on Debian
-  ansible.builtin.stat:
-    path: /usr/local/bin/packer
-  register: _pkr_bin
-  when: ansible_facts['lsb']['id'] == 'Debian'
-
-- name: Install Packer on Debian
+- name: Install Packer on Debian or Nobara
   when:
-    - ansible_facts['lsb']['id'] == 'Debian'
+    - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
     - not _pkr_bin.stat.exists
   block:
     - name: Get checksum list
       ansible.builtin.set_fact:
-        __pkr_cs: "{{ lookup('ansible.builtin.url', '{{ pgs_debbian_packer_url }}_SHA256SUMS', wantlist=True) | list }}"
+        __pkr_cs: "{{ lookup('ansible.builtin.url', '{{ pgs_packer_url }}_SHA256SUMS', wantlist=True) | list }}"
       until: __pkr_cs is search('linux_amd64.zip')
       retries: 10
     - name: Get checksum for amd64
@@ -45,7 +39,7 @@
       when: "('linux_amd64.zip') in item"
     - name: Download packer binary to local folder
       ansible.builtin.get_url:
-        url: '{{ pgs_debbian_packer_url }}_linux_amd64.zip'
+        url: '{{ pgs_packer_url }}_linux_amd64.zip'
         dest: /tmp/packer.zip
         checksum: 'sha256:{{ __pkr_checksum }}'
         mode: "0644"
@@ -76,26 +70,20 @@
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
     - pgs_install_looking_glass
 
-- name: Check if Looking Glass already installed on Debian
-  ansible.builtin.stat:
-    path: /usr/local/bin/looking-glass-client
-  register: _lg_bin
-  when: ansible_facts['lsb']['id'] == 'Debian'
-
-- name: Install Looking Glass on Debian
+- name: Install Looking Glass on Debian or Nobara
   when:
-    - ansible_facts['lsb']['id'] == 'Debian'
+    - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
     - pgs_install_looking_glass
     - not _lg_bin.stat.exists
   block:
     - name: Install Looking Glass build dependencies
       ansible.builtin.package:
-        name: '{{ pgs_debian_lg_dependencies }}'
+        name: '{{ pgs_lg_dependencies }}'
         state: present
       become: true
     - name: Get Looking Glass sources
       ansible.builtin.get_url:
-        url: '{{ pgs_debian_lg_url }}'
+        url: '{{ pgs_lg_url }}'
         dest: /tmp/looking-glass.tar.gz
         mode: "0644"
     - name: Unarchive Looking Glass sources
@@ -104,29 +92,29 @@
         dest: /tmp
     - name: Create build directory
       ansible.builtin.file:
-        path: '/tmp/looking-glass-{{ pgs_debian_lg_version }}/client/build'
+        path: '/tmp/looking-glass-{{ pgs_lg_version }}/client/build'
         state: directory
         mode: "0755"
     - name: Run cmake
       ansible.builtin.command:
         cmd: cmake ../
-        chdir: '/tmp/looking-glass-{{ pgs_debian_lg_version }}/client/build'
+        chdir: '/tmp/looking-glass-{{ pgs_lg_version }}/client/build'
       changed_when: true
     - name: Run make
       community.general.make:
         jobs: '{{ ansible_processor_vcpus }}'
-        chdir: '/tmp/looking-glass-{{ pgs_debian_lg_version }}/client/build'
+        chdir: '/tmp/looking-glass-{{ pgs_lg_version }}/client/build'
     - name: Run make install
       community.general.make:
-        chdir: '/tmp/looking-glass-{{ pgs_debian_lg_version }}/client/build'
+        chdir: '/tmp/looking-glass-{{ pgs_lg_version }}/client/build'
         target: install
       become: true
     - name: Remove Looking Glass build dependencies
       ansible.builtin.package:
-        name: '{{ pgs_debian_lg_dependencies }}'
+        name: '{{ pgs_lg_dependencies }}'
         state: absent
       become: true
-      when: pgs_debian_rm_lg_dependencies
+      when: pgs_rm_lg_dependencies
 
 - name: Install Zen Kernel on EndeavourOS
   ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed

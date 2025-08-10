@@ -1,25 +1,5 @@
 ---
 
-- name: Get CPU pinning
-  ansible.builtin.command: /tmp/cpu_pinning.sh cputune
-  register: _cpu_pinning
-  changed_when: false
-
-- name: Get CPU configuration for host passthrough classic CPU
-  ansible.builtin.command: /tmp/cpu_pinning.sh cpuconf
-  register: _cpu_conf
-  changed_when: false
-
-- name: Get Disk configuration
-  ansible.builtin.command: /tmp/cpu_pinning.sh diskconf
-  register: _disk_conf
-  changed_when: false
-
-- name: Get SCSI controller
-  ansible.builtin.command: /tmp/cpu_pinning.sh scsicntrl
-  register: _scsi_cntrl
-  changed_when: false
-
 - name: Extract QEMU efi machine version for x86_64
   ansible.builtin.shell:
     cmd: |
@@ -39,15 +19,6 @@
     - "{{ pgs_windows_vm_name }}"
   become: true
 
-- name: Get the PCI disk controller address
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      udevadm info --name={{ pgs_windows_disk_device_path }} --query=property --value --property ID_PATH | cut -d'-' -f2
-  register: _disk_pci_addr
-  changed_when: false
-  when: pgs_config_pass_disk_controller
-
 - name: Copy VM EFI vars
   ansible.builtin.copy:
     src: "{{ role_path }}/build/windows_img_dir/efivars.fd"
@@ -55,16 +26,16 @@
     mode: preserve
   become: true
 
-- name: Create XML fot VM configuration before define
-  vars:
-    _lg: true
-  ansible.builtin.template:
-    src: libvirt_conf_vm.xml.j2
-    dest: "/tmp/{{ pgs_windows_vm_name }}.xml"
-    mode: "0600"
-    owner: root
-    group: root
-  become: true
+# - name: Create XML fot VM configuration before define
+#   vars:
+#     _lg: true
+#   ansible.builtin.template:
+#     src: libvirt_conf_vm.xml.j2
+#     dest: "/tmp/{{ pgs_windows_vm_name }}.xml"
+#     mode: "0600"
+#     owner: root
+#     group: root
+#   become: true
 
 - name: Define the VM
   vars:

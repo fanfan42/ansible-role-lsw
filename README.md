@@ -97,3 +97,10 @@ Open libvirt-manager and lauch the VM
 In the pre requisites, you have to install sudo and put yourself in sudo group with root user (/usr/sbin/usermod -a -G sudo $(whoami))
 Also install gawk
 By default, I install Gnome for Desktop Environment. Now, Gnome starts on Wayland by default. At the Login, before typing your password, please ensure that "GNOME on Xorg" is selected in bottom right wheel of the screen
+
+## Notes for Nobara
+For using LG: looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture
+For still unknown reasons, sometimes, you have to write again your password when shutting down the VM (sddm issue)
+
+## General bug
+If booting on windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS

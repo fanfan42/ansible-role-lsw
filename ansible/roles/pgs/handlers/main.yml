@@ -1,25 +1,52 @@
 ---
 
-- name: Reinstall Kernels
+- name: Reload Boot Loader
   ansible.builtin.shell:
     cmd: >-
       {{
-        'reinstall-kernels'
-        if _systemd_boot.stat.exists
-        else 'update-grub && update-initramfs -u -k all'
+        'echo "Nothing to do"'
+        if pgs_distro_boot_loader == 'systemd-boot'
+        else
+        'update-grub'
       }}
   changed_when: true
   become: true
 
+- name: Reload initramfs
+  ansible.builtin.shell: >-
+    {{
+      'for kv in $(ls /lib/modules); do krlpth=' ~ pgs_distro_boot_location ~ '/vmlinuz-$kv ; [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth" ; done'
+      if pgs_distro_initramfs_binary == 'dracut'
+      else
+      'update-initramfs -u -k all'
+    }}
+  changed_when: true
+  become: true
+
+# - name: Reinstall boot loader with Windows Disk
+#   ansible.builtin.shell:
+#     cmd: >-
+#       {{
+#         'reinstall-kernels'
+#         if pgs_distro_boot_loader == 'systemd-boot'
+#         else
+#         'sed -i "s/^#.*OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub ; update-grub ;
+# sed -i "s/^.*OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub'
+#       }}
+#   changed_when: true
+#   become: true
+
 - name: Reinstall boot loader with Windows Disk
-  ansible.builtin.shell:
-    cmd: >-
-      {{
-        'reinstall-kernels'
-        if _systemd_boot.stat.exists
-        else
-        'sed -i "s/^#.*OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub ; update-grub ; sed -i "s/^.*OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/"'
-      }}
+  ansible.builtin.shell: |
+    if [ "{{ pgs_distro_boot_loader }}" = "systemd-boot" ]; then
+      reinstall-kernels
+    else
+      grep -q '^#*GRUB_DISABLE_OS_PROBER' /etc/default/grub \
+        && sed -i 's/^#*GRUB_DISABLE_OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub \
+        || echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
+      update-grub
+      sed -i 's/^GRUB_DISABLE_OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
+    fi
   changed_when: true
   become: true
 
@@ -28,7 +55,7 @@
     nohup bash -c "sleep 10 && shutdown -r now" >/dev/null 2>&1 &
   async: 1
   poll: 0
-  ignore_errors: true
+  # ignore_errors: true
   become: true
   changed_when: true
 

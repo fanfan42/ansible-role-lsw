@@ -67,24 +67,12 @@
   notify: Restart libvirt
   become: true
 
-- name: Get Host CPU set for CPU
-  ansible.builtin.command: bash /tmp/cpu_pinning.sh systemd
-  register: _host_cpus
-  changed_when: false
-
 - name: Create scripts for Passthrough VM
   become: true
   vars:
     _lg: false
   when: pgs_virt_mode == 'passthrough'
   block:
-    - name: Get Display Manager
-      ansible.builtin.shell:
-        cmd: |
-          set -o pipefail
-          systemctl status --no-pager display-manager | head -n1 | cut -d' ' -f2 | cut -d'.' -f1
-      register: _dm
-      changed_when: false
     - name: Create libvirt hooks folders
       ansible.builtin.file:
         path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
