@@ -102,5 +102,8 @@ By default, I install Gnome for Desktop Environment. Now, Gnome starts on Waylan
 For using LG: looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture
 For still unknown reasons, sometimes, you have to write again your password when shutting down the VM (sddm issue)
 
-## General bug
-If booting on windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS
+## General bugs
+If booting on Windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS
+
+When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows don't diaplay.
+You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and play continues as well
