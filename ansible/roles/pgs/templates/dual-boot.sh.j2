@@ -1,0 +1,24 @@
+#!/bin/bash
+
+{% if pgs_distro_boot_loader == 'systemd-boot' %}
+cp /usr/share/edk2-shell/x64/Shell.efi {{ pgs_distro_boot_location  }}/shellx64.efi
+cat << EOF > {{ pgs_distro_boot_location  }}/windows.nsh
+for %i in 0 1 2 3 4 5 6 7
+    if exist FS%i:\EFI\Microsoft\Boot\bootmgfw.efi then
+        FS%i:\EFI\Microsoft\Boot\bootmgfw.efi
+        exit
+    endif
+endfor
+EOF
+cat << EOF > {{ pgs_distro_boot_location }}/loader/entries/windows.conf
+title  Windows
+efi     /shellx64.efi
+options -nointerrupt -noconsolein -noconsoleout windows.nsh
+EOF
+{% elif pgs_distro_boot_loader == 'grub' %}
+grep -q '^#*GRUB_DISABLE_OS_PROBER' /etc/default/grub \
+    && sed -i 's/^#*GRUB_DISABLE_OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub \
+    || echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
+update-grub
+sed -i 's/^GRUB_DISABLE_OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
+{% endif %}

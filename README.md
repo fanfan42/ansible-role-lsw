@@ -103,7 +103,9 @@ For using LG: looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboar
 For still unknown reasons, sometimes, you have to write again your password when shutting down the VM (sddm issue)
 
 ## General bugs
-If booting on Windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS
+If booting on Windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS. It's done only once, this behavior doesn't repeat at aother boot from the Linux boot loader.
 
-When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows don't diaplay.
+When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows dont display.
 You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and play continues as well
+
+When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted

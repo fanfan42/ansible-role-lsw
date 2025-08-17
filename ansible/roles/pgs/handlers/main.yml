@@ -1,52 +1,39 @@
 ---
 
 - name: Reload Boot Loader
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: >-
       {{
-        'echo "Nothing to do"'
-        if pgs_distro_boot_loader == 'systemd-boot'
-        else
         'update-grub'
+        if pgs_distro_boot_loader == 'grub'
+        else
+        '/bin/true'
       }}
-  changed_when: true
+  changed_when: pgs_distro_boot_loader == 'grub'
   become: true
 
 - name: Reload initramfs
   ansible.builtin.shell: >-
-    {{
-      'for kv in $(ls /lib/modules); do krlpth=' ~ pgs_distro_boot_location ~ '/vmlinuz-$kv ; [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth" ; done'
-      if pgs_distro_initramfs_binary == 'dracut'
-      else
-      'update-initramfs -u -k all'
-    }}
+    {% if pgs_distro_initramfs_binary == 'dracut' %}
+      {% if pgs_distro_boot_loader == 'systemd-boot' %}
+        for kv in $(ls /lib/modules); do
+          krlpth="/usr/lib/modules/$kv/vmlinuz"
+          [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
+        done
+      {% else %}
+        for kv in $(ls /lib/modules); do
+          krlpth="/{{ pgs_distro_boot_location }}/vmlinuz-$kv"
+          [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
+        done
+      {% endif %}
+    {% else %}
+      update-initramfs -u -k all
+    {% endif %}
   changed_when: true
   become: true
 
-# - name: Reinstall boot loader with Windows Disk
-#   ansible.builtin.shell:
-#     cmd: >-
-#       {{
-#         'reinstall-kernels'
-#         if pgs_distro_boot_loader == 'systemd-boot'
-#         else
-#         'sed -i "s/^#.*OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub ; update-grub ;
-# sed -i "s/^.*OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/" /etc/default/grub'
-#       }}
-#   changed_when: true
-#   become: true
-
 - name: Reinstall boot loader with Windows Disk
-  ansible.builtin.shell: |
-    if [ "{{ pgs_distro_boot_loader }}" = "systemd-boot" ]; then
-      reinstall-kernels
-    else
-      grep -q '^#*GRUB_DISABLE_OS_PROBER' /etc/default/grub \
-        && sed -i 's/^#*GRUB_DISABLE_OS_PROBER.*/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub \
-        || echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
-      update-grub
-      sed -i 's/^GRUB_DISABLE_OS_PROBER.*/#GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
-    fi
+  ansible.builtin.command: bash /tmp/dual-boot.sh
   changed_when: true
   become: true
 
@@ -55,7 +42,6 @@
     nohup bash -c "sleep 10 && shutdown -r now" >/dev/null 2>&1 &
   async: 1
   poll: 0
-  # ignore_errors: true
   become: true
   changed_when: true
 

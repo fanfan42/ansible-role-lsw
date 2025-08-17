@@ -57,18 +57,73 @@
       become: true
 
 - name: Install pycdlib on EndeavourOS
-  ansible.builtin.command: yay -S --noconfirm --needed python-wheel python-pycdlib-git
-  register: _install_eos
-  changed_when: "'install' in _install_eos.stdout.lower()"
-  when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+  when:
+    - ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - "'python-pycdlib-git' not in _pacman_pkg.stdout"
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: '{{ pgs_pycdlib_dependencies }}'
+        state: present
+      become: true
+    - name: Clone AUR repository for python-pycdlib-git
+      ansible.builtin.git:
+        repo: https://aur.archlinux.org/python-pycdlib-git.git
+        dest: /tmp/python-pycdlib-git
+        force: true
+        update: true
+    - name: Build and install python-pycdlib-git from AUR
+      ansible.builtin.command: makepkg -s --noconfirm
+      args:
+        chdir: /tmp/python-pycdlib-git
+        creates: /tmp/python-pycdlib-git/*.pkg.tar.zst
+      environment:
+        MAKEPKG: /usr/bin/makepkg
+    - name: Install built pycdlib package with pacman
+      ansible.builtin.shell: pacman -U --noconfirm /tmp/python-pycdlib-git/*.pkg.tar.zst
+      changed_when: true
+      become: true
+    - name: Uninstall requirements
+      ansible.builtin.package:
+        name: '{{ pgs_pycdlib_dependencies }}'
+        state: present
+      become: true
+      when: pgs_rm_pycdlib_dependencies
 
 - name: Install Looking Glass on EndeavourOS
-  ansible.builtin.command: yay -S --noconfirm --needed looking-glass
-  register: _install_eos_lg
-  changed_when: "'install' in _install_eos_lg.stdout.lower()"
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
     - pgs_install_looking_glass
+    - "'looking-glass' not in _pacman_pkg.stdout"
+  block:
+    - name: Install requirements
+      ansible.builtin.package:
+        name: '{{ pgs_lg_dependencies }}'
+        state: present
+      become: true
+    - name: Clone AUR repository for looking-glass
+      ansible.builtin.git:
+        repo: https://aur.archlinux.org/looking-glass.git
+        dest: /tmp/looking-glass
+        force: true
+        update: true
+    - name: Build and install looking-glass from AUR
+      ansible.builtin.command: makepkg -s --noconfirm
+      args:
+        chdir: /tmp/looking-glass
+        creates: /tmp/looking-glass/*.pkg.tar.zst
+      environment:
+        MAKEPKG: /usr/bin/makepkg
+    - name: Install built looking-glass package with pacman
+      ansible.builtin.shell: pacman -U --noconfirm /tmp/looking-glass/*.pkg.tar.zst
+      changed_when: true
+      become: true
+    - name: Uninstall requirements
+      ansible.builtin.package:
+        name: '{{ pgs_lg_dependencies }}'
+        state: present
+      become: true
+      when: pgs_rm_lg_dependencies
 
 - name: Install Looking Glass on Debian or Nobara
   when:

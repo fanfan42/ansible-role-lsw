@@ -6,11 +6,11 @@
   gather_facts: true
   become: false
   vars:
-    pgs_windows_iso: windows10.iso
-    pgs_windows_version: 10
-    pgs_windows_img_size: 20G
+    pgs_windows_iso: windows11.iso
+    pgs_windows_version: 11
+    pgs_windows_img_size: 30G
     pgs_windows_disk_device_path: '/dev/sda'
-    pgs_config_pass_disk_controller: false
+    pgs_config_pass_disk_controller: true
     pgs_windows_password: ''
     pgs_windows_gpu_driver: nvidia
     pgs_windows_install_app_from_ninite: true

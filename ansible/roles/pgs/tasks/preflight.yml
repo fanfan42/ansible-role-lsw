@@ -35,31 +35,14 @@
     msg: "Path to disk for copying img isn't a disk !!!"
   when: pgs_windows_disk_device_path != '' and _is_disk.stdout != 'disk'
 
-# - name: Configure IOMMU for dracut
-#   ansible.builtin.copy:
-#     dest: /etc/kernel/cmdline
-#     content: >-
-#       {{
-#         (_krnl_file.content | b64decode)
-#         if __iommu_param in (_krnl_file.content | b64decode)
-#         else (_krnl_file.content | b64decode + ' ' + __iommu_param + ' iommu=pt')
-#       }}
-#     mode: "0644"
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
-    content: >-
-      {{
-        (
-          (_krnl_file.content | b64decode).splitlines() | join(' ')
-        ).strip()
-        if __iommu_param in (_krnl_file.content | b64decode)
-        else (
-          ((_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __iommu_param + ' iommu=pt') | trim
-        )
-      }}
+    content: "{{ ((_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __iommu_param + ' iommu=pt') | trim }}"
     mode: "0644"
-  when: pgs_distro_initramfs_binary == 'dracut'
+  when:
+    - pgs_distro_initramfs_binary == 'dracut'
+    - __iommu_param not in (_krnl_file.content | b64decode)
   become: true
   notify:
     - Reload Boot Loader

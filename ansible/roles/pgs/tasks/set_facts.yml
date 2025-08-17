@@ -16,6 +16,13 @@
     __intel_generation: "{{ _intel_generation.stdout | default('0') }}"
   when: __iommu_param == 'intel_iommu=on'
 
+- name: Create script for dual boot Windows
+  ansible.builtin.template:
+    src: dual-boot.sh.j2
+    dest: /tmp/dual-boot.sh
+    mode: "0755"
+  when: pgs_windows_disk_device_path != ''
+
 - name: Create script for cpu pinning classic version
   ansible.builtin.template:
     src: cpu_pinning_classic.sh.j2
@@ -66,6 +73,12 @@
   register: _is_disk
   changed_when: false
   when: pgs_windows_disk_device_path != ''
+
+- name: Get installed package in endeavourOS
+  ansible.builtin.command: pacman -Q
+  register: _pacman_pkg
+  changed_when: false
+  when: ansible_facts['lsb']['id'] == 'EndeavourOS'
 
 - name: Collect PCI information
   ansible.builtin.command: lspci -mm

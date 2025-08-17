@@ -8,7 +8,7 @@
 
 - name: Copy Windows Unattend template
   ansible.builtin.template:
-    src: autounattend.xml.j2
+    src: 'autounattend_{{ pgs_windows_install_template }}.xml.j2'
     dest: '{{ role_path }}/build/autounattend.xml'
     mode: preserve
 

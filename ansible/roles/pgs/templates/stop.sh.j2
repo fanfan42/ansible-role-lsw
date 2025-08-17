@@ -31,6 +31,13 @@ echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drive
 {% endif %}
 {% endfor %}
 
+{% if pgs_windows_gpu_driver == 'nvidia' %}
+modprobe nvidia
+modprobe nvidia_modeset
+modprobe nvidia_drm
+modprobe nvidia_uvm
+{% endif %}
+
 # Restart Display Manager
 systemctl restart display-manager.service
 sleep 5
