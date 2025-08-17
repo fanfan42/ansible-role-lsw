@@ -18,10 +18,13 @@
         ["-cpu", "host,migratable=on,hv-time=on,hv-relaxed=on,hv-vapic=on,hv-spinlocks=0x1fff,hv-vpindex=on,hv-runtime=on,hv-synic=on,hv-stimer=on,hv-frequencies=on,hv-tlbflush=on,hv-ipi=on,hv-evmcs=on,hv-avic=on"],
         ["-drive", "if=none,file=windows_img_dir/{{ pgs_windows_vm_name }},id=drive0,cache=writeback,discard=ignore,format={{ pgs_windows_img_format }}"],
         ["-drive", "file={{ pgs_windows_iso }},media=cdrom"],
-        ["-drive", "file={{ pgs_windows_ovmf_code_path }},if=pflash,unit=0,format={% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %},readonly=on"],
+        ["-drive", "file={% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}{{ pgs_windows_ovmf_code_secboot_path }}{% else %}{{ pgs_windows_ovmf_code_path }}{% endif %},if=pflash,unit=0,format={% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %},readonly=on"],
         ["-drive", "file=windows_img_dir/efivars.fd,if=pflash,unit=1,format=raw"],
         ["-drive", "file=virtio/virtio-win.iso,media=cdrom"],
         ["-drive", "file=extra_packages/packages.iso,media=cdrom"],
+{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}
+        ["-device", "driver=tpm-crb,tpmdev=tpm0,id=tpm0"],
+{% endif %}
         ["-device", "virtio-scsi-pci,id=scsi0"],
         ["-device", "scsi-hd,bus=scsi0.0,drive=drive0"],
         ["-device", "driver=pcie-root-port,port=16,chassis=1,id=pci.1,bus=pcie.0,multifunction=true,addr=0x3"],
@@ -39,8 +42,11 @@
 {% endif %}
       ],
       "efi_boot": "true",
-      "efi_firmware_code": "{{ pgs_windows_ovmf_code_path }}",
+      "efi_firmware_code": "{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}{{ pgs_windows_ovmf_code_secboot_path }}{% else %}{{ pgs_windows_ovmf_code_path }}{% endif %}",
       "efi_firmware_vars": "{{ pgs_windows_ovmf_vars_path }}",
+{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}
+      "vtpm": "true",
+{% endif %}
       "machine_type": "q35",
       "memory": "{{ pgs_windows_build_mem }}",
       "cpus": "{{ pgs_windows_build_num_cpu }}",

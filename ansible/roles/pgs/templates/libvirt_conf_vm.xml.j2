@@ -13,12 +13,12 @@
   </memoryBacking>
 {{ _cpu_pinning.stdout }}
   <os firmware="efi">
-    <type arch="x86_64" machine="pc-q35-{{ _qemu_machine.stdout }}">hvm</type>
+    <type arch="x86_64" machine="pc-q35-{{ _pgs_qemu_machine.stdout }}">hvm</type>
     <firmware>
       <feature enabled="no" name="enrolled-keys"/>
-      <feature enabled="no" name="secure-boot"/>
+      <feature enabled="{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{{ pgs_windows_ovmf_code_path }}</loader>
+    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}{{ pgs_windows_ovmf_code_secboot_path }}{% else %}{{ pgs_windows_ovmf_code_path }}{% endif %}</loader>
     <nvram template="{{ pgs_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
@@ -160,6 +160,11 @@
     <input type="keyboard" bus="virtio">
       <address type="pci" domain="0x0000" bus="0x1d" slot="0x00" function="0x0"/>
     </input>
+{% endif %}
+{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}
+    <tpm model="tpm-crb">
+      <backend type="emulator" version="2.0"/>
+    </tpm>
 {% endif %}
 {% if _lg %}
     <graphics type="spice" autoport="yes">

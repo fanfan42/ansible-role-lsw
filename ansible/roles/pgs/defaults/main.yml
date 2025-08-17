@@ -23,6 +23,12 @@ pgs_windows_disk_device_path: ''
 pgs_windows_build_mem: '{{ (ansible_memtotal_mb / 2) | int }}'
 pgs_windows_build_num_cpu: '{{ (ansible_processor_vcpus / 2) | int }}'
 pgs_windows_build_timeout_minutes: 30
+# Can be normal or private
+# WARNING: using the private mode improves performance at the cost of losing Microsoft support as explained in their EULA
+# private mode musts only be used for private or educational purpose
+# normal mode has very few optimization for performance but are accepted by the Microsoft EULA
+# In any case, a licence key is still mandatory
+pgs_windows_install_template: normal
 # Can be 10 or 11
 pgs_windows_version: 10
 pgs_windows_language: fr-FR
