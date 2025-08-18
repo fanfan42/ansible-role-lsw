@@ -72,7 +72,7 @@
         dest: /tmp/python-pycdlib-git
         force: true
         update: true
-    - name: Build and install python-pycdlib-git from AUR
+    - name: Build python-pycdlib-git from AUR
       ansible.builtin.command: makepkg -s --noconfirm
       args:
         chdir: /tmp/python-pycdlib-git
@@ -107,7 +107,7 @@
         dest: /tmp/looking-glass
         force: true
         update: true
-    - name: Build and install looking-glass from AUR
+    - name: Build looking-glass from AUR
       ansible.builtin.command: makepkg -s --noconfirm
       args:
         chdir: /tmp/looking-glass

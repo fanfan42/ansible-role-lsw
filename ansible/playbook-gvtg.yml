@@ -9,8 +9,8 @@
     pgs_virt_mode: gvtg
     pgs_windows_iso: windows11.iso
     pgs_windows_version: 11
-    pgs_windows_img_size: 20G
-    pgs_windows_disk_device_path: ''
+    pgs_windows_img_size: 30G
+    pgs_windows_disk_device_path: '/dev/sda'
     pgs_config_pass_disk_controller: false
     pgs_windows_password: ''
     pgs_windows_install_app_from_ninite: true
