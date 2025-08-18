@@ -1,0 +1,30 @@
+---
+
+dependencies: []
+
+galaxy_info:
+  author: "FanfanKTA"
+  role_name: "pgs"
+  namespace: "fanfankta"
+  description: "Manage personal GVT-g, SR-IOV or Passthrough Windows based Virtual Machines"
+  issue_tracker_url: https://github.com/fanfan42/ansible-role-passthrough-gvtg-sriov/issues
+  license: "AGPL-3.0-or-later"
+  min_ansible_version: "2.9"
+  github_branch: master
+  platforms:
+    - name: ArchLinux
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - trixie
+    - name: Fedora
+      versions:
+        - "42"
+  galaxy_tags:
+    - virtualization
+    - libvirt
+    - qemu
+    - passthrough
+    - gvtg
+    - sriov
