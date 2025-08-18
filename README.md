@@ -96,7 +96,13 @@ Open libvirt-manager and lauch the VM
 ## Notes for Debian
 In the pre requisites, you have to install sudo and put yourself in sudo group with root user (/usr/sbin/usermod -a -G sudo $(whoami))
 Also install gawk
-By default, I install Gnome for Desktop Environment. Now, Gnome starts on Wayland by default. At the Login, before typing your password, please ensure that "GNOME on Xorg" is selected in bottom right wheel of the screen
+Boot the 2 VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/vm-name.log 
+For the Passthrough VM without Looking Glass
+aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f
+For the Looking Glass VM:
+aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f
+The passthrough VM may have not any sound. The only way I found to get it back was to boot from the boot loader (grub) on Windows Boot Manager. When I restarted the VM, sound was back. But it implies that you have installed Windows on another disk.
+
 
 ## Notes for Nobara
 For using LG: looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture

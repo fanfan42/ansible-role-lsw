@@ -75,3 +75,4 @@ pgs_rm_lg_dependencies: false
 pgs_windows_ovmf_code_path: /usr/share/edk2/x64/OVMF_CODE.4m.fd
 pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd
 pgs_windows_ovmf_vars_path: /usr/share/edk2/x64/OVMF_VARS.4m.fd
+pgs_windows_uefi_shell_path: /usr/share/edk2-shell/x64/Shell.efi

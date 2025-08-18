@@ -98,6 +98,15 @@
         mode: preserve
       become: true
       when: "'build' in ansible_run_tags"
+    - name: Copy modukes-load.d options for vfio
+      ansible.builtin.copy:
+        src: vfio-modules.conf
+        dest: /etc/modules-load.d/vfio.conf
+        mode: preserve
+      become: true
+      when:
+        - "'build' in ansible_run_tags"
+        - pgs_distro_initramfs_binary != 'dracut'
 
 - name: Preflight for GVT-g Virtualization mode
   when: pgs_virt_mode == 'gvtg'

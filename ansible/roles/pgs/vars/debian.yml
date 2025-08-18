@@ -25,6 +25,9 @@ pgs_packages:
   - dnsmasq
   - python3-lxml
   - python3-pycdlib
+  - swtpm
+  - efi-shell-x64
+  - apparmor-utils
 
 pgs_zen_packages:
   - linux-image-6.12.17-1-liquorix-amd64
@@ -65,4 +68,6 @@ pgs_packer_version: 1.13.1
 pgs_packer_url: 'https://releases.hashicorp.com/packer/{{ pgs_packer_version }}/packer_{{ pgs_packer_version }}'
 
 pgs_windows_ovmf_code_path: /usr/share/OVMF/OVMF_CODE_4M.fd
+pgs_windows_ovmf_code_secboot_path: /usr/share/OVMF/OVMF_CODE_4M.secboot.fd
 pgs_windows_ovmf_vars_path: /usr/share/OVMF/OVMF_VARS_4M.fd
+pgs_windows_uefi_shell_path: /usr/share/efi-shell-x64/shellx64.efi

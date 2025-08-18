@@ -35,6 +35,7 @@ fi
 
 {% if pgs_windows_gpu_driver == 'nvidia' %}
 sleep 5
+systemctl stop nvidia-persistenced
 rmmod nvidia_uvm
 rmmod nvidia_drm
 rmmod nvidia_modeset

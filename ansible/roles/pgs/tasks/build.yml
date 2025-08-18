@@ -90,17 +90,15 @@
   notify: Reinstall boot loader with Windows Disk
 
 - name: Remove vfio build configuration for Passthrough Virtualization mode
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - /etc/dracut.conf.d/vfio.conf
+    - /etc/modprobe.d/vfio.conf
+    - /etc/modules-load.d/vfio.conf
   when: pgs_virt_mode == "passthrough"
   become: true
   notify:
     - Reload Boot Loader
     - Reload initramfs
-  block:
-    - name: Remove initramfs (dracut) options
-      ansible.builtin.file:
-        path: /etc/dracut.conf.d/vfio.conf
-        state: absent
-    - name: Remove modprobe.d options for vfio
-      ansible.builtin.file:
-        path: /etc/modprobe.d/vfio.conf
-        state: absent

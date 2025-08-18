@@ -26,17 +26,6 @@
     mode: preserve
   become: true
 
-# - name: Create XML fot VM configuration before define
-#   vars:
-#     _lg: true
-#   ansible.builtin.template:
-#     src: libvirt_conf_vm.xml.j2
-#     dest: "/tmp/{{ pgs_windows_vm_name }}.xml"
-#     mode: "0600"
-#     owner: root
-#     group: root
-#   become: true
-
 - name: Define the VM
   vars:
     _lg: false
