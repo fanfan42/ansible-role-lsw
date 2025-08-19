@@ -35,6 +35,31 @@
     msg: "Path to disk for copying img isn't a disk !!!"
   when: pgs_windows_disk_device_path != '' and _pgs_is_disk.stdout != 'disk'
 
+- name: Fail when missing Windows ISO file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/{{ pgs_windows_iso }} doesn't exist, check {{ role_path }}/build/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_windows_iso.stat.exists"
+
+- name: Fail when missing GPU driver file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/gpudriver.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_gpu_driver.stat.exists"
+
+- name: Fail when missing Virtio ISO file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/virtio/virtio-win.iso doesn't exist, check {{ role_path }}/build/virtio/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_virtio_win.stat.exists"
+
+- name: Fail when missing Ninite Installer file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/NiniteInstaller.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "pgs_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _pgs_ninite_file.stat.exists"
+
+- name: Fail when missing Looking Glass driver file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/looking-glass-host-setup.exe dont exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "pgs_install_looking_glass and 'build' in ansible_run_tags and not _pgs_lg_driver.stat.exists"
+
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
