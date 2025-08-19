@@ -23,26 +23,26 @@
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:
     msg: "Path to second mouse doesn't exist !!!"
-  when: pgs_config_usb_mouse != '' and not _second_mouse.stat.exists
+  when: pgs_config_usb_mouse != '' and not _pgs_second_mouse.stat.exists
 
 - name: Fail when path to second keyboard doesnt exist
   ansible.builtin.fail:
     msg: "Path to second keyboard doesn't exist !!!"
-  when: pgs_config_usb_kbd != '' and not _second_kbd.stat.exists
+  when: pgs_config_usb_kbd != '' and not _pgs_second_kbd.stat.exists
 
 - name: Fail when physical disk path is not good
   ansible.builtin.fail:
     msg: "Path to disk for copying img isn't a disk !!!"
-  when: pgs_windows_disk_device_path != '' and _is_disk.stdout != 'disk'
+  when: pgs_windows_disk_device_path != '' and _pgs_is_disk.stdout != 'disk'
 
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
-    content: "{{ ((_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __iommu_param + ' iommu=pt') | trim }}"
+    content: "{{ ((_pgs_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __pgs_iommu_param + ' iommu=pt') | trim }}"
     mode: "0644"
   when:
     - pgs_distro_initramfs_binary == 'dracut'
-    - __iommu_param not in (_krnl_file.content | b64decode)
+    - __pgs_iommu_param not in (_pgs_krnl_file.content | b64decode)
   become: true
   notify:
     - Reload Boot Loader
@@ -54,11 +54,11 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=[\"'](.*)[\"']"
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __iommu_param }} iommu=pt"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __pgs_iommu_param }} iommu=pt"'
     backrefs: true
   when:
     - pgs_distro_boot_loader == 'grub'
-    - _grub_check.stdout == 'absent'
+    - _pgs_grub_check.stdout == 'absent'
   become: true
   notify:
     - Reload Boot Loader
@@ -77,7 +77,7 @@
     - name: Fail if not enough GPU
       ansible.builtin.fail:
         msg: "You need at least 2 GPU !!!"
-      when: "_lspci_output.stdout_lines | select('search', 'VGA') | list | length < 2"
+      when: "_pgs_lspci_output.stdout_lines | select('search', 'VGA') | list | length < 2"
     - name: Fail if no 2nd Keyboard/Mouse and no LookingGlass
       ansible.builtin.fail:
         msg: "VM wont be usable without 2nd Keyboard/Mouse or LookingGlass not enabled !!!"
@@ -119,7 +119,7 @@
     - name: Fail when CPU doesn't support GVT-g
       ansible.builtin.fail:
         msg: "GVT-g virtualization mode is not supported on this CPU !!!"
-      when: not 'intel' in __iommu_param or (__intel_generation | int) < 6 or (__intel_generation | int) > 10
+      when: not 'intel' in __pgs_iommu_param or (__pgs_intel_generation | int) < 6 or (__pgs_intel_generation | int) > 10
     - name: Fail when Looking Glass not enabled
       ansible.builtin.fail:
         msg: "Virtualization mode gvtg needs Looking Glass !!!"

@@ -1,6 +1,6 @@
 <domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">
-  <name>{{ pgs_windows_vm_name }}{% if _lg %}lg{% endif %}</name>
-  <uuid>{% if _lg %}fca46f9a-f8f6-45f6-8d73-28a7b7e8684f{% else %}94d6959d-b1ae-4ba9-8a9f-4aa60563e40f{% endif %}</uuid>
+  <name>{{ pgs_windows_vm_name }}{% if _pgs_lg %}lg{% endif %}</name>
+  <uuid>{% if _pgs_lg %}fca46f9a-f8f6-45f6-8d73-28a7b7e8684f{% else %}94d6959d-b1ae-4ba9-8a9f-4aa60563e40f{% endif %}</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://microsoft.com/win/{{ pgs_windows_version }}"/>
@@ -11,7 +11,7 @@
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
-{{ _cpu_pinning.stdout }}
+{{ _pgs_cpu_pinning.stdout }}
   <os firmware="efi">
     <type arch="x86_64" machine="pc-q35-{{ _pgs_qemu_machine.stdout }}">hvm</type>
     <firmware>
@@ -53,7 +53,7 @@
   <devices>
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
 {% if not pgs_config_pass_disk_controller %}
-{{ _disk_conf.stdout }}
+{{ _pgs_disk_conf.stdout }}
 {% endif %}
     <controller type="usb" index="0" model="qemu-xhci" ports="15">
       <address type="pci" domain="0x0000" bus="0x02" slot="0x00" function="0x0"/>
@@ -133,10 +133,10 @@
       <address type="pci" domain="0x0000" bus="0x00" slot="0x1f" function="0x2"/>
     </controller>
 {% if not pgs_config_pass_disk_controller %}
-{{ _scsi_cntrl.stdout }}
+{{ _pgs_scsi_cntrl.stdout }}
 {% endif %}
     <interface type="network">
-      <mac address="52:54:00:{% if _lg %}00:24:be{% else %}70:65:8d{% endif %}"/>
+      <mac address="52:54:00:{% if _pgs_lg %}00:24:be{% else %}70:65:8d{% endif %}"/>
       <source network="default"/>
       <model type="virtio"/>
       <address type="pci" domain="0x0000" bus="0x19" slot="0x00" function="0x0"/>
@@ -166,7 +166,7 @@
       <backend type="emulator" version="2.0"/>
     </tpm>
 {% endif %}
-{% if _lg %}
+{% if _pgs_lg %}
     <graphics type="spice" autoport="yes">
       <listen type="{% if pgs_config_usb_kbd != '' and pgs_config_usb_mouse != '' %}none{% else %}address{% endif %}"/>
     </graphics>
@@ -174,7 +174,7 @@
       <model type="none"/>
     </video>
 {% endif %}
-{% if _lg %}
+{% if _pgs_lg %}
     <sound model="ich9">
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
@@ -187,7 +187,7 @@
     <audio id="1" type="none"/>
 {% endif %}
 {% if pgs_virt_mode == 'passthrough' %}
-{% for idx in range(_pci_ids.stdout.split(',') | length) %}
+{% for idx in range(_pgs_pci_ids.stdout.split(',') | length) %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
         <address domain="0x0000" bus="0x{{ (pgs_passthrough_gpu_pci_base_addr | split(':'))[0] }}" slot="0x{{ (pgs_passthrough_gpu_pci_base_addr | split(':'))[1] }}" function="0x{{ idx }}"/>
@@ -210,14 +210,14 @@
 {% if pgs_config_pass_disk_controller %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
-        <address domain="0x{{ _disk_pci_addr.stdout.split(':')[0] }}" bus="0x{{ _disk_pci_addr.stdout.split(':')[1] }}" slot="0x{{ _disk_pci_addr.stdout.split(':')[2].split('.')[0] }}" function="0x{{ _disk_pci_addr.stdout.split('.')[1] }}"/>
+        <address domain="0x{{ _pgs_disk_pci_addr.stdout.split(':')[0] }}" bus="0x{{ _pgs_disk_pci_addr.stdout.split(':')[1] }}" slot="0x{{ _pgs_disk_pci_addr.stdout.split(':')[2].split('.')[0] }}" function="0x{{ _pgs_disk_pci_addr.stdout.split('.')[1] }}"/>
       </source>
       <boot order="1"/>
       <address type="pci" domain="0x0000" bus="0x1b" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
     <memballoon model="none"/>
-{% if _lg %}
+{% if _pgs_lg %}
     <shmem name="looking-glass">
       <model type="ivshmem-plain"/>
       <size unit="M">{{ pgs_looking_glass_memory }}</size>

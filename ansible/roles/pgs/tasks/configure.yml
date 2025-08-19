@@ -63,14 +63,14 @@
   ansible.builtin.blockinfile:
     path: /etc/libvirt/qemu.conf
     marker: "# {mark} ANSIBLE MANAGED BLOCK - cgroup_device_acl"
-    block: "{{ __cgroup_acl_block }}"
+    block: "{{ __pgs_cgroup_acl_block }}"
   notify: Restart libvirt
   become: true
 
 - name: Create scripts for Passthrough VM
   become: true
   vars:
-    _lg: false
+    _pgs_lg: false
   when: pgs_virt_mode == 'passthrough'
   block:
     - name: Create libvirt hooks folders
@@ -130,7 +130,7 @@
 - name: Create scripts for Looking Glass VM
   become: true
   vars:
-    _lg: true
+    _pgs_lg: true
   when: pgs_install_looking_glass
   block:
     - name: Create libvirt hooks folders for Looking Glass VM

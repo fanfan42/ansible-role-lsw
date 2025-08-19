@@ -2,19 +2,19 @@
 
 - name: Set IOMMU kernel parameter based on CPU vendor
   ansible.builtin.set_fact:
-    __iommu_param: >-
+    __pgs_iommu_param: >-
       {{ 'intel_iommu=on' if 'GenuineIntel' in ansible_facts['processor'][1] else 'amd_iommu=on' }}
 
 - name: Get Intel CPU generation
   ansible.builtin.command: bash {{ role_path }}/files/intelcpuversion.sh
-  register: _intel_generation
+  register: _pgs_intel_generation
   changed_when: false
-  when: __iommu_param == 'intel_iommu=on'
+  when: __pgs_iommu_param == 'intel_iommu=on'
 
 - name: Extract CPU generation (Intel only)
   ansible.builtin.set_fact:
-    __intel_generation: "{{ _intel_generation.stdout | default('0') }}"
-  when: __iommu_param == 'intel_iommu=on'
+    __pgs_intel_generation: "{{ _pgs_intel_generation.stdout | default('0') }}"
+  when: __pgs_iommu_param == 'intel_iommu=on'
 
 - name: Create script for dual boot Windows
   ansible.builtin.template:
@@ -28,18 +28,18 @@
     src: cpu_pinning_classic.sh.j2
     dest: /tmp/cpu_pinning.sh
     mode: "0755"
-  when: "not ('intel' in __iommu_param and (__intel_generation | int) >= 12)"
+  when: "not ('intel' in __pgs_iommu_param and (__pgs_intel_generation | int) >= 12)"
 
 - name: Create script for cpu Intel new generation CPU
   ansible.builtin.template:
     src: cpu_pinning_intel_newgen.sh.j2
     dest: /tmp/cpu_pinning.sh
     mode: "0755"
-  when: "'intel' in __iommu_param and (__intel_generation | int) >= 12"
+  when: "'intel' in __pgs_iommu_param and (__pgs_intel_generation | int) >= 12"
 
 - name: Generate dynamic cgroup_device_acl block content
   ansible.builtin.set_fact:
-    __cgroup_acl_block: |
+    __pgs_cgroup_acl_block: |
       cgroup_device_acl = [
       {% if pgs_config_usb_kbd != '' %}
           "{{ pgs_config_usb_kbd }}",
@@ -56,13 +56,13 @@
 - name: Check 2nd mouse exists
   ansible.builtin.stat:
     path: '{{ pgs_config_usb_mouse }}'
-  register: _second_mouse
+  register: _pgs_second_mouse
   become: true
 
 - name: Check 2nd keyboard exists
   ansible.builtin.stat:
     path: '{{ pgs_config_usb_kbd }}'
-  register: _second_kbd
+  register: _pgs_second_kbd
   become: true
 
 - name: Verify if disk is correct
@@ -70,19 +70,19 @@
     cmd: |
       set -o pipefail
       lsblk -no TYPE {{ pgs_windows_disk_device_path }} | head -n1
-  register: _is_disk
+  register: _pgs_is_disk
   changed_when: false
   when: pgs_windows_disk_device_path != ''
 
 - name: Get installed package in endeavourOS
   ansible.builtin.command: pacman -Q
-  register: _pacman_pkg
+  register: _pgs_pacman_pkg
   changed_when: false
   when: ansible_facts['lsb']['id'] == 'EndeavourOS'
 
 - name: Collect PCI information
   ansible.builtin.command: lspci -mm
-  register: _lspci_output
+  register: _pgs_lspci_output
   changed_when: false
 
 - name: Facts for passthrough
@@ -93,14 +93,14 @@
         cmd: |
           set -o pipefail
           lspci -nn | gawk '/{{ pgs_passthrough_gpu_pci_base_addr }}/{match($0, /\[([0-9a-fA-F]{4}:[0-9a-fA-F]{4})\]/, m); if (m[1]) print m[1]}' | paste -sd,
-      register: _pci_ids
+      register: _pgs_pci_ids
       changed_when: false
     - name: Get Display Manager
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
           systemctl status --no-pager display-manager | head -n1 | cut -d' ' -f2 | cut -d'.' -f1
-      register: _dm
+      register: _pgs_dm
       changed_when: false
 
 - name: Facts for GVT-g
@@ -111,29 +111,29 @@
         cmd: |
           set -o pipefail
           lspci | grep -i Intel | grep VGA | cut -d' ' -f1
-      register: _pci_cpu
+      register: _pgs_pci_cpu
       changed_when: false
     - name: Get MDEV best type for GVT-g
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
-          ls -1 /sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/mdev_supported_types/ | head -n1
-      register: _mdev_type
+          ls -1 /sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/mdev_supported_types/ | head -n1
+      register: _pgs_mdev_type
       changed_when: false
       ignore_errors: true
 
 - name: Read /etc/kernel/cmdline
   ansible.builtin.slurp:
     src: /etc/kernel/cmdline
-  register: _krnl_file
+  register: _pgs_krnl_file
   when: pgs_distro_initramfs_binary == 'dracut'
 
 - name: Check if IOMMU param already present in GRUB config
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      grep -q '{{ __iommu_param }}' /etc/default/grub && echo present || echo absent
-  register: _grub_check
+      grep -q '{{ __pgs_iommu_param }}' /etc/default/grub && echo present || echo absent
+  register: _pgs_grub_check
   changed_when: false
   when: pgs_distro_boot_loader == 'grub'
 
@@ -142,49 +142,49 @@
     cmd: |
       set -o pipefail
       udevadm info --name={{ pgs_windows_disk_device_path }} --query=property --value --property ID_PATH | cut -d'-' -f2
-  register: _disk_pci_addr
+  register: _pgs_disk_pci_addr
   changed_when: false
   when: pgs_config_pass_disk_controller
 
 - name: Verify if packages.iso exists
   ansible.builtin.stat:
     path: '{{ role_path }}/build/extra_packages/packages.iso'
-  register: _pkgiso
+  register: _pgs_pkgiso
   when: "'build' in ansible_run_tags"
 
 - name: Get Host CPU set for CPU
   ansible.builtin.command: /tmp/cpu_pinning.sh systemd
-  register: _host_cpus
+  register: _pgs_host_cpus
   changed_when: false
 
 - name: Get CPU pinning
   ansible.builtin.command: /tmp/cpu_pinning.sh cputune
-  register: _cpu_pinning
+  register: _pgs_cpu_pinning
   changed_when: false
 
 - name: Get CPU configuration for host passthrough classic CPU
   ansible.builtin.command: /tmp/cpu_pinning.sh cpuconf
-  register: _cpu_conf
+  register: _pgs_cpu_conf
   changed_when: false
 
 - name: Get Disk configuration
   ansible.builtin.command: /tmp/cpu_pinning.sh diskconf
-  register: _disk_conf
+  register: _pgs_disk_conf
   changed_when: false
 
 - name: Get SCSI controller
   ansible.builtin.command: /tmp/cpu_pinning.sh scsicntrl
-  register: _scsi_cntrl
+  register: _pgs_scsi_cntrl
   changed_when: false
 
 - name: Check if packer already installed on Debian or Nobara
   ansible.builtin.stat:
     path: /usr/local/bin/packer
-  register: _pkr_bin
+  register: _pgs_pkr_bin
   when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
 
 - name: Check if Looking Glass already installed on Debian or Nobara
   ansible.builtin.stat:
     path: /usr/local/bin/looking-glass-client
-  register: _lg_bin
+  register: _pgs_lg_bin
   when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']

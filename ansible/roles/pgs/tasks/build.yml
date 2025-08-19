@@ -17,7 +17,7 @@
     src_files: '{{ role_path }}/build/extra_packages'
     dest_iso: '{{ role_path }}/build/extra_packages/packages.iso'
     interchange_level: 3
-  when: not _pkgiso.stat.exists
+  when: not _pgs_pkgiso.stat.exists
 
 - name: Delete Windows destination directory if exists
   ansible.builtin.file:
@@ -33,12 +33,12 @@
       ansible.builtin.shell: |
         echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > \
         /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }}/driver/unbind
-      loop: "{{ range(0, (_pci_ids.stdout | split(',') | length)) | list }}"
+      loop: "{{ range(0, (_pgs_pci_ids.stdout | split(',') | length)) | list }}"
       changed_when: true
     - name: Bind devices to vfio-pci for passthrough
       ansible.builtin.shell: |
         echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > /sys/bus/pci/drivers/vfio-pci/bind
-      loop: "{{ range(0, (_pci_ids.stdout | split(',') | length)) | list }}"
+      loop: "{{ range(0, (_pgs_pci_ids.stdout | split(',') | length)) | list }}"
       changed_when: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
@@ -60,7 +60,7 @@
     - name: Create MDEV device
       ansible.builtin.shell: |
         echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > \
-        /sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/mdev_supported_types/{{ _mdev_type.stdout }}/create
+        /sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/mdev_supported_types/{{ _pgs_mdev_type.stdout }}/create
       changed_when: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
@@ -77,7 +77,7 @@
     - name: Remove MDEV device
       ansible.builtin.shell: |
         echo 1 > \
-        /sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove
+        /sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove
       changed_when: true
 
 - name: Copy img to disk

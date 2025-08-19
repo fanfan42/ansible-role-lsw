@@ -28,7 +28,7 @@
 
 - name: Define the VM
   vars:
-    _lg: false
+    _pgs_lg: false
   community.libvirt.virt:
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
@@ -37,7 +37,7 @@
 
 - name: Define the VM with Looking Glass
   vars:
-    _lg: true
+    _pgs_lg: true
   community.libvirt.virt:
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"

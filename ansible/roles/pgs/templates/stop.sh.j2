@@ -7,8 +7,8 @@ systemctl set-property --runtime -- system.slice AllowedCPUs=0-{{ (ansible_proce
 systemctl set-property --runtime -- init.scope AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
 
 {% if pgs_config_pass_disk_controller %}
-echo {{ _disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _disk_pci_addr.stdout }}/driver/unbind
-virsh nodedev-reattach pci_{{ _disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
+echo {{ _pgs_disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _pgs_disk_pci_addr.stdout }}/driver/unbind
+virsh nodedev-reattach pci_{{ _pgs_disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
 {% endif %}
 
 {% if pgs_virt_mode == 'passthrough' %}
@@ -18,7 +18,7 @@ modprobe -r vfio_iommu_type1
 modprobe -r vfio
 
 # Re-Bind GPU to Host
-{% for idx in range(_pci_ids.stdout.split(',') | length) %}
+{% for idx in range(_pgs_pci_ids.stdout.split(',') | length) %}
 echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
 virsh nodedev-reattach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
 sleep 2
@@ -43,22 +43,22 @@ systemctl restart display-manager.service
 sleep 5
 
 # Comment out autologin lines in Display Manager
-{% if _dm.stdout == 'lightdm' %}
+{% if _pgs_dm.stdout == 'lightdm' %}
 sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf
-{% elif _dm.stdout == 'gdm' %}
+{% elif _pgs_dm.stdout == 'gdm' %}
 sed -i 's/^AutomaticLoginEnable = true/#  AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
 sed -i 's/^AutomaticLogin = {{ ansible_env['LOGNAME'] }}/#  AutomaticLogin = user1/' /etc/gdm3/daemon.conf
-{% elif _dm.stdout == 'sddm' %}
+{% elif _pgs_dm.stdout == 'sddm' %}
 sed -i '/^User={{ ansible_env['LOGNAME'] }}$/d' /etc/sddm.conf
 {% endif %}
 
 {% endif %}
 
-{% if _lg | default(false) %}
+{% if _pgs_lg | default(false) %}
 # Delete looking glass shm
 rm /dev/shm/looking-glass
 {% endif %}
 
 {% if pgs_virt_mode == 'gvtg' %}
-echo 1 > "/sys/bus/pci/devices/0000:{{ _pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
+echo 1 > "/sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
 {% endif %}

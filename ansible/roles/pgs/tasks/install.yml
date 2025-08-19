@@ -25,26 +25,26 @@
 - name: Install Packer on Debian or Nobara
   when:
     - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
-    - not _pkr_bin.stat.exists
+    - not _pgs_pkr_bin.stat.exists
   block:
     - name: Get checksum list
       ansible.builtin.set_fact:
-        __pkr_cs: "{{ lookup('ansible.builtin.url', '{{ pgs_packer_url }}_SHA256SUMS', wantlist=True) | list }}"
-      until: __pkr_cs is search('linux_amd64.zip')
+        __pgs_pkr_cs: "{{ lookup('ansible.builtin.url', '{{ pgs_packer_url }}_SHA256SUMS', wantlist=True) | list }}"
+      until: __pgs_pkr_cs is search('linux_amd64.zip')
       retries: 10
     - name: Get checksum for amd64
       ansible.builtin.set_fact:
-        __pkr_checksum: "{{ item.split(' ')[0] }}"
-      loop: '{{ __pkr_cs }}'
+        __pgs_pkr_checksum: "{{ item.split(' ')[0] }}"
+      loop: '{{ __pgs_pkr_cs }}'
       when: "('linux_amd64.zip') in item"
     - name: Download packer binary to local folder
       ansible.builtin.get_url:
         url: '{{ pgs_packer_url }}_linux_amd64.zip'
         dest: /tmp/packer.zip
-        checksum: 'sha256:{{ __pkr_checksum }}'
+        checksum: 'sha256:{{ __pgs_pkr_checksum }}'
         mode: "0644"
-      register: _download
-      until: _download is succeeded
+      register: _pgs_download
+      until: _pgs_download is succeeded
       retries: 5
       delay: 2
     - name: Unpack Packer binary
@@ -59,7 +59,7 @@
 - name: Install pycdlib on EndeavourOS
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
-    - "'python-pycdlib-git' not in _pacman_pkg.stdout"
+    - "'python-pycdlib-git' not in _pgs_pacman_pkg.stdout"
   block:
     - name: Install requirements
       ansible.builtin.package:
@@ -70,6 +70,7 @@
       ansible.builtin.git:
         repo: https://aur.archlinux.org/python-pycdlib-git.git
         dest: /tmp/python-pycdlib-git
+        version: master
         force: true
         update: true
     - name: Build python-pycdlib-git from AUR
@@ -86,7 +87,7 @@
     - name: Uninstall requirements
       ansible.builtin.package:
         name: '{{ pgs_pycdlib_dependencies }}'
-        state: present
+        state: absent
       become: true
       when: pgs_rm_pycdlib_dependencies
 
@@ -94,7 +95,7 @@
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
     - pgs_install_looking_glass
-    - "'looking-glass' not in _pacman_pkg.stdout"
+    - "'looking-glass' not in _pgs_pacman_pkg.stdout"
   block:
     - name: Install requirements
       ansible.builtin.package:
@@ -105,6 +106,7 @@
       ansible.builtin.git:
         repo: https://aur.archlinux.org/looking-glass.git
         dest: /tmp/looking-glass
+        version: master
         force: true
         update: true
     - name: Build looking-glass from AUR
@@ -121,7 +123,7 @@
     - name: Uninstall requirements
       ansible.builtin.package:
         name: '{{ pgs_lg_dependencies }}'
-        state: present
+        state: absent
       become: true
       when: pgs_rm_lg_dependencies
 
@@ -129,7 +131,7 @@
   when:
     - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
     - pgs_install_looking_glass
-    - not _lg_bin.stat.exists
+    - not _pgs_lg_bin.stat.exists
   block:
     - name: Install Looking Glass build dependencies
       ansible.builtin.package:
@@ -173,8 +175,8 @@
 
 - name: Install Zen Kernel on EndeavourOS
   ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed
-  register: _install_eos_zen
-  changed_when: "'install' in _install_eos_zen.stdout.lower()"
+  register: _pgs_install_eos_zen
+  changed_when: "'install' in _pgs_install_eos_zen.stdout.lower()"
   loop: "{{ pgs_zen_packages }}"
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
@@ -187,8 +189,8 @@
 
 - name: Install Zen Kernel on EndeavourOS with GVT-g
   ansible.builtin.command: downgrade --prefer-cache --ignore always {{ item }} -- --noconfirm --needed
-  register: _install_eos_zen
-  changed_when: "'install' in _install_eos_zen.stdout.lower()"
+  register: _pgs_install_eos_zen
+  changed_when: "'install' in _pgs_install_eos_zen.stdout.lower()"
   loop: "{{ pgs_zen_gvtg_packages }}"
   when:
     - ansible_facts['lsb']['id'] == 'EndeavourOS'
