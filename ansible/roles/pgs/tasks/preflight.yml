@@ -57,7 +57,7 @@
 
 - name: Fail when missing Looking Glass driver file for building
   ansible.builtin.fail:
-    msg: "{{ role_path }}/build/extra_packages/looking-glass-host-setup.exe dont exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+    msg: "{{ role_path }}/build/extra_packages/looking_glass_host_setup.exe dont exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
   when: "pgs_install_looking_glass and 'build' in ansible_run_tags and not _pgs_lg_driver.stat.exists"
 
 - name: Configure IOMMU for dracut

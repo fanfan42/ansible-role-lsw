@@ -7,15 +7,17 @@
   become: false
   vars:
     pgs_virt_mode: gvtg
-    pgs_windows_iso: windows11.iso
-    pgs_windows_version: 11
+    pgs_windows_iso: windows10.iso
+    pgs_windows_version: 10
     pgs_windows_img_size: 30G
-    pgs_windows_disk_device_path: '/dev/sda'
+    pgs_windows_disk_device_path: ''
     pgs_config_pass_disk_controller: false
     pgs_windows_password: ''
+    pgs_windows_install_template: private
     pgs_windows_install_app_from_ninite: true
     pgs_install_looking_glass: true
     pgs_windows_build_timeout_minutes: 26
+    pgs_config_usb_kbd: "/dev/input/by-id/usb-Chicony_USB_Keyboard-event-kbd"
     pgs_config_usb_mouse: "/dev/input/by-id/usb-Razer_Razer_Basilisk_X_HyperSpeed-event-mouse"
     # pgs_config_usb_kbd: "/dev/input/by-id/usb-Metadot_-_Das_Keyboard_Das_Keyboard-event-kbd"
     # pgs_config_usb_mouse: "/dev/input/by-id/usb-Razer_Razer_Basilisk_V3-event-mouse"
