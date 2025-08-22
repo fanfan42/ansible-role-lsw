@@ -20,20 +20,16 @@ pgs_packages:
   - dnsmasq
   - python3-lxml
   - python3-pycdlib
+  - swtpm
 
 pgs_lg_version: B7
 pgs_lg_url: 'https://looking-glass.io/artifact/{{ pgs_lg_version }}/source'
 
 pgs_lg_dependencies:
-  - cmake
-  - gcc
   - gcc-c++
   - libglvnd-devel
-  - fontconfig-devel
   - spice-protocol
-  - make
   - nettle-devel
-  - pkgconf-pkg-config
   - binutils-devel
   - libXi-devel
   - libXinerama-devel
@@ -56,4 +52,6 @@ pgs_packer_version: 1.13.1
 pgs_packer_url: 'https://releases.hashicorp.com/packer/{{ pgs_packer_version }}/packer_{{ pgs_packer_version }}'
 
 pgs_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
+pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2
 pgs_windows_ovmf_vars_path: /usr/share/edk2/ovmf/OVMF_VARS_4M.qcow2
+pgs_windows_uefi_shell_path: /usr/share/edk2/ovmf/Shell.efi

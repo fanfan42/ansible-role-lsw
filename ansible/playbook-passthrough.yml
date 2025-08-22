@@ -12,8 +12,9 @@
     pgs_windows_disk_device_path: '/dev/sda'
     pgs_config_pass_disk_controller: true
     pgs_windows_password: ''
+    pgs_windows_install_template: private
     pgs_windows_gpu_driver: nvidia
-    pgs_windows_install_app_from_ninite: false
+    pgs_windows_install_app_from_ninite: true
     pgs_install_looking_glass: true
     pgs_passthrough_gpu_pci_base_addr: 01:00
     pgs_windows_build_timeout_minutes: 26

@@ -27,7 +27,7 @@ pgs_windows_build_timeout_minutes: 30
 # WARNING: using the private mode improves performance at the cost of losing Microsoft support as explained in their EULA
 # private mode musts only be used for private or educational purpose
 # normal mode has very few optimization for performance but are accepted by the Microsoft EULA
-# In any case, a licence key is still mandatory
+# In any case, a valid non generic licence key is still mandatory
 pgs_windows_install_template: normal
 # Can be 10 or 11
 pgs_windows_version: 10
@@ -36,9 +36,13 @@ pgs_windows_timezone: 'Romance Standard Time'
 # 040c:00000409 -> US
 # 0409:0000040c -> FR France
 pgs_windows_keyboard: 040c:00000409
-# Generic Licence Key for Windows 10/11 Pro N
+# Generic Licence Key for Windows 10/11 Pro (N)
 # Either you change it with a valid licence key, either you activate Windows after install
-pgs_windows_licence_key: 2B87N-8KFHP-DKV6R-Y2C8J-PKCKT
+# Pro N: 2B87N-8KFHP-DKV6R-Y2C8J-PKCKT
+# Pro: VK7JG-NPHTM-C97JM-9MPGT-3V66T
+# Note: autounattend template (normal or private) installs a Windows based on your licence key, generic or valid.
+# Other versions of Windows haven't been tested
+pgs_windows_licence_key: VK7JG-NPHTM-C97JM-9MPGT-3V66T
 pgs_windows_user: "{{ ansible_env['LOGNAME'] }}"
 pgs_windows_password: ''
 # Can be nvidia or amd or intel (the default if using gvtg or sriov)
@@ -121,9 +125,6 @@ pgs_windows_feature_to_remove:
 
 # Configuration vars
 pgs_config_is_laptop: false
-# Only for nvidia
-# Can be: integrated, nvidia, hybrid, auto (if on battery or AC power)
-# pgs_optmgr_default_mode: integrated
 # In MB, cannot exceed 3/4 of Host memory or this role will fail
 pgs_config_vm_memory: 8192
 # You need 2 keyboards to set this variable, one for the VM, one for the system/host

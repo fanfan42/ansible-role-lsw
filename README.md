@@ -101,17 +101,17 @@ For the Passthrough VM without Looking Glass
 aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f
 For the Looking Glass VM:
 aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f
-The passthrough VM may have not any sound. The only way I found to get it back was to boot from the boot loader (grub) on Windows Boot Manager. When I restarted the VM, sound was back. But it implies that you have installed Windows on another disk.
-
 
 ## Notes for Nobara
 For using LG: looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture
 For still unknown reasons, sometimes, you have to write again your password when shutting down the VM (sddm issue)
 
 ## General bugs
-If booting on Windows from grub/systemd-boot, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS. It's done only once, this behavior doesn't repeat at aother boot from the Linux boot loader.
+If booting on Windows from grub/systemd-boot, Windows takes the lead to boot at each reboot for Nobara and only once if Debian. You have to manually reset the boot order in your BIOS.
 
 When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows dont display.
 You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and play continues as well
 
 When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted
+
+The passthrough VM may have not any sound. The only way I found to get it back was to re build the VM. Please ensure that gpudriver.exe is for your card and system.

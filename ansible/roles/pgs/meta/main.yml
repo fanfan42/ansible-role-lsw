@@ -20,7 +20,7 @@ galaxy_info:
         - trixie
     - name: Fedora
       versions:
-        - "42"
+        - 42
   galaxy_tags:
     - virtualization
     - libvirt
