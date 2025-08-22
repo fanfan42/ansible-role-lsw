@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The goal of this role is to allow the automatic installation of a full Windows 10/11 Family (other variants are also possible) Virtual Machine (VM) on a Linux host. The VM is customized to allow maximum performance at the price of security "features" and can be built with these virtualization technologies :
+PGS stands for Passthrough GVT-g SR-IOV. The goal of this role is to allow the automatic installation of a full Windows 10/11 Pro (other variants are also possible) Virtual Machine (VM) on a Linux host. The VM is customized to allow maximum performance at the price of security "features" and can be built with these virtualization technologies :
 
 * Passthrough
 * Intel GVT-g
@@ -13,11 +13,10 @@ The VM built runs with QEMU+KVM and libvirt is used to manage the VM.
 For this role, I can build the VM on 4 Linux distributions (or distros):
 
 * Arch Linux based : EndeavourOS with XFCE (my personal distro)
-* Ubuntu based : Pop!_OS with (modified) GNOME
+* Debian with GNOME
 * Fedora based : Nobara with KDE
-* NixOS with GNOME
 
-I only support X11/X.org DE, no tests on Wayland. Even if it's the future, I think that Nvidia drivers are not stable enough on Wayland. The 4 distros are not randomly chosen, I think they are the best to provide a good desktop experience and they are also designed/easy to configure for the best gaming experience on Linux (for example, Zen/Liquorix kernels are easy to install). The VM built atop of it only adds other options for gaming in case Wine/Proton don't offer good stability for some Windows games. NixOS is more a POC, I can already hear NixOS users scream that Ansible is not designed to build a NixOS system. All Desktop Managers (DM) are supported. Grub2 and systemd-boot are also supported.
+The 3 distros are not randomly chosen, I think they are the best to provide a good desktop experience and they are also designed/easy to configure for the best gaming experience on Linux (for example, Zen/Liquorix kernels are easy to install). The VM built atop of it only adds other options for gaming in case Wine/Proton don't offer good stability for some Windows games.
 
 For my tests, I used 2 laptops :
 
@@ -66,28 +65,7 @@ This role is "only" for personal usage, the **LICENSE** associated to this role 
 
 At least, 16GB of RAM. This role will, by default, split your **Host** memory in half. The other half is passed to the **Guest** (VM). Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM. **Note:** the Lenovo laptop used has 16GB of RAM, the Asus one, 32GB. I won't test if it works on smaller RAM, again, I'm not here to suffer.
 
-This role is tested on a fresh install of the 4 distros listed before. Do the same.
-
-## Example of playbook and inventory to use this role
-
-inventory file :
-
-```ini
-[localhost]
-localhost ansible_host=127.0.0.1
-```
-
-Playbook file :
-
-```yaml
-- name: pgs
-  hosts: localhost
-  connection: local
-  become: true
-  roles:
-    - passthrough-gvtg-sriov
- 
-```
+This role is tested on a fresh install of the 3 distros listed above.
 
 ## How to use the VM
 
