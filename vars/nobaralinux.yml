@@ -26,10 +26,15 @@ pgs_lg_version: B7
 pgs_lg_url: 'https://looking-glass.io/artifact/{{ pgs_lg_version }}/source'
 
 pgs_lg_dependencies:
+  - cmake
+  - gcc
   - gcc-c++
   - libglvnd-devel
+  - fontconfig-devel
   - spice-protocol
+  - make
   - nettle-devel
+  - pkgconf-pkg-config
   - binutils-devel
   - libXi-devel
   - libXinerama-devel
