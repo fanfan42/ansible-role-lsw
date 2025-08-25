@@ -1,0 +1,62 @@
+---
+
+pgs_distro_boot_location: /boot
+pgs_distro_boot_loader: grub
+pgs_distro_initramfs_binary: dracut
+
+pgs_packages:
+  - edk2-ovmf
+  - qemu-common
+  - qemu-img
+  - qemu-system-x86
+  - qemu-ui-spice-core
+  - qemu-ui-opengl
+  - qemu-ui-gtk
+  - qemu-audio-pipewire
+  - libvirt
+  - virt-manager
+  - virt-install
+  - ebtables
+  - dnsmasq
+  - python3-lxml
+  - python3-pycdlib
+  - swtpm
+
+pgs_lg_version: B7
+pgs_lg_url: 'https://looking-glass.io/artifact/{{ pgs_lg_version }}/source'
+
+pgs_lg_dependencies:
+  - cmake
+  - gcc
+  - gcc-c++
+  - libglvnd-devel
+  - fontconfig-devel
+  - spice-protocol
+  - make
+  - nettle-devel
+  - pkgconf-pkg-config
+  - binutils-devel
+  - libXi-devel
+  - libXinerama-devel
+  - libXcursor-devel
+  - libXpresent-devel
+  - libxkbcommon-x11-devel
+  - wayland-devel
+  - wayland-protocols-devel
+  - libXScrnSaver-devel
+  - libXrandr-devel
+  - dejavu-sans-mono-fonts
+  - libdecor-devel
+  - pipewire-devel
+  - libsamplerate-devel
+  - pulseaudio-libs-devel
+
+pgs_rm_lg_dependencies: false
+
+pgs_packer_version: 1.13.1
+pgs_packer_url: 'https://releases.hashicorp.com/packer/{{ pgs_packer_version }}/packer_{{ pgs_packer_version }}'
+
+pgs_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
+pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2
+pgs_windows_ovmf_vars_path: /usr/share/edk2/ovmf/OVMF_VARS_4M.qcow2
+pgs_windows_uefi_shell_path: /usr/share/edk2/ovmf/Shell.efi

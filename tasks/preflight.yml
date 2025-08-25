@@ -1,0 +1,170 @@
+---
+
+- name: Fail when Distro is not supported
+  ansible.builtin.fail:
+    msg: "Distribution not supported !!!"
+  when: ansible_facts['lsb']['id'] not in ['EndeavourOS','Debian','NobaraLinux']
+
+- name: Fail when Virtualization mode is wrong
+  ansible.builtin.fail:
+    msg: "Virtualization mode not supported, please set pgs_virt_mode on passthrough or gvtg or sriov !!!"
+  when: pgs_virt_mode not in ['passthrough','gvtg','sriov']
+
+- name: Fail when driver not Nvidia, Intel or AMD
+  ansible.builtin.fail:
+    msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
+  when: pgs_windows_gpu_driver not in ['intel','nvidia','amd']
+
+- name: Fail when VM memory exceeds 3/4 of total memory available on Host
+  ansible.builtin.fail:
+    msg: "VM memory (RAM) too high, host also needs memory !!!"
+  when: pgs_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
+
+- name: Fail when path to second mouse doesnt exist
+  ansible.builtin.fail:
+    msg: "Path to second mouse doesn't exist !!!"
+  when: pgs_config_usb_mouse != '' and not _pgs_second_mouse.stat.exists
+
+- name: Fail when path to second keyboard doesnt exist
+  ansible.builtin.fail:
+    msg: "Path to second keyboard doesn't exist !!!"
+  when: pgs_config_usb_kbd != '' and not _pgs_second_kbd.stat.exists
+
+- name: Fail when physical disk path is not good
+  ansible.builtin.fail:
+    msg: "Path to disk for copying img isn't a disk !!!"
+  when: pgs_windows_disk_device_path != '' and _pgs_is_disk.stdout != 'disk'
+
+- name: Fail when missing Windows ISO file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/{{ pgs_windows_iso }} doesn't exist, check {{ role_path }}/build/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_windows_iso.stat.exists"
+
+- name: Fail when missing GPU driver file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/gpudriver.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_gpu_driver.stat.exists"
+
+- name: Fail when missing Virtio ISO file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/virtio/virtio-win.iso doesn't exist, check {{ role_path }}/build/virtio/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _pgs_virtio_win.stat.exists"
+
+- name: Fail when missing Ninite Installer file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/NiniteInstaller.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "pgs_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _pgs_ninite_file.stat.exists"
+
+- name: Fail when missing Looking Glass driver file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/build/extra_packages/looking_glass_host_setup.exe dont exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
+  when: "pgs_install_looking_glass and 'build' in ansible_run_tags and not _pgs_lg_driver.stat.exists"
+
+- name: Configure IOMMU for dracut
+  ansible.builtin.copy:
+    dest: /etc/kernel/cmdline
+    content: "{{ ((_pgs_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __pgs_iommu_param + ' iommu=pt') | trim }}"
+    mode: "0644"
+  when:
+    - pgs_distro_initramfs_binary == 'dracut'
+    - __pgs_iommu_param not in (_pgs_krnl_file.content | b64decode)
+  become: true
+  notify:
+    - Reload Boot Loader
+    - Reload initramfs
+    - Reboot
+    - Pause
+
+- name: Configure IOMMU for grub2
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=[\"'](.*)[\"']"
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __pgs_iommu_param }} iommu=pt"'
+    backrefs: true
+  when:
+    - pgs_distro_boot_loader == 'grub'
+    - _pgs_grub_check.stdout == 'absent'
+  become: true
+  notify:
+    - Reload Boot Loader
+    - Reload initramfs
+    - Reboot
+    - Pause
+
+- name: Preflight for Passthrough Virtualization mode
+  when: pgs_virt_mode == 'passthrough'
+  notify:
+    - Reload Boot Loader
+    - Reload initramfs
+    - Reboot
+    - Pause
+  block:
+    - name: Fail if not enough GPU
+      ansible.builtin.fail:
+        msg: "You need at least 2 GPU !!!"
+      when: "_pgs_lspci_output.stdout_lines | select('search', 'VGA') | list | length < 2"
+    - name: Fail if no 2nd Keyboard/Mouse and no LookingGlass
+      ansible.builtin.fail:
+        msg: "VM wont be usable without 2nd Keyboard/Mouse or LookingGlass not enabled !!!"
+      when: "not pgs_install_looking_glass and (pgs_config_usb_kbd == '' or pgs_config_usb_mouse == '')"
+    - name: Copy initramfs (dracut) options
+      ansible.builtin.template:
+        src: vfio-dracut.conf.j2
+        dest: /etc/dracut.conf.d/vfio.conf
+        mode: preserve
+      become: true
+      when:
+        - "'build' in ansible_run_tags"
+        - pgs_distro_initramfs_binary == 'dracut'
+    - name: Copy modprobe.d options for vfio
+      ansible.builtin.template:
+        src: vfio-modprobe.conf.j2
+        dest: /etc/modprobe.d/vfio.conf
+        mode: preserve
+      become: true
+      when: "'build' in ansible_run_tags"
+    - name: Copy modukes-load.d options for vfio
+      ansible.builtin.copy:
+        src: vfio-modules.conf
+        dest: /etc/modules-load.d/vfio.conf
+        mode: preserve
+      become: true
+      when:
+        - "'build' in ansible_run_tags"
+        - pgs_distro_initramfs_binary != 'dracut'
+
+- name: Preflight for GVT-g Virtualization mode
+  when: pgs_virt_mode == 'gvtg'
+  notify:
+    - Reload Boot Loader
+    - Reload initramfs
+    - Reboot
+    - Pause
+  block:
+    - name: Fail when CPU doesn't support GVT-g
+      ansible.builtin.fail:
+        msg: "GVT-g virtualization mode is not supported on this CPU !!!"
+      when: not 'intel' in __pgs_iommu_param or (__pgs_intel_generation | int) < 6 or (__pgs_intel_generation | int) > 10
+    - name: Fail when Looking Glass not enabled
+      ansible.builtin.fail:
+        msg: "Virtualization mode gvtg needs Looking Glass !!!"
+      when: not pgs_install_looking_glass
+    - name: Copy modprobe options for i915 module
+      ansible.builtin.copy:
+        src: i915.gvtg.conf
+        dest: /etc/modprobe.d/i915.conf
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
+    - name: Copy modules to load at boot
+      ansible.builtin.copy:
+        src: modules.gvtg.conf
+        dest: /etc/modules-load.d/gvtg.conf
+        mode: "0644"
+        owner: root
+        group: root
+      become: true
+
+- name: Force all notified handlers to run at this point
+  ansible.builtin.meta: flush_handlers

@@ -1,0 +1,204 @@
+---
+
+- name: Create autologin group
+  ansible.builtin.group:
+    name: autologin
+    state: present
+  become: true
+
+- name: Add current (non root) user to some groups
+  ansible.builtin.user:
+    name: "{{ ansible_env['LOGNAME'] }}"
+    groups: libvirt,kvm,input,disk,autologin
+    append: true
+  become: true
+
+- name: Start and enable libvirtd
+  ansible.builtin.systemd:
+    name: libvirtd
+    enabled: true
+    state: started
+  become: true
+
+# This task doesn't work everytime
+# You may have to run it manually
+# sudo virsh net-start default
+# sudo virsh net-autostart default
+# To see the actual state:
+# sudo virsh net-list --all
+- name: Enable and start default network
+  community.libvirt.virt_net:
+    name: default
+    state: present
+    autostart: true
+  become: true
+
+# BUG on Debian, VM doesn't start with no errors in logs
+# https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
+- name: Stop and disable dnsmasq for Debian
+  ansible.builtin.systemd:
+    name: dnsmasq
+    enabled: false
+    state: stopped
+  become: true
+  when: ansible_facts['lsb']['id'] == 'Debian'
+
+- name: Replace libvirt QEMU user
+  ansible.builtin.replace:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^#?\s*user\s*=.*'
+    replace: user = "{{ ansible_env['LOGNAME'] }}"
+  notify: Restart libvirt
+  become: true
+
+- name: Replace libvirt QEMU group
+  ansible.builtin.replace:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^#?\s*group\s*=.*'
+    replace: 'group = "kvm"'
+  notify: Restart libvirt
+  become: true
+
+- name: Modify cgroup_device_acl block in libvirt QEMU conf
+  ansible.builtin.blockinfile:
+    path: /etc/libvirt/qemu.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - cgroup_device_acl"
+    block: "{{ __pgs_cgroup_acl_block }}"
+  notify: Restart libvirt
+  become: true
+
+- name: Create scripts for Passthrough VM
+  become: true
+  vars:
+    _pgs_lg: false
+  when: pgs_virt_mode == 'passthrough'
+  block:
+    - name: Create libvirt hooks folders
+      ansible.builtin.file:
+        path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
+        state: directory
+        recurse: true
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - prepare,begin
+        - release,end
+    - name: Create Start script for VM
+      ansible.builtin.template:
+        src: start.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/start.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create Stop script for VM
+      ansible.builtin.template:
+        src: stop.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/stop.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU performance script
+      ansible.builtin.copy:
+        src: cpu_mode_performance.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU powersave script
+      ansible.builtin.copy:
+        src: cpu_mode_powersave.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/cpu_mode_powersave.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy RAM deallocation Hugepages script
+      ansible.builtin.copy:
+        src: dealloc_hugepages.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/dealloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create RAM allocation Hugepages script
+      ansible.builtin.template:
+        src: alloc_hugepages.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/alloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
+
+- name: Create scripts for Looking Glass VM
+  become: true
+  vars:
+    _pgs_lg: true
+  when: pgs_install_looking_glass
+  block:
+    - name: Create libvirt hooks folders for Looking Glass VM
+      ansible.builtin.file:
+        path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
+        state: directory
+        recurse: true
+        mode: "0755"
+        owner: root
+        group: root
+      loop:
+        - prepare,begin
+        - release,end
+    - name: Create Start script for Looking Glass VM
+      ansible.builtin.template:
+        src: start.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/start.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create Stop script for Looking Glass VM
+      ansible.builtin.template:
+        src: stop.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/stop.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU performance script for Looking Glass VM
+      ansible.builtin.copy:
+        src: cpu_mode_performance.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/cpu_mode_performance.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy CPU powersave script for Looking Glass VM
+      ansible.builtin.copy:
+        src: cpu_mode_powersave.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/cpu_mode_powersave.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Copy RAM deallocation Hugepages script for Looking Glass VM
+      ansible.builtin.copy:
+        src: dealloc_hugepages.sh
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/dealloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create RAM allocation Hugepages script for Looking Glass VM
+      ansible.builtin.template:
+        src: alloc_hugepages.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/alloc_hugepages.sh"
+        mode: "0755"
+        owner: root
+        group: root
+    - name: Create tmpfiles for Looking Glass
+      ansible.builtin.copy:
+        src: lg_tmpfile
+        dest: /etc/tmpfiles.d/10-looking-glass.conf
+        mode: "0644"
+        owner: root
+        group: libvirt
+
+- name: Copy QEMU hook manager
+  ansible.builtin.copy:
+    src: qemu
+    dest: /etc/libvirt/hooks/qemu
+    mode: "0755"
+    owner: root
+    group: root
+  become: true

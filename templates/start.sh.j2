@@ -1,0 +1,58 @@
+#!/bin/bash
+# Helpful to read output when debugging
+set -x
+
+# Isolate host
+# Mostly if kernel ACS patching 
+systemctl set-property --runtime -- user.slice AllowedCPUs={{ _pgs_host_cpus.stdout }}
+systemctl set-property --runtime -- system.slice AllowedCPUs={{ _pgs_host_cpus.stdout }}
+systemctl set-property --runtime -- init.scope AllowedCPUs={{ _pgs_host_cpus.stdout }}
+
+{% if _pgs_lg | default(false) %}
+# Create looking glass shm
+systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
+{% endif %}
+
+{% if pgs_config_pass_disk_controller %}
+echo {{ _pgs_disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _pgs_disk_pci_addr.stdout }}/driver/unbind
+virsh nodedev-detach pci_{{ _pgs_disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
+{% endif %}
+
+{% if pgs_virt_mode == 'passthrough' %}
+systemctl stop display-manager.service
+
+# Uncomment autologin lines in Display manager
+{% if _pgs_dm.stdout == 'lightdm' %}
+sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/lightdm/lightdm.conf
+{% elif _pgs_dm.stdout == 'gdm' %}
+sed -i 's/^#  AutomaticLoginEnable = true/AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
+sed -i 's/^#  AutomaticLogin = user1/AutomaticLogin = {{ ansible_env['LOGNAME'] }}/' /etc/gdm3/daemon.conf
+{% elif _pgs_dm.stdout == 'sddm' %}
+if ! grep -q "^User={{ ansible_env['LOGNAME'] }}$" /etc/sddm.conf; then
+    sed -i '/^\[Autologin\]/a User={{ ansible_env['LOGNAME'] }}' /etc/sddm.conf
+fi
+{% endif %}
+
+{% if pgs_windows_gpu_driver == 'nvidia' %}
+sleep 5
+systemctl stop nvidia-persistenced
+rmmod nvidia_uvm
+rmmod nvidia_drm
+rmmod nvidia_modeset
+rmmod nvidia
+{% endif %}
+
+{% for idx in range(_pgs_pci_ids.stdout.split(',') | length) %}
+echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
+virsh nodedev-detach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
+{% endfor %}
+
+modprobe vfio
+modprobe vfio_pci
+modprobe vfio_iommu_type1
+systemctl start display-manager.service
+{% endif %}
+
+{% if pgs_virt_mode == 'gvtg' %}
+echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > "/sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/mdev_supported_types/{{ _pgs_mdev_type.stdout }}/create"
+{% endif %}

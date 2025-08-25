@@ -1,0 +1,57 @@
+---
+
+- name: Reload Boot Loader
+  ansible.builtin.shell:
+    cmd: >-
+      {{
+        'update-grub'
+        if pgs_distro_boot_loader == 'grub'
+        else
+        '/bin/true'
+      }}
+  changed_when: pgs_distro_boot_loader == 'grub'
+  become: true
+
+- name: Reload initramfs
+  ansible.builtin.shell: >-
+    {% if pgs_distro_initramfs_binary == 'dracut' %}
+      {% if pgs_distro_boot_loader == 'systemd-boot' %}
+        for kv in $(ls /lib/modules); do
+          krlpth="/usr/lib/modules/$kv/vmlinuz"
+          [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
+        done
+      {% else %}
+        for kv in $(ls /lib/modules); do
+          krlpth="/{{ pgs_distro_boot_location }}/vmlinuz-$kv"
+          [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
+        done
+      {% endif %}
+    {% else %}
+      update-initramfs -u -k all
+    {% endif %}
+  changed_when: true
+  become: true
+
+- name: Reinstall boot loader with Windows Disk
+  ansible.builtin.command: bash /tmp/dual-boot.sh
+  changed_when: true
+  become: true
+
+- name: Reboot
+  ansible.builtin.shell: |
+    nohup bash -c "sleep 10 && shutdown -r now" >/dev/null 2>&1 &
+  async: 1
+  poll: 0
+  become: true
+  changed_when: true
+
+- name: Pause
+  ansible.builtin.pause:
+    seconds: 15
+    prompt: 'The system will now reboot, please re execute the playbook at next startup'
+
+- name: Restart libvirt
+  ansible.builtin.systemd:
+    name: libvirtd
+    state: restarted
+  become: true
