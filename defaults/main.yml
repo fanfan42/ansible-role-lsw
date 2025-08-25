@@ -6,7 +6,6 @@
 # - sriov
 pgs_virt_mode: passthrough
 
-# Passthrough vars
 # Get this var by running this command: lspci | grep VGA
 pgs_passthrough_gpu_pci_base_addr: 01:00
 
@@ -129,10 +128,10 @@ pgs_config_is_laptop: false
 pgs_config_vm_memory: 8192
 # You need 2 keyboards to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-kbd
-pgs_config_usb_kbd: ""
+pgs_config_usb_kbd: ''
 # You need 2 mice to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-mouse
-pgs_config_usb_mouse: ""
+pgs_config_usb_mouse: ''
 # If Nvidia GPU GTX family, you will have to set this var to true
 # Also, please follow the guide to create a patched ROM for your card
 pgs_config_gpu_nvidia_gtx: false

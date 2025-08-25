@@ -1,0 +1,23 @@
+---
+
+# The minperf playbook stands for "minimal performance"
+# The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
+# Please take your time to adjust the size for "pgs_windows_img_size" you can give to your image depending
+# on the size you have on your only disk.
+# Note: Looking Glass musts be installed because no 2nd keyboard and mouse are set.
+# Adjust the variables with documentation/VARIABLES.md
+
+- name: A man needs a name
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+  vars:
+    pgs_windows_iso: windows11.iso
+    pgs_windows_version: 11
+    pgs_windows_img_size: 100G
+    pgs_windows_gpu_driver: nvidia
+    pgs_passthrough_gpu_pci_base_addr: 01:00
+    pgs_install_looking_glass: true
+  roles:
+    - ansible-role-pgs

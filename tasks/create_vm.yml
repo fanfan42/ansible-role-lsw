@@ -1,6 +1,6 @@
 ---
 
-- name: Extract QEMU efi machine version for x86_64
+- name: Extract QEMU machine version for x86_64
   ansible.builtin.shell:
     cmd: |
       set -o pipefail |
