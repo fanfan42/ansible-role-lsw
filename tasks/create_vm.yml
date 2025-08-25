@@ -1,0 +1,45 @@
+---
+
+- name: Extract QEMU machine version for x86_64
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail |
+      qemu-system-x86_64 --version | head -n1 | sed -E 's/.* ([0-9]+)\.([0-9]+)\..*/\1.\2/'
+  register: _pgs_qemu_machine
+  changed_when: false
+
+- name: Change right for VM and its EFI vars
+  ansible.builtin.file:
+    path: "{{ role_path }}/build/windows_img_dir/{{ item }}"
+    mode: "0600"
+    owner: "{{ ansible_env['LOGNAME'] }}"
+    group: kvm
+  loop:
+    - efivars.fd
+    - "{{ pgs_windows_vm_name }}"
+  become: true
+
+- name: Copy VM EFI vars
+  ansible.builtin.copy:
+    src: "{{ role_path }}/build/windows_img_dir/efivars.fd"
+    dest: "/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd"
+    mode: preserve
+  become: true
+
+- name: Define the VM
+  vars:
+    _pgs_lg: false
+  community.libvirt.virt:
+    command: define
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
+  become: true
+  when: pgs_virt_mode == 'passthrough'
+
+- name: Define the VM with Looking Glass
+  vars:
+    _pgs_lg: true
+  community.libvirt.virt:
+    command: define
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
+  become: true
+  when: pgs_install_looking_glass

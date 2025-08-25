@@ -1,0 +1,78 @@
+---
+
+pgs_distro_boot_location: /efi
+pgs_distro_boot_loader: systemd-boot
+pgs_distro_initramfs_binary: dracut
+
+pgs_packages:
+  - packer
+  - edk2-ovmf
+  - qemu-base
+  - qemu-common
+  - qemu-hw-usb-host
+  - qemu-img
+  - qemu-system-x86
+  - qemu-system-x86-firmware
+  - libvirt
+  - virt-manager
+  - virt-install
+  - ebtables
+  - dnsmasq
+  - downgrade
+  - yay
+  - python-lxml
+  - qemu-audio-pipewire
+  - qemu-ui-spice-core
+  - qemu-ui-opengl
+  - swtpm
+  - edk2-shell
+# Build dependencies
+  - qemu-ui-gtk
+
+pgs_zen_packages:
+  - 'linux-zen=6.12.10.zen1'
+  - 'linux-zen-headers=6.12.10.zen1'
+pgs_zen_gvtg_packages:
+  - 'linux-zen=6.1.12.zen1'
+  - 'linux-zen-headers=6.1.12.zen1'
+
+pgs_pycdlib_dependencies:
+  - base-devel
+  - python-setuptools
+  - python-wheel
+  - python-build
+  - python-installer
+  - python-pyproject-hooks
+
+pgs_rm_pycdlib_dependencies: false
+
+pgs_lg_dependencies:
+  - cppdap
+  - double-conversion
+  - jsoncpp
+  - libb2
+  - libdatachannel
+  - libjuice
+  - mbedtls
+  - md4c
+  - qt6-base
+  - qt6-svg
+  - qt6-translations
+  - rhash
+  - rnnoise
+  - tslib
+  - uthash
+  - xcb-util-cursor
+  - xcb-util-image
+  - xcb-util-keysyms
+  - xcb-util-renderutil
+  - xcb-util-wm
+  - cmake
+  - obs-studio
+
+pgs_rm_lg_dependencies: false
+
+pgs_windows_ovmf_code_path: /usr/share/edk2/x64/OVMF_CODE.4m.fd
+pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd
+pgs_windows_ovmf_vars_path: /usr/share/edk2/x64/OVMF_VARS.4m.fd
+pgs_windows_uefi_shell_path: /usr/share/edk2-shell/x64/Shell.efi

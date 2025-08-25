@@ -1,0 +1,8 @@
+profile: production
+exclude_paths:
+  - build/
+  - playbook_examples/
+  - documentation/
+var_naming_pattern: "^(_)?pgs_[a-z0-9_]*$"
+skip_list:
+  - schema[meta]

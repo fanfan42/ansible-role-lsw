@@ -1,0 +1,35 @@
+---
+
+# The maxperf playbook stands for "maximum performance"
+# The Windows VM is on a dedicated disk for the VM with passthrough PCI controller.
+# pgs_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
+# It gives you a dual boot system with Windows and Linux at boot.
+# pgs_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
+# pgs_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
+# You have to find the path of your pgs_config_usb_kbd and pgs_config_usb_mouse to have low latency on these devices.
+# Note: pgs_config_usb_kbd and pgs_config_usb_mouse wont work on Linux host 
+# It gives maximum performance.
+# Ninite programs are also installed.
+# Adjust the variables with documentation/VARIABLES.md.
+# Note 1: Windows 10 has still better performance than Windows 11 but support may end in October 2025.
+# Note 2: Looking Glass musts be installed because it's a requirement for this virtualization mode. 
+
+- name: A man needs a name
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+  vars:
+    pgs_virt_mode: gvtg
+    pgs_windows_iso: windows10.iso
+    pgs_windows_version: 10
+    pgs_windows_img_size: 30G
+    pgs_windows_disk_device_path: '/dev/nvme1n1'
+    pgs_config_pass_disk_controller: true
+    pgs_windows_install_template: private
+    pgs_windows_install_app_from_ninite: true
+    pgs_install_looking_glass: true
+    pgs_config_usb_kbd: "/dev/input/by-id/usb-mykeyboard-event-kbd"
+    pgs_config_usb_mouse: "/dev/input/by-id/usb-mymouse-event-mouse"
+  roles:
+    - ansible-role-pgs
