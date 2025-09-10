@@ -20,20 +20,6 @@
     state: started
   become: true
 
-# This task doesn't work everytime
-# You may have to run it manually
-# sudo virsh net-start default
-# sudo virsh net-autostart default
-# To see the actual state:
-# sudo virsh net-list --all
-- name: Enable and start default network
-  community.libvirt.virt_net:
-    name: default
-    state: present
-    autostart: true
-    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
-  become: true
-
 # BUG on Debian, VM doesn't start with no errors in logs
 # https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
 - name: Stop and disable dnsmasq for Debian
@@ -43,6 +29,28 @@
     state: stopped
   become: true
   when: ansible_facts['lsb']['id'] == 'Debian'
+
+# Bug on Debian and EndeavourOS, delete default network before adding it
+- name: Disable and stop default network
+  community.libvirt.virt_net:
+    name: default
+    state: absent
+    autostart: false
+  become: true
+  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS']
+
+- name: Enable and start default network
+  community.libvirt.virt_net:
+    name: default
+    state: present
+    autostart: true
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
+  become: true
+
+- name: Enable and start default network for Debian and EndeavourOS
+  ansible.builtin.shell: virsh net-start default && virsh net-autostart default
+  become: true
+  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS']
 
 - name: Replace libvirt QEMU user
   ansible.builtin.replace:
@@ -64,19 +72,19 @@
   ansible.builtin.blockinfile:
     path: /etc/libvirt/qemu.conf
     marker: "# {mark} ANSIBLE MANAGED BLOCK - cgroup_device_acl"
-    block: "{{ __pgs_cgroup_acl_block }}"
+    block: "{{ __lsw_cgroup_acl_block }}"
   notify: Restart libvirt
   become: true
 
 - name: Create scripts for Passthrough or SR-IOV VM
   become: true
   vars:
-    _pgs_lg: false
-  when: pgs_virt_mode in ['passthrough', 'sriov']
+    _lsw_lg: false
+  when: lsw_virt_mode in ['passthrough', 'sriov']
   block:
     - name: Create libvirt hooks folders
       ansible.builtin.file:
-        path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
+        path: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
         state: directory
         recurse: true
         mode: "0755"
@@ -88,42 +96,42 @@
     - name: Create Start script for VM
       ansible.builtin.template:
         src: start.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/start.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/prepare/begin/start.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Create Stop script for VM
       ansible.builtin.template:
         src: stop.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/stop.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/release/end/stop.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy CPU performance script
       ansible.builtin.copy:
         src: cpu_mode_performance.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/prepare/begin/cpu_mode_performance.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy CPU powersave script
       ansible.builtin.copy:
         src: cpu_mode_powersave.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/cpu_mode_powersave.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/release/end/cpu_mode_powersave.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy RAM deallocation Hugepages script
       ansible.builtin.copy:
         src: dealloc_hugepages.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/release/end/dealloc_hugepages.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/release/end/dealloc_hugepages.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Create RAM allocation Hugepages script
       ansible.builtin.template:
         src: alloc_hugepages.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}/prepare/begin/alloc_hugepages.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/prepare/begin/alloc_hugepages.sh"
         mode: "0755"
         owner: root
         group: root
@@ -131,12 +139,12 @@
 - name: Create scripts for Looking Glass VM
   become: true
   vars:
-    _pgs_lg: true
-  when: pgs_install_looking_glass
+    _lsw_lg: true
+  when: lsw_install_looking_glass
   block:
     - name: Create libvirt hooks folders for Looking Glass VM
       ansible.builtin.file:
-        path: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
+        path: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/{{ (item | split(','))[0] }}/{{ (item | split(','))[1] }}"
         state: directory
         recurse: true
         mode: "0755"
@@ -148,42 +156,42 @@
     - name: Create Start script for Looking Glass VM
       ansible.builtin.template:
         src: start.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/start.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/prepare/begin/start.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Create Stop script for Looking Glass VM
       ansible.builtin.template:
         src: stop.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/stop.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/release/end/stop.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy CPU performance script for Looking Glass VM
       ansible.builtin.copy:
         src: cpu_mode_performance.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/cpu_mode_performance.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/prepare/begin/cpu_mode_performance.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy CPU powersave script for Looking Glass VM
       ansible.builtin.copy:
         src: cpu_mode_powersave.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/cpu_mode_powersave.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/release/end/cpu_mode_powersave.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Copy RAM deallocation Hugepages script for Looking Glass VM
       ansible.builtin.copy:
         src: dealloc_hugepages.sh
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/release/end/dealloc_hugepages.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/release/end/dealloc_hugepages.sh"
         mode: "0755"
         owner: root
         group: root
     - name: Create RAM allocation Hugepages script for Looking Glass VM
       ansible.builtin.template:
         src: alloc_hugepages.sh.j2
-        dest: "/etc/libvirt/hooks/qemu.d/{{ pgs_windows_vm_name }}lg/prepare/begin/alloc_hugepages.sh"
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/prepare/begin/alloc_hugepages.sh"
         mode: "0755"
         owner: root
         group: root

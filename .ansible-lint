@@ -3,6 +3,6 @@ exclude_paths:
   - build/
   - playbook_examples/
   - documentation/
-var_naming_pattern: "^(_)?pgs_[a-z0-9_]*$"
+var_naming_pattern: "^(_)?lsw_[a-z0-9_]*$"
 skip_list:
   - schema[meta]

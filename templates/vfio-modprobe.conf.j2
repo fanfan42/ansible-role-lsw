@@ -1,6 +1,6 @@
-{% if pgs_windows_gpu_driver != 'nvidia' %}
+{% if lsw_windows_gpu_driver != 'nvidia' %}
 softdep drm pre: vfio-pci
 {% else %}
 softdep nvidia pre: vfio-pci
 {% endif %}
-options vfio-pci ids={{ _pgs_pci_ids.stdout }}
+options vfio-pci ids={{ _lsw_pci_ids.stdout }}

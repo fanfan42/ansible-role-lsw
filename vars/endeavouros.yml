@@ -1,10 +1,10 @@
 ---
 
-pgs_distro_boot_location: /efi
-pgs_distro_boot_loader: systemd-boot
-pgs_distro_initramfs_binary: dracut
+lsw_distro_boot_location: /efi
+lsw_distro_boot_loader: systemd-boot
+lsw_distro_initramfs_binary: dracut
 
-pgs_packages:
+lsw_packages:
   - packer
   - edk2-ovmf
   - qemu-base
@@ -29,14 +29,14 @@ pgs_packages:
 # Build dependencies
   - qemu-ui-gtk
 
-pgs_zen_packages:
+lsw_zen_packages:
   - 'linux-zen=6.12.10.zen1'
   - 'linux-zen-headers=6.12.10.zen1'
-pgs_zen_gvtg_packages:
+lsw_zen_gvtg_packages:
   - 'linux-zen=6.1.12.zen1'
   - 'linux-zen-headers=6.1.12.zen1'
 
-pgs_pycdlib_dependencies:
+lsw_pycdlib_dependencies:
   - base-devel
   - python-setuptools
   - python-wheel
@@ -44,9 +44,9 @@ pgs_pycdlib_dependencies:
   - python-installer
   - python-pyproject-hooks
 
-pgs_rm_pycdlib_dependencies: false
+lsw_rm_pycdlib_dependencies: false
 
-pgs_lg_dependencies:
+lsw_lg_dependencies:
   - cppdap
   - double-conversion
   - jsoncpp
@@ -70,17 +70,17 @@ pgs_lg_dependencies:
   - cmake
   - obs-studio
 
-pgs_rm_lg_dependencies: false
+lsw_rm_lg_dependencies: false
 
-pgs_windows_ovmf_code_path: /usr/share/edk2/x64/OVMF_CODE.4m.fd
-pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd
-pgs_windows_ovmf_vars_path: /usr/share/edk2/x64/OVMF_VARS.4m.fd
-pgs_windows_uefi_shell_path: /usr/share/edk2-shell/x64/Shell.efi
+lsw_windows_ovmf_code_path: /usr/share/edk2/x64/OVMF_CODE.4m.fd
+lsw_windows_ovmf_code_secboot_path: /usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd
+lsw_windows_ovmf_vars_path: /usr/share/edk2/x64/OVMF_VARS.4m.fd
+lsw_windows_uefi_shell_path: /usr/share/edk2-shell/x64/Shell.efi
 
-pgs_sriov_rdp_packages:
+lsw_sriov_rdp_packages:
   - remmina
   - freerdp
 
-pgs_sriov_pkg_version: '2025.07.22'
-pgs_sriov_i915_pkg: 'i915-sriov-dkms_{{ pgs_sriov_pkg_version }}-1-x86_64.pkg.tar.zst'
-pgs_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/releases/download/{{ pgs_sriov_pkg_version }}/{{ pgs_sriov_i915_pkg }}'
+lsw_sriov_pkg_version: '2025.07.22'
+lsw_sriov_i915_pkg: 'i915-sriov-dkms_{{ lsw_sriov_pkg_version }}-1-x86_64.pkg.tar.zst'
+lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/releases/download/{{ lsw_sriov_pkg_version }}/{{ lsw_sriov_i915_pkg }}'

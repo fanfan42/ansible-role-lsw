@@ -4,10 +4,10 @@ dependencies: []
 
 galaxy_info:
   author: "FanfanKTA"
-  role_name: "pgs"
+  role_name: "lsw"
   namespace: "fanfankta"
-  description: "Manage personal GVT-g, SR-IOV or Passthrough Windows based Virtual Machines"
-  issue_tracker_url: https://github.com/fanfan42/ansible-role-passthrough-gvtg-sriov/issues
+  description: "Linux Sub Windows - Manage personal GVT-g, SR-IOV or Passthrough Windows based Virtual Machines"
+  issue_tracker_url: https://github.com/fanfan42/ansible-role-lsw/issues
   license: "AGPL-3.0-or-later"
   min_ansible_version: "2.9"
   github_branch: master

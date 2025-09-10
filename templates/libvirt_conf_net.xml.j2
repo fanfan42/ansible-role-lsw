@@ -11,8 +11,10 @@
   <ip address='192.168.122.1' netmask='255.255.255.0'>
     <dhcp>
       <range start='192.168.122.2' end='192.168.122.254'/>
-      <host mac='52:54:00:70:65:8d' name='{{ pgs_windows_vm_name }}' ip='{{ pgs_windows_vm_private_ip }}'/>
-      <host mac='52:54:00:00:24:be' name='{{ pgs_windows_vm_name }}lg' ip='{{ pgs_windows_vmlg_private_ip }}'/>
+      <host mac='52:54:00:70:65:8d' name='{{ lsw_windows_vm_name }}' ip='{{ lsw_windows_vm_private_ip }}'/>
+{% if lsw_install_looking_glass %}
+      <host mac='52:54:00:00:24:be' name='{{ lsw_windows_vm_name }}lg' ip='{{ lsw_windows_vmlg_private_ip }}'/>
+{% endif %}
     </dhcp>
   </ip>
 </network>
