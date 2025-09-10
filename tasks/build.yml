@@ -8,7 +8,7 @@
 
 - name: Copy Windows Unattend template
   ansible.builtin.template:
-    src: 'autounattend_{{ pgs_windows_install_template }}.xml.j2'
+    src: 'autounattend_{{ lsw_windows_install_template }}.xml.j2'
     dest: '{{ role_path }}/build/autounattend.xml'
     mode: preserve
 
@@ -17,7 +17,7 @@
     src_files: '{{ role_path }}/build/extra_packages'
     dest_iso: '{{ role_path }}/build/extra_packages/packages.iso'
     interchange_level: 3
-  when: not _pgs_pkgiso.stat.exists
+  when: not _lsw_pkgiso.stat.exists
 
 - name: Delete Windows destination directory if exists
   ansible.builtin.file:
@@ -26,19 +26,19 @@
   become: true
 
 - name: Prepare build for passthrough mode
-  when: pgs_virt_mode == "passthrough"
+  when: lsw_virt_mode == "passthrough"
   become: true
   block:
     - name: Unbind devices before build for passthrough
       ansible.builtin.shell: |
-        echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > \
-        /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }}/driver/unbind
-      loop: "{{ range(0, (_pgs_pci_ids.stdout | split(',') | length)) | list }}"
+        echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ item }} > \
+        /sys/bus/pci/devices/0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ item }}/driver/unbind
+      loop: "{{ range(0, (_lsw_pci_ids.stdout | split(',') | length)) | list }}"
       changed_when: true
     - name: Bind devices to vfio-pci for passthrough
       ansible.builtin.shell: |
-        echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ item }} > /sys/bus/pci/drivers/vfio-pci/bind
-      loop: "{{ range(0, (_pgs_pci_ids.stdout | split(',') | length)) | list }}"
+        echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ item }} > /sys/bus/pci/drivers/vfio-pci/bind
+      loop: "{{ range(0, (_lsw_pci_ids.stdout | split(',') | length)) | list }}"
       changed_when: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
@@ -54,13 +54,13 @@
       changed_when: true
 
 - name: Prepare build for GVT-g mode
-  when: pgs_virt_mode == "gvtg"
+  when: lsw_virt_mode == "gvtg"
   become: true
   block:
     - name: Create MDEV device
       ansible.builtin.shell: |
         echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > \
-        /sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/mdev_supported_types/{{ _pgs_mdev_type.stdout }}/create
+        /sys/bus/pci/devices/0000:{{ _lsw_pci_cpu.stdout }}/mdev_supported_types/{{ _lsw_mdev_type.stdout }}/create
       changed_when: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
@@ -77,23 +77,23 @@
     - name: Remove MDEV device
       ansible.builtin.shell: |
         echo 1 > \
-        /sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove
+        /sys/bus/pci/devices/0000:{{ _lsw_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove
       changed_when: true
 
 - name: Prepare build for SR-IOV mode
-  when: pgs_virt_mode == "sriov"
+  when: lsw_virt_mode == "sriov"
   become: true
   block:
     - name: Create Virtual Function device
-      ansible.builtin.shell: echo 1 > "/sys/devices/pci0000:00/0000:{{ _pgs_pci_cpu.stdout }}/sriov_numvfs"
+      ansible.builtin.shell: echo 1 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_cpu.stdout }}/sriov_numvfs"
       changed_when: true
     - name: Unbind VF before build for sriov
       ansible.builtin.shell: |
-        echo 0000:{{ (_pgs_pci_cpu.stdout | split('.'))[0] }}.1 > \
-        /sys/devices/pci0000:00/0000:{{ (_pgs_pci_cpu.stdout | split('.'))[0] }}.1/driver/unbind
+        echo 0000:{{ (_lsw_pci_cpu.stdout | split('.'))[0] }}.1 > \
+        /sys/devices/pci0000:00/0000:{{ (_lsw_pci_cpu.stdout | split('.'))[0] }}.1/driver/unbind
       changed_when: true
     - name: Detach VF
-      ansible.builtin.command: virsh nodedev-detach pci_0000_{{ (_pgs_pci_cpu.stdout | replace(':', '_') | split('.'))[0] }}_1
+      ansible.builtin.command: virsh nodedev-detach pci_0000_{{ (_lsw_pci_cpu.stdout | replace(':', '_') | split('.'))[0] }}_1
       changed_when: true
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
@@ -108,14 +108,14 @@
         PACKER_LOG: "1"
       changed_when: true
     - name: Remove Virtual Function device
-      ansible.builtin.shell: echo 0 > "/sys/devices/pci0000:00/0000:{{ _pgs_pci_cpu.stdout }}/sriov_numvfs"
+      ansible.builtin.shell: echo 0 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_cpu.stdout }}/sriov_numvfs"
       changed_when: true
 
 - name: Copy img to disk
   ansible.builtin.command:
     cmd: |
-      qemu-img convert -f {{ pgs_windows_img_format }} -O raw {{ role_path }}/build/windows_img_dir/{{ pgs_windows_vm_name }} {{ pgs_windows_disk_device_path }}
-  when: pgs_windows_disk_device_path != ''
+      qemu-img convert -f {{ lsw_windows_img_format }} -O raw {{ role_path }}/build/windows_img_dir/{{ lsw_windows_vm_name }} {{ lsw_windows_disk_device_path }}
+  when: lsw_windows_disk_device_path != ''
   changed_when: true
   become: true
   notify: Reinstall boot loader with Windows Disk
@@ -128,7 +128,7 @@
     - /etc/dracut.conf.d/vfio.conf
     - /etc/modprobe.d/vfio.conf
     - /etc/modules-load.d/vfio.conf
-  when: pgs_virt_mode == "passthrough"
+  when: lsw_virt_mode == "passthrough"
   become: true
   notify:
     - Reload Boot Loader

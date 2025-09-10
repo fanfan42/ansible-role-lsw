@@ -1,25 +1,25 @@
 <domain xmlns:qemu="http://libvirt.org/schemas/domain/qemu/1.0" type="kvm">
-  <name>{{ pgs_windows_vm_name }}{% if _pgs_lg %}lg{% endif %}</name>
-  <uuid>{% if _pgs_lg %}fca46f9a-f8f6-45f6-8d73-28a7b7e8684f{% else %}94d6959d-b1ae-4ba9-8a9f-4aa60563e40f{% endif %}</uuid>
+  <name>{{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}</name>
+  <uuid>{% if _lsw_lg %}fca46f9a-f8f6-45f6-8d73-28a7b7e8684f{% else %}94d6959d-b1ae-4ba9-8a9f-4aa60563e40f{% endif %}</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
-      <libosinfo:os id="http://microsoft.com/win/{{ pgs_windows_version }}"/>
+      <libosinfo:os id="http://microsoft.com/win/{{ lsw_windows_version }}"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory unit="KiB">{{ (pgs_config_vm_memory * 1024) | int }}</memory>
-  <currentMemory unit="KiB">{{ (pgs_config_vm_memory * 1024) | int }}</currentMemory>
+  <memory unit="KiB">{{ (lsw_config_vm_memory * 1024) | int }}</memory>
+  <currentMemory unit="KiB">{{ (lsw_config_vm_memory * 1024) | int }}</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
-{{ _pgs_cpu_pinning.stdout }}
+{{ _lsw_cpu_pinning.stdout }}
   <os firmware="efi">
-    <type arch="x86_64" machine="pc-q35-{{ _pgs_qemu_machine.stdout }}">hvm</type>
+    <type arch="x86_64" machine="pc-q35-{{ _lsw_qemu_machine.stdout }}">hvm</type>
     <firmware>
       <feature enabled="no" name="enrolled-keys"/>
-      <feature enabled="{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
+      <feature enabled="{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}{{ pgs_windows_ovmf_code_secboot_path }}{% else %}{{ pgs_windows_ovmf_code_path }}{% endif %}</loader>
-    <nvram template="{{ pgs_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd</nvram>
+    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}</loader>
+    <nvram template="{{ lsw_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -36,7 +36,7 @@
     <vmport state="off"/>
     <ioapic driver="kvm"/>
   </features> 
-{{ _pgs_cpu_conf.stdout }}
+{{ _lsw_cpu_conf.stdout }}
   <clock offset="localtime">
     <timer name="rtc" tickpolicy="catchup"/>
     <timer name="pit" tickpolicy="delay"/>
@@ -52,8 +52,8 @@
   </pm>
   <devices>
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
-{% if not pgs_config_pass_disk_controller %}
-{{ _pgs_disk_conf.stdout }}
+{% if not lsw_config_pass_disk_controller %}
+{{ _lsw_disk_conf.stdout }}
 {% endif %}
     <controller type="usb" index="0" model="qemu-xhci" ports="15">
       <address type="pci" domain="0x0000" bus="0x02" slot="0x00" function="0x0"/>
@@ -132,11 +132,11 @@
     <controller type="sata" index="0">
       <address type="pci" domain="0x0000" bus="0x00" slot="0x1f" function="0x2"/>
     </controller>
-{% if not pgs_config_pass_disk_controller %}
-{{ _pgs_scsi_cntrl.stdout }}
+{% if not lsw_config_pass_disk_controller %}
+{{ _lsw_scsi_cntrl.stdout }}
 {% endif %}
     <interface type="network">
-      <mac address="52:54:00:{% if _pgs_lg %}00:24:be{% else %}70:65:8d{% endif %}"/>
+      <mac address="52:54:00:{% if _lsw_lg %}00:24:be{% else %}70:65:8d{% endif %}"/>
       <source network="default"/>
       <model type="virtio"/>
       <address type="pci" domain="0x0000" bus="0x19" slot="0x00" function="0x0"/>
@@ -151,30 +151,30 @@
     </console>
     <input type="mouse" bus="ps2"/>
     <input type="keyboard" bus="ps2"/>
-{% if pgs_config_usb_mouse != '' %}
+{% if lsw_config_usb_mouse != '' %}
     <input type="mouse" bus="virtio">
       <address type="pci" domain="0x0000" bus="0x1c" slot="0x00" function="0x0"/>
     </input>
 {% endif %}
-{% if pgs_config_usb_kbd != '' %}
+{% if lsw_config_usb_kbd != '' %}
     <input type="keyboard" bus="virtio">
       <address type="pci" domain="0x0000" bus="0x1d" slot="0x00" function="0x0"/>
     </input>
 {% endif %}
-{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}
+{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}
     <tpm model="tpm-crb">
       <backend type="emulator" version="2.0"/>
     </tpm>
 {% endif %}
-{% if _pgs_lg %}
+{% if _lsw_lg %}
     <graphics type="spice" autoport="yes">
-      <listen type="{% if pgs_config_usb_kbd != '' and pgs_config_usb_mouse != '' %}none{% else %}address{% endif %}"/>
+      <listen type="{% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}none{% else %}address{% endif %}"/>
     </graphics>
     <video>
       <model type="none"/>
     </video>
 {% endif %}
-{% if _pgs_lg or pgs_virt_mode == 'sriov' %}
+{% if _lsw_lg or lsw_virt_mode == 'sriov' %}
     <sound model="ich9">
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
@@ -183,23 +183,23 @@
       <input mixingEngine="no"/>
       <output mixingEngine="no"/>
     </audio>
-{% elif pgs_virt_mode == 'passthrough' %}
+{% elif lsw_virt_mode == 'passthrough' %}
     <audio id="1" type="none"/>
 {% endif %}
-{% if pgs_virt_mode == 'passthrough' %}
-{% for idx in range(_pgs_pci_ids.stdout.split(',') | length) %}
+{% if lsw_virt_mode == 'passthrough' %}
+{% for idx in range(_lsw_pci_ids.stdout.split(',') | length) %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
-        <address domain="0x0000" bus="0x{{ (pgs_passthrough_gpu_pci_base_addr | split(':'))[0] }}" slot="0x{{ (pgs_passthrough_gpu_pci_base_addr | split(':'))[1] }}" function="0x{{ idx }}"/>
+        <address domain="0x0000" bus="0x{{ (lsw_passthrough_gpu_pci_base_addr | split(':'))[0] }}" slot="0x{{ (lsw_passthrough_gpu_pci_base_addr | split(':'))[1] }}" function="0x{{ idx }}"/>
       </source>
-{% if pgs_config_gpu_nvidia_gtx and idx == 0 %}
+{% if lsw_config_gpu_nvidia_gtx and idx == 0 %}
       <rom file="{{ role_path }}/files/patched-bios.rom"/>
 {% endif %}
       <address type="pci" domain="0x0000" bus="0x1{{ idx + 5 }}" slot="0x00" function="0x0"/>
     </hostdev>
 {% endfor %}
 {% endif %}
-{% if pgs_virt_mode == 'gvtg' %}
+{% if lsw_virt_mode == 'gvtg' %}
     <hostdev mode="subsystem" type="mdev" managed="no" model="vfio-pci" display="off">
       <source>
         <address uuid="65e0c490-1f9f-47e2-87b4-3f3d14255b2f"/>
@@ -207,44 +207,44 @@
       <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
-{% if pgs_virt_mode == 'sriov' %}
+{% if lsw_virt_mode == 'sriov' %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
-        <address domain='0x0000' bus='0x{{ (_pgs_pci_cpu.stdout | split(':'))[0] }}' slot='0x{{ ((_pgs_pci_cpu.stdout | split('.'))[0] | split(':'))[1] }}' function='0x1'/>
+        <address domain='0x0000' bus='0x{{ (_lsw_pci_cpu.stdout | split(':'))[0] }}' slot='0x{{ ((_lsw_pci_cpu.stdout | split('.'))[0] | split(':'))[1] }}' function='0x1'/>
       </source>
       <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
-{% if pgs_config_pass_disk_controller %}
+{% if lsw_config_pass_disk_controller %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
-        <address domain="0x{{ _pgs_disk_pci_addr.stdout.split(':')[0] }}" bus="0x{{ _pgs_disk_pci_addr.stdout.split(':')[1] }}" slot="0x{{ _pgs_disk_pci_addr.stdout.split(':')[2].split('.')[0] }}" function="0x{{ _pgs_disk_pci_addr.stdout.split('.')[1] }}"/>
+        <address domain="0x{{ _lsw_disk_pci_addr.stdout.split(':')[0] }}" bus="0x{{ _lsw_disk_pci_addr.stdout.split(':')[1] }}" slot="0x{{ _lsw_disk_pci_addr.stdout.split(':')[2].split('.')[0] }}" function="0x{{ _lsw_disk_pci_addr.stdout.split('.')[1] }}"/>
       </source>
       <boot order="1"/>
       <address type="pci" domain="0x0000" bus="0x1b" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
-{% if _pgs_lg %}
+{% if _lsw_lg %}
     <shmem name="looking-glass">
       <model type="ivshmem-plain"/>
-      <size unit="M">{{ pgs_looking_glass_memory }}</size>
+      <size unit="M">{{ lsw_looking_glass_memory }}</size>
       <address type="pci" domain="0x0000" bus="0x12" slot="0x00" function="0x0"/>
     </shmem>
 {% endif %}
     <memballoon model="none"/>
   </devices>
   <qemu:commandline>
-{% if pgs_config_is_laptop and pgs_virt_mode == 'passthrough' %}
+{% if lsw_config_is_laptop and lsw_virt_mode == 'passthrough' %}
     <qemu:arg value="-acpitable"/>
     <qemu:arg value="file={{ role_path }}/files/acpitable.bin"/>
 {% endif %}
-{% if pgs_config_usb_mouse != '' %}
+{% if lsw_config_usb_mouse != '' %}
     <qemu:arg value="-object"/>
-    <qemu:arg value="input-linux,id=mouse1,evdev={{ pgs_config_usb_mouse }}"/>
+    <qemu:arg value="input-linux,id=mouse1,evdev={{ lsw_config_usb_mouse }}"/>
 {% endif %}
-{% if pgs_config_usb_kbd != '' %}
+{% if lsw_config_usb_kbd != '' %}
     <qemu:arg value="-object"/>
-    <qemu:arg value="input-linux,id=kbd1,evdev={{ pgs_config_usb_kbd }},grab_all=on,repeat=on"/>
+    <qemu:arg value="input-linux,id=kbd1,evdev={{ lsw_config_usb_kbd }},grab_all=on,repeat=on"/>
 {% endif %}
     <qemu:arg value="-rtc"/>
     <qemu:arg value="base=localtime"/>

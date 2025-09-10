@@ -2,7 +2,7 @@
 
 # The minperf playbook stands for "minimal performance"
 # The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
-# Please take your time to adjust the size for "pgs_windows_img_size" you can give to your image depending
+# Please take your time to adjust the size for "lsw_windows_img_size" you can give to your image depending
 # on the size you have on your only disk.
 # Adjust the variables with documentation/VARIABLES.md
 # Note 1: RDP musts be activated because it's the only way to access the VM
@@ -14,10 +14,11 @@
   gather_facts: true
   become: false
   vars:
-    pgs_virt_mode: sriov
-    pgs_windows_iso: windows11.iso
-    pgs_windows_version: 11
-    pgs_windows_img_size: 100G
-    pgs_windows_activate_rdp: true
+    lsw_virt_mode: sriov
+    lsw_windows_iso: windows11.iso
+    lsw_windows_version: 11
+    lsw_windows_img_size: 100G
+    lsw_windows_activate_rdp: true
+    lsw_windows_password: 'secret_password'
   roles:
-    - ansible-role-pgs
+    - ansible-role-lsw

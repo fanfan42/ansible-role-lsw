@@ -1,8 +1,8 @@
-# ansible-role-pgs
+# ansible-role-lsw
 
 ## Introduction
 
-PGS stands for Passthrough GVT-g SR-IOV. The goal of this role is to allow the automatic installation of a full Windows 10/11 Pro (other variants are also possible) Virtual Machine (VM) on a Linux host. The VM is customized to allow maximum performance at the price of security "features" and can be built with these virtualization technologies :
+LSW stands for Linux Sub Windows, the reverse application of Windows WSL. The goal of this role is to allow the automatic installation of a full Windows 10/11 Pro Virtual Machine (VM) on a Linux host. The VM is customized to allow maximum performance at the price of security "features" and can be built with these virtualization technologies :
 
 * Passthrough
 * Intel GVT-g

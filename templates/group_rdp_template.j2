@@ -1,5 +1,5 @@
 [remmina]
-password={{ pgs_windows_password }}
+password={{ lsw_windows_password }}
 gateway_username=
 notes_text=
 vc=
@@ -12,7 +12,7 @@ freerdp_log_level=OFF
 serialname=
 sound=remote
 printer_overrides=
-name={{ pgs_windows_vm_name }}{% if _pgs_lg %}lg{% endif %}
+name={{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}
 
 console=0
 colordepth=99
@@ -23,7 +23,7 @@ postcommand=
 left-handed=0
 multitransport=0
 group=
-server={% if _pgs_lg %}{{ pgs_windows_vmlg_private_ip }}{% else %}{{ pgs_windows_vm_private_ip }}{% endif %}
+server={% if _lsw_lg %}{{ lsw_windows_vmlg_private_ip }}{% else %}{{ lsw_windows_vm_private_ip }}{% endif %}
 
 ssh_tunnel_certfile=
 glyph-cache=0

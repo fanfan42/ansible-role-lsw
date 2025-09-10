@@ -2,7 +2,7 @@
 
 # The medperf playbook stands for "medium performance"
 # The Windows VM is on a dedicated disk for the VM but the PCI controller is "emulated".
-# pgs_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
+# lsw_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance. It also installs Looking Glass on both Linux host and Windows VM.
 # Ninite programs are also installed.
@@ -15,13 +15,13 @@
   gather_facts: true
   become: false
   vars:
-    pgs_windows_iso: windows11.iso
-    pgs_windows_version: 11
-    pgs_windows_img_size: 30G
-    pgs_windows_disk_device_path: '/dev/sda'
-    pgs_windows_gpu_driver: nvidia
-    pgs_passthrough_gpu_pci_base_addr: 01:00
-    pgs_windows_install_app_from_ninite: true
-    pgs_install_looking_glass: true
+    lsw_windows_iso: windows11.iso
+    lsw_windows_version: 11
+    lsw_windows_img_size: 30G
+    lsw_windows_disk_device_path: '/dev/sda'
+    lsw_windows_gpu_driver: nvidia
+    lsw_passthrough_gpu_pci_base_addr: 01:00
+    lsw_windows_install_app_from_ninite: true
+    lsw_install_looking_glass: true
   roles:
-    - ansible-role-pgs
+    - ansible-role-lsw

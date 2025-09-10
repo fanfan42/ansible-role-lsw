@@ -5,7 +5,7 @@
     cmd: |
       set -o pipefail |
       qemu-system-x86_64 --version | head -n1 | sed -E 's/.* ([0-9]+)\.([0-9]+)\..*/\1.\2/'
-  register: _pgs_qemu_machine
+  register: _lsw_qemu_machine
   changed_when: false
 
 - name: Change right for VM and its EFI vars
@@ -16,36 +16,36 @@
     group: kvm
   loop:
     - efivars.fd
-    - "{{ pgs_windows_vm_name }}"
+    - "{{ lsw_windows_vm_name }}"
   become: true
 
 - name: Copy VM EFI vars
   ansible.builtin.copy:
     src: "{{ role_path }}/build/windows_img_dir/efivars.fd"
-    dest: "/var/lib/libvirt/qemu/nvram/{{ pgs_windows_vm_name }}_VARS.4m.fd"
+    dest: "/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd"
     mode: preserve
   become: true
 
 - name: Define the VM
   vars:
-    _pgs_lg: false
+    _lsw_lg: false
   community.libvirt.virt:
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
-  when: pgs_virt_mode in ['passthrough', 'sriov']
+  when: lsw_virt_mode in ['passthrough', 'sriov']
 
 - name: Define the VM with Looking Glass
   vars:
-    _pgs_lg: true
+    _lsw_lg: true
   community.libvirt.virt:
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
-  when: pgs_install_looking_glass
+  when: lsw_install_looking_glass
 
 - name: Configure client RDP
-  when: pgs_windows_activate_rdp
+  when: lsw_windows_activate_rdp
   block:
     - name: Create remmina conf directories
       ansible.builtin.file:
@@ -67,21 +67,21 @@
         group: "{{ ansible_env['LOGNAME'] }}"
     - name: Create remmina VM conf
       vars:
-        _pgs_lg: false
+        _lsw_lg: false
       ansible.builtin.template:
         src: group_rdp_template.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ pgs_windows_vm_name }}.remmina"
+        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
         mode: "0600"
         owner: "{{ ansible_env['LOGNAME'] }}"
         group: "{{ ansible_env['LOGNAME'] }}"
-      when: pgs_virt_mode in ['passthrough', 'sriov']
+      when: lsw_virt_mode in ['passthrough', 'sriov']
     - name: Create remmina VM conf for Looking Glass
       vars:
-        _pgs_lg: true
+        _lsw_lg: true
       ansible.builtin.template:
         src: group_rdp_template.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ pgs_windows_vm_name }}lg.remmina"
+        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}lg.remmina"
         mode: "0600"
         owner: "{{ ansible_env['LOGNAME'] }}"
         group: "{{ ansible_env['LOGNAME'] }}"
-      when: pgs_virt_mode == 'gvtg' or (pgs_virt_mode == 'passthrough' and pgs_install_looking_glass)
+      when: lsw_virt_mode == 'gvtg' or (lsw_virt_mode == 'passthrough' and lsw_install_looking_glass)

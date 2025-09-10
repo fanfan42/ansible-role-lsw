@@ -4,57 +4,57 @@
 # - passthrough
 # - gvtg
 # - sriov
-pgs_virt_mode: passthrough
+lsw_virt_mode: passthrough
 
 # Get this var by running this command: lspci | grep VGA
-pgs_passthrough_gpu_pci_base_addr: 01:00
+lsw_passthrough_gpu_pci_base_addr: 01:00
 
 # Build Windows VM vars
-pgs_windows_iso: windows10.iso
-pgs_windows_vm_name: 'vm-{{ ansible_hostname }}'
+lsw_windows_iso: windows10.iso
+lsw_windows_vm_name: 'vm-{{ ansible_hostname }}'
 # Can be raw or qcow2
-pgs_windows_img_format: raw
-pgs_windows_img_size: 50G
+lsw_windows_img_format: raw
+lsw_windows_img_size: 50G
 # Disk only, not a partition
 # WARNING: the disk is wiped
 # Ex: /dev/sda or /dev/nvme0n1
-pgs_windows_disk_device_path: ''
-pgs_windows_build_mem: '{{ (ansible_memtotal_mb / 2) | int }}'
-pgs_windows_build_num_cpu: '{{ (ansible_processor_vcpus / 2) | int }}'
-pgs_windows_build_timeout_minutes: 30
+lsw_windows_disk_device_path: ''
+lsw_windows_build_mem: '{{ (ansible_memtotal_mb / 2) | int }}'
+lsw_windows_build_num_cpu: '{{ (ansible_processor_vcpus / 2) | int }}'
+lsw_windows_build_timeout_minutes: 30
 # Can be normal or private
 # WARNING: using the private mode improves performance at the cost of losing Microsoft support as explained in their EULA
 # private mode musts only be used for private or educational purpose
 # normal mode has very few optimization for performance but are accepted by the Microsoft EULA
 # In any case, a valid non generic licence key is still mandatory
-pgs_windows_install_template: normal
+lsw_windows_install_template: normal
 # Can be 10 or 11
-pgs_windows_version: 10
-pgs_windows_language: fr-FR
-pgs_windows_timezone: 'Romance Standard Time'
+lsw_windows_version: 10
+lsw_windows_language: fr-FR
+lsw_windows_timezone: 'Romance Standard Time'
 # 040c:00000409 -> US
 # 0409:0000040c -> FR France
-pgs_windows_keyboard: 040c:00000409
+lsw_windows_keyboard: 040c:00000409
 # Generic Licence Key for Windows 10/11 Pro (N)
 # Either you change it with a valid licence key, either you activate Windows after install
 # Pro N: 2B87N-8KFHP-DKV6R-Y2C8J-PKCKT
 # Pro: VK7JG-NPHTM-C97JM-9MPGT-3V66T
 # Note: autounattend template (normal or private) installs a Windows based on your licence key, generic or valid.
 # Other versions of Windows haven't been tested
-pgs_windows_licence_key: VK7JG-NPHTM-C97JM-9MPGT-3V66T
-pgs_windows_user: "{{ ansible_env['LOGNAME'] }}"
-pgs_windows_password: ''
+lsw_windows_licence_key: VK7JG-NPHTM-C97JM-9MPGT-3V66T
+lsw_windows_user: "{{ ansible_env['LOGNAME'] }}"
+lsw_windows_password: ''
 # Can be nvidia or amd or intel (the default if using gvtg or sriov)
-pgs_windows_gpu_driver: intel
-pgs_windows_gpu_install_options:
+lsw_windows_gpu_driver: intel
+lsw_windows_gpu_install_options:
   'intel': '-s -f'
   'nvidia': '-s -noreboot'
   'amd': '/INSTALL /QUIET /NORESTART'
 # Set it to true if you want to access your VM with RDP (not recommended but mandatory for sriov virtualization mode)
-pgs_windows_activate_rdp: false
-pgs_windows_vm_private_ip: 192.168.122.42
-pgs_windows_vmlg_private_ip: 192.168.122.21
-pgs_windows_app_to_remove:
+lsw_windows_activate_rdp: false
+lsw_windows_vm_private_ip: 192.168.122.42
+lsw_windows_vmlg_private_ip: 192.168.122.21
+lsw_windows_app_to_remove:
   - Microsoft.Microsoft3DViewer
   - Microsoft.BingSearch
   - Microsoft.WindowsCalculator
@@ -102,7 +102,7 @@ pgs_windows_app_to_remove:
   - Microsoft.ZuneMusic
   - Microsoft.ZuneVideo
 
-pgs_windows_capability_to_remove:
+lsw_windows_capability_to_remove:
   - Print.Fax.Scan
   - Language.Handwriting
   - Browser.InternetExplorer
@@ -120,37 +120,37 @@ pgs_windows_capability_to_remove:
   - Hello.Face.20134
   - Media.WindowsMediaPlayer
 
-pgs_windows_feature_to_remove:
+lsw_windows_feature_to_remove:
   - MediaPlayback
   - Recall
   - Microsoft-SnippingTool
 
 # Configuration vars
-pgs_config_is_laptop: false
+lsw_config_is_laptop: false
 # In MB, cannot exceed 3/4 of Host memory or this role will fail
-pgs_config_vm_memory: 8192
+lsw_config_vm_memory: 8192
 # You need 2 keyboards to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-kbd
-pgs_config_usb_kbd: ''
+lsw_config_usb_kbd: ''
 # You need 2 mice to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-mouse
-pgs_config_usb_mouse: ''
+lsw_config_usb_mouse: ''
 # If Nvidia GPU GTX family, you will have to set this var to true
 # Also, please follow the guide to create a patched ROM for your card
-pgs_config_gpu_nvidia_gtx: false
-# Only if pgs_windows_disk_device_path is set with a valid disk path
+lsw_config_gpu_nvidia_gtx: false
+# Only if lsw_windows_disk_device_path is set with a valid disk path
 # If set to true, the PCI controller is passed to the VM. It gives bare-metal performance
 # For SATA controller, it gives all the SATA disks to the VM
-pgs_config_pass_disk_controller: false
+lsw_config_pass_disk_controller: false
 
 # Other vars
-pgs_windows_install_app_from_ninite: false
-pgs_install_looking_glass: false
+lsw_windows_install_app_from_ninite: false
+lsw_install_looking_glass: false
 # The best for 1920x1080
 # See other possible values here:
 # https://looking-glass.io/docs/B7/install_libvirt/#determining-memory
-pgs_looking_glass_memory: 64
+lsw_looking_glass_memory: 64
 # Highly recommended to install to have better performance for a desktop Linux
 # If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 # Only Nobara won't have zen kernels, they use their own kernel for specific Gaming PC
-pgs_install_zen: true
+lsw_install_zen: true

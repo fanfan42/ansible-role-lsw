@@ -7,13 +7,13 @@
 
 - name: Fail when Virtualization mode is wrong
   ansible.builtin.fail:
-    msg: "Virtualization mode not supported, please set pgs_virt_mode on passthrough or gvtg or sriov !!!"
-  when: pgs_virt_mode not in ['passthrough','gvtg','sriov']
+    msg: "Virtualization mode not supported, please set lsw_virt_mode on passthrough or gvtg or sriov !!!"
+  when: lsw_virt_mode not in ['passthrough','gvtg','sriov']
 
 - name: Fail when Virtualization mode is wrong for unsupported CPU
   ansible.builtin.fail:
     msg: "Virtualization mode not supported for AMD !!!"
-  when: pgs_virt_mode in ['gvtg','sriov'] and __pgs_iommu_param != 'intel_iommu=on'
+  when: lsw_virt_mode in ['gvtg','sriov'] and __lsw_iommu_param != 'intel_iommu=on'
 
 - name: Fail when Ansible runs with root user
   ansible.builtin.fail:
@@ -23,64 +23,64 @@
 - name: Fail when driver not Nvidia, Intel or AMD
   ansible.builtin.fail:
     msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
-  when: pgs_windows_gpu_driver not in ['intel','nvidia','amd']
+  when: lsw_windows_gpu_driver not in ['intel','nvidia','amd']
 
 - name: Fail when VM memory exceeds 3/4 of total memory available on Host
   ansible.builtin.fail:
     msg: "VM memory (RAM) too high, host also needs memory !!!"
-  when: pgs_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
+  when: lsw_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
 
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:
     msg: "Path to second mouse doesn't exist !!!"
-  when: pgs_config_usb_mouse != '' and not _pgs_second_mouse.stat.exists
+  when: lsw_config_usb_mouse != '' and not _lsw_second_mouse.stat.exists
 
 - name: Fail when path to second keyboard doesnt exist
   ansible.builtin.fail:
     msg: "Path to second keyboard doesn't exist !!!"
-  when: pgs_config_usb_kbd != '' and not _pgs_second_kbd.stat.exists
+  when: lsw_config_usb_kbd != '' and not _lsw_second_kbd.stat.exists
 
 - name: Fail when physical disk path is not good
   ansible.builtin.fail:
     msg: "Path to disk for copying built image isn't a disk !!!"
-  when: pgs_windows_disk_device_path != '' and _pgs_is_disk.stdout != 'disk'
+  when: lsw_windows_disk_device_path != '' and _lsw_is_disk.stdout != 'disk'
 
 - name: Fail when missing Windows ISO file for building
   ansible.builtin.fail:
-    msg: "{{ role_path }}/build/{{ pgs_windows_iso }} doesn't exist, check {{ role_path }}/build/README.md to install it !!!"
-  when: "'build' in ansible_run_tags and not _pgs_windows_iso.stat.exists"
+    msg: "{{ role_path }}/build/{{ lsw_windows_iso }} doesn't exist, check {{ role_path }}/build/README.md to install it !!!"
+  when: "'build' in ansible_run_tags and not _lsw_windows_iso.stat.exists"
 
 - name: Fail when missing GPU driver file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/build/extra_packages/gpudriver.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
-  when: "'build' in ansible_run_tags and not _pgs_gpu_driver.stat.exists"
+  when: "'build' in ansible_run_tags and not _lsw_gpu_driver.stat.exists"
 
 - name: Fail when missing Virtio ISO file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/build/virtio/virtio-win.iso doesn't exist, check {{ role_path }}/build/virtio/README.md to install it !!!"
-  when: "'build' in ansible_run_tags and not _pgs_virtio_win.stat.exists"
+  when: "'build' in ansible_run_tags and not _lsw_virtio_win.stat.exists"
 
 - name: Fail when missing Ninite Installer file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/build/extra_packages/NiniteInstaller.exe doesn't exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
-  when: "pgs_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _pgs_ninite_file.stat.exists"
+  when: "lsw_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _lsw_ninite_file.stat.exists"
 
 - name: Fail when missing Looking Glass driver file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/build/extra_packages/looking_glass_host_setup.exe dont exist, check {{ role_path }}/build/extra_packages/README.md to install it !!!"
-  when: "pgs_install_looking_glass and 'build' in ansible_run_tags and not _pgs_lg_driver.stat.exists"
+  when: "lsw_install_looking_glass and 'build' in ansible_run_tags and not _lsw_lg_driver.stat.exists"
 
 - name: Fail when password for the VM not set with RDP activated
   ansible.builtin.fail:
     msg: "Windows VM password cannot be empty !!!"
-  when: pgs_windows_activate_rdp and pgs_windows_password == ''
+  when: lsw_windows_activate_rdp and lsw_windows_password == ''
 
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
-    content: "{{ ((_pgs_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __pgs_iommu_param + ' iommu=pt') | trim }}"
+    content: "{{ ((_lsw_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __lsw_iommu_param + ' iommu=pt') | trim }}"
     mode: "0644"
-  when: pgs_distro_initramfs_binary == 'dracut' and __pgs_iommu_param not in (_pgs_krnl_file.content | b64decode)
+  when: lsw_distro_initramfs_binary == 'dracut' and __lsw_iommu_param not in (_lsw_krnl_file.content | b64decode)
   become: true
   notify:
     - Reload Boot Loader
@@ -92,9 +92,9 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=[\"'](.*)[\"']"
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __pgs_iommu_param }} iommu=pt"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __lsw_iommu_param }} iommu=pt"'
     backrefs: true
-  when: pgs_distro_boot_loader == 'grub' and _pgs_grub_check.stdout == 'absent'
+  when: lsw_distro_boot_loader == 'grub' and _lsw_grub_check.stdout == 'absent'
   become: true
   notify:
     - Reload Boot Loader
@@ -103,7 +103,7 @@
     - Pause
 
 - name: Preflight for Passthrough Virtualization mode
-  when: pgs_virt_mode == 'passthrough'
+  when: lsw_virt_mode == 'passthrough'
   notify:
     - Reload Boot Loader
     - Reload initramfs
@@ -113,18 +113,18 @@
     - name: Fail if not enough GPU
       ansible.builtin.fail:
         msg: "You need at least 2 GPU !!!"
-      when: "_pgs_lspci_output.stdout_lines | select('search', 'VGA') | list | length < 2"
+      when: "_lsw_lspci_output.stdout_lines | select('search', 'VGA') | list | length < 2"
     - name: Fail if no 2nd Keyboard/Mouse and no LookingGlass
       ansible.builtin.fail:
         msg: "VM wont be usable without 2nd Keyboard/Mouse or LookingGlass not enabled !!!"
-      when: "not pgs_install_looking_glass and (pgs_config_usb_kbd == '' or pgs_config_usb_mouse == '')"
+      when: "not lsw_install_looking_glass and (lsw_config_usb_kbd == '' or lsw_config_usb_mouse == '')"
     - name: Copy initramfs (dracut) options
       ansible.builtin.template:
         src: vfio-dracut.conf.j2
         dest: /etc/dracut.conf.d/vfio.conf
         mode: preserve
       become: true
-      when: "'build' in ansible_run_tags and pgs_distro_initramfs_binary == 'dracut'"
+      when: "'build' in ansible_run_tags and lsw_distro_initramfs_binary == 'dracut'"
     - name: Copy modprobe.d options for vfio
       ansible.builtin.template:
         src: vfio-modprobe.conf.j2
@@ -138,10 +138,10 @@
         dest: /etc/modules-load.d/vfio.conf
         mode: preserve
       become: true
-      when: "'build' in ansible_run_tags and pgs_distro_initramfs_binary != 'dracut'"
+      when: "'build' in ansible_run_tags and lsw_distro_initramfs_binary != 'dracut'"
 
 - name: Preflight for GVT-g Virtualization mode
-  when: pgs_virt_mode == 'gvtg'
+  when: lsw_virt_mode == 'gvtg'
   notify:
     - Reload Boot Loader
     - Reload initramfs
@@ -151,11 +151,11 @@
     - name: Fail when CPU doesn't support GVT-g
       ansible.builtin.fail:
         msg: "GVT-g virtualization mode is not supported on this CPU !!!"
-      when: not 'intel' in __pgs_iommu_param or (__pgs_intel_generation | int) < 6 or (__pgs_intel_generation | int) > 10
+      when: not 'intel' in __lsw_iommu_param or (__lsw_intel_generation | int) < 6 or (__lsw_intel_generation | int) > 10
     - name: Fail when Looking Glass not enabled
       ansible.builtin.fail:
         msg: "Virtualization mode gvtg needs Looking Glass !!!"
-      when: not pgs_install_looking_glass
+      when: not lsw_install_looking_glass
     - name: Copy modprobe options for i915 module
       ansible.builtin.copy:
         src: i915.gvtg.conf
@@ -174,7 +174,7 @@
       become: true
 
 - name: Preflight for SR-IOV Virtualization mode
-  when: pgs_virt_mode == 'sriov'
+  when: lsw_virt_mode == 'sriov'
   notify:
     - Reload Boot Loader
     - Reload initramfs
@@ -184,19 +184,19 @@
     - name: Fail when CPU doesn't support SR-IOV
       ansible.builtin.fail:
         msg: "SR-IOV virtualization mode is not supported on this CPU !!!"
-      when: not 'intel' in __pgs_iommu_param or (__pgs_intel_generation | int) < 11
+      when: not 'intel' in __lsw_iommu_param or (__lsw_intel_generation | int) < 11
     - name: Fail when Looking Glass is enabled
       ansible.builtin.fail:
         msg: "Virtualization mode sriov doesn't need Looking Glass !!!"
-      when: pgs_install_looking_glass
+      when: lsw_install_looking_glass
     - name: Fail when 2nd mouse/keyboard passed on SR-IOV virtualization mode
       ansible.builtin.fail:
         msg: "Don't pass 2nd mouse or keyboard when in SR-IOV virtualization mode !!!"
-      when: pgs_config_usb_kbd != '' or pgs_config_usb_mouse != ''
+      when: lsw_config_usb_kbd != '' or lsw_config_usb_mouse != ''
     - name: Fail when RDP is not set
       ansible.builtin.fail:
         msg: "Virtualization mode sriov needs RDP !!!"
-      when: not pgs_windows_activate_rdp
+      when: not lsw_windows_activate_rdp
     - name: Copy modprobe options for i915 module
       ansible.builtin.copy:
         src: i915.sriov.conf

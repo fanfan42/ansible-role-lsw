@@ -6,32 +6,32 @@ systemctl set-property --runtime -- user.slice AllowedCPUs=0-{{ (ansible_process
 systemctl set-property --runtime -- system.slice AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
 systemctl set-property --runtime -- init.scope AllowedCPUs=0-{{ (ansible_processor_vcpus - 1) }}
 
-{% if pgs_config_pass_disk_controller %}
-echo {{ _pgs_disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _pgs_disk_pci_addr.stdout }}/driver/unbind
-virsh nodedev-reattach pci_{{ _pgs_disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
+{% if lsw_config_pass_disk_controller %}
+echo {{ _lsw_disk_pci_addr.stdout }} > /sys/bus/pci/devices/{{ _lsw_disk_pci_addr.stdout }}/driver/unbind
+virsh nodedev-reattach pci_{{ _lsw_disk_pci_addr.stdout | replace(':', '_') | replace('.', '_') }}
 {% endif %}
 
-{% if pgs_virt_mode == 'passthrough' %}
+{% if lsw_virt_mode == 'passthrough' %}
 # Unload VFIO-PCI Kernel Driver
 modprobe -r vfio_pci
 modprobe -r vfio_iommu_type1
 modprobe -r vfio
 
 # Re-Bind GPU to Host
-{% for idx in range(_pgs_pci_ids.stdout.split(',') | length) %}
-echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
-virsh nodedev-reattach pci_0000_{{ pgs_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
+{% for idx in range(_lsw_pci_ids.stdout.split(',') | length) %}
+echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/devices/0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ idx }}/driver/unbind
+virsh nodedev-reattach pci_0000_{{ lsw_passthrough_gpu_pci_base_addr | replace(':', '_') }}_{{ idx }}
 sleep 2
-{% if pgs_windows_gpu_driver == 'nvidia' %}
-echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/nvidia-gpu/bind
-{% elif pgs_windows_gpu_driver == 'intel' %}
-echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/xe/bind
-{% elif pgs_windows_gpu_driver == 'amd' %}
-echo 0000:{{ pgs_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/amdgpu/bind
+{% if lsw_windows_gpu_driver == 'nvidia' %}
+echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/nvidia-gpu/bind
+{% elif lsw_windows_gpu_driver == 'intel' %}
+echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/xe/bind
+{% elif lsw_windows_gpu_driver == 'amd' %}
+echo 0000:{{ lsw_passthrough_gpu_pci_base_addr }}.{{ idx }} > /sys/bus/pci/drivers/amdgpu/bind
 {% endif %}
 {% endfor %}
 
-{% if pgs_windows_gpu_driver == 'nvidia' %}
+{% if lsw_windows_gpu_driver == 'nvidia' %}
 modprobe nvidia
 modprobe nvidia_modeset
 modprobe nvidia_drm
@@ -43,26 +43,26 @@ systemctl restart display-manager.service
 sleep 5
 
 # Comment out autologin lines in Display Manager
-{% if _pgs_dm.stdout == 'lightdm' %}
+{% if _lsw_dm.stdout == 'lightdm' %}
 sed -i 's/^autologin-user={{ ansible_env['LOGNAME'] }}/#autologin-user=/' /etc/lightdm/lightdm.conf
-{% elif _pgs_dm.stdout == 'gdm' %}
+{% elif _lsw_dm.stdout == 'gdm' %}
 sed -i 's/^AutomaticLoginEnable = true/#  AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
 sed -i 's/^AutomaticLogin = {{ ansible_env['LOGNAME'] }}/#  AutomaticLogin = user1/' /etc/gdm3/daemon.conf
-{% elif _pgs_dm.stdout == 'sddm' %}
+{% elif _lsw_dm.stdout == 'sddm' %}
 sed -i '/^User={{ ansible_env['LOGNAME'] }}$/d' /etc/sddm.conf
 {% endif %}
 
 {% endif %}
 
-{% if _pgs_lg | default(false) %}
+{% if _lsw_lg | default(false) %}
 # Delete looking glass shm
 rm /dev/shm/looking-glass
 {% endif %}
 
-{% if pgs_virt_mode == 'gvtg' %}
-echo 1 > "/sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
+{% if lsw_virt_mode == 'gvtg' %}
+echo 1 > "/sys/bus/pci/devices/0000:{{ _lsw_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
 {% endif %}
 
-{% if pgs_virt_mode == 'sriov' %}
-echo 0 > "/sys/devices/pci0000:00/0000:{{ _pgs_pci_cpu.stdout }}/sriov_numvfs"
+{% if lsw_virt_mode == 'sriov' %}
+echo 0 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_cpu.stdout }}/sriov_numvfs"
 {% endif %}
