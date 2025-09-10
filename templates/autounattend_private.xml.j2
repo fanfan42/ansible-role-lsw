@@ -4,43 +4,43 @@
 	<settings pass="windowsPE">
 		<component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<SetupUILanguage>
-				<UILanguage>{{ pgs_windows_language }}</UILanguage>
+				<UILanguage>{{ lsw_windows_language }}</UILanguage>
 			</SetupUILanguage>
-			<InputLocale>{{ pgs_windows_keyboard }}</InputLocale>
-			<SystemLocale>{{ pgs_windows_language }}</SystemLocale>
-			<UILanguage>{{ pgs_windows_language }}</UILanguage>
-			<UserLocale>{{ pgs_windows_language }}</UserLocale>
+			<InputLocale>{{ lsw_windows_keyboard }}</InputLocale>
+			<SystemLocale>{{ lsw_windows_language }}</SystemLocale>
+			<UILanguage>{{ lsw_windows_language }}</UILanguage>
+			<UserLocale>{{ lsw_windows_language }}</UserLocale>
 		</component>
 		<component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
 			<DriverPaths>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="1">
-					<Path>D:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>D:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="2">
-					<Path>E:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>E:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="3">
-					<Path>F:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>F:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 			</DriverPaths>
 		</component>
 		<component name="Microsoft-Windows-PnpCustomizationsNonWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
 			<DriverPaths>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="1">
-					<Path>D:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>D:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="2">
-					<Path>E:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>E:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="3">
-					<Path>F:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>F:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 			</DriverPaths>
 		</component>
 		<component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<UserData>
 				<ProductKey>
-					<Key>{{ pgs_windows_licence_key }}</Key>
+					<Key>{{ lsw_windows_licence_key }}</Key>
 					<WillShowUI>OnError</WillShowUI>
 				</ProductKey>
 				<AcceptEula>true</AcceptEula>
@@ -156,7 +156,7 @@
 					<Order>14</Order>
 					<Path>cmd.exe /c "start /MIN cscript.exe //E:vbscript X:\defender.vbs"</Path>
 				</RunSynchronousCommand>
-{% if pgs_windows_version == 11 %}
+{% if lsw_windows_version == 11 %}
 				<RunSynchronousCommand wcm:action="add">
 					<Order>15</Order>
 					<Path>reg.exe add "HKLM\SYSTEM\Setup\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>
@@ -176,8 +176,8 @@
 	<settings pass="generalize"></settings>
 	<settings pass="specialize">
 		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-			<ComputerName>{{ pgs_windows_vm_name }}</ComputerName>
-			<TimeZone>{{ pgs_windows_timezone }}</TimeZone>
+			<ComputerName>{{ lsw_windows_vm_name }}</ComputerName>
+			<TimeZone>{{ lsw_windows_timezone }}</TimeZone>
 		</component>
 		<component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<RunSynchronous>
@@ -208,31 +208,31 @@
 	<settings pass="auditUser"></settings>
 	<settings pass="oobeSystem">
 		<component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-			<InputLocale>{{ pgs_windows_keyboard }}</InputLocale>
-			<SystemLocale>{{ pgs_windows_language }}</SystemLocale>
-			<UILanguage>{{ pgs_windows_language }}</UILanguage>
-			<UserLocale>{{ pgs_windows_language }}</UserLocale>
+			<InputLocale>{{ lsw_windows_keyboard }}</InputLocale>
+			<SystemLocale>{{ lsw_windows_language }}</SystemLocale>
+			<UILanguage>{{ lsw_windows_language }}</UILanguage>
+			<UserLocale>{{ lsw_windows_language }}</UserLocale>
 		</component>
 		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<UserAccounts>
 				<LocalAccounts>
 					<LocalAccount wcm:action="add">
-						<Name>{{ pgs_windows_user }}</Name>
+						<Name>{{ lsw_windows_user }}</Name>
 						<DisplayName></DisplayName>
 						<Group>Administrators</Group>
 						<Password>
-							<Value>{{ pgs_windows_password }}</Value>
+							<Value>{{ lsw_windows_password }}</Value>
 							<PlainText>true</PlainText>
 						</Password>
 					</LocalAccount>
 				</LocalAccounts>
 			</UserAccounts>
 			<AutoLogon>
-				<Username>{{ pgs_windows_user }}</Username>
+				<Username>{{ lsw_windows_user }}</Username>
 				<Enabled>true</Enabled>
 				<LogonCount>1</LogonCount>
 				<Password>
-					<Value>{{ pgs_windows_password }}</Value>
+					<Value>{{ lsw_windows_password }}</Value>
 					<PlainText>true</PlainText>
 				</Password>
 			</AutoLogon>
@@ -274,7 +274,7 @@ foreach( $file in $Document.unattend.Extensions.File ) {
 		</ExtractScript>
 		<File path="C:\Windows\Setup\Scripts\RemovePackages.ps1">
 $selectors = @(
-{% for app in pgs_windows_app_to_remove %}
+{% for app in lsw_windows_app_to_remove %}
   '{{ app }}';
 {% endfor %}
 );
@@ -320,7 +320,7 @@ $logfile = 'C:\Windows\Setup\Scripts\RemovePackages.log';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\RemoveCapabilities.ps1">
 $selectors = @(
-{% for cap in pgs_windows_capability_to_remove %}
+{% for cap in lsw_windows_capability_to_remove %}
   '{{ cap }}';
 {% endfor %}
 );
@@ -369,7 +369,7 @@ $logfile = 'C:\Windows\Setup\Scripts\RemoveCapabilities.log';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\RemoveFeatures.ps1">
 $selectors = @(
-{% for feat in pgs_windows_feature_to_remove %}
+{% for feat in lsw_windows_feature_to_remove %}
   '{{ feat }}';
 {% endfor %}
 );
@@ -591,7 +591,7 @@ $ErrorActionPreference = 'Stop';
 	}
 } *&gt;&amp;1 &gt;&gt; 'C:\Windows\Setup\Scripts\MakeEdgeUninstallable.log';
 		</File>
-{% if pgs_windows_version == 11 %}
+{% if lsw_windows_version == 11 %}
 		<File path="C:\Windows\Setup\Scripts\SetStartPins.ps1">
 $json = '{"pinnedList":[]}';
 if( [System.Environment]::OSVersion.Version.Build -lt 20000 ) {
@@ -736,19 +736,19 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
-        Start-Process -FilePath $exe -ArgumentList '{{ pgs_windows_gpu_install_options[pgs_windows_gpu_driver] }}' -Wait;
-{% if pgs_install_looking_glass %}
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
+{% if lsw_install_looking_glass %}
         Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
 {% endif %}
         return;
     }
 }
-'GPU driver {% if pgs_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
+'GPU driver {% if lsw_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
 Get-NetConnectionProfile -InterfaceAlias 'Ethernet*' | Set-NetConnectionProfile -NetworkCategory 'Private';
 
-{% if pgs_windows_version == 11 %}
+{% if lsw_windows_version == 11 %}
 $diskpartScript = @"
 select disk 0
 select partition 4
@@ -762,7 +762,7 @@ Start-Process -FilePath "diskpart.exe" -ArgumentList "/s `"$scriptPath`"" -Wait 
 Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
 {% endif %}
 
-{% if pgs_windows_install_app_from_ninite %}
+{% if lsw_windows_install_app_from_ninite %}
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\NiniteInstaller.exe";
     if( Test-Path -LiteralPath $exe ) {
@@ -782,17 +782,17 @@ $scripts = @(
 	{
 		Remove-Item -LiteralPath 'Registry::HKLM\Software\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate' -Force -ErrorAction 'SilentlyContinue';
 	};
-{% if 'OneCoreUAP.OneSync' in pgs_windows_capability_to_remove %}
+{% if 'OneCoreUAP.OneSync' in lsw_windows_capability_to_remove %}
 	{
 		Remove-Item -LiteralPath 'C:\Users\Default\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk', 'C:\Windows\System32\OneDriveSetup.exe', 'C:\Windows\SysWOW64\OneDriveSetup.exe' -ErrorAction 'Continue';
 	};
 {% endif %}
-{% if 'Microsoft.OutlookForWindows' in pgs_windows_app_to_remove %}
+{% if 'Microsoft.OutlookForWindows' in lsw_windows_app_to_remove %}
 	{
 		Remove-Item -LiteralPath 'Registry::HKLM\Software\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate' -Force -ErrorAction 'SilentlyContinue';
 	};
 {% endif %}
-{% if pgs_windows_app_to_remove | select('match', '^M.*Teams') | list | length > 0 %}
+{% if lsw_windows_app_to_remove | select('match', '^M.*Teams') | list | length > 0 %}
 	{
 		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications" /v ConfigureChatAutoInstall /t REG_DWORD /d 0 /f;
 	};
@@ -859,7 +859,7 @@ $scripts = @(
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\VirtIoGuestTools.ps1' -Raw | Invoke-Expression;
 	};
-{% if pgs_windows_version == 11 %}
+{% if lsw_windows_version == 11 %}
 	{
 		reg.exe add "HKLM\SYSTEM\Setup\MoSetup" /v AllowUpgradesWithUnsupportedTPMOrCPU /t REG_DWORD /d 1 /f;
 	};
@@ -908,7 +908,7 @@ $scripts = @(
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-02.ps1' -Raw | Invoke-Expression;
 	};
-{% if pgs_windows_activate_rdp %}
+{% if lsw_windows_activate_rdp %}
 	{
 		netsh.exe advfirewall firewall set rule group="@FirewallAPI.dll,-28752" new enable=Yes;
 		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f;
@@ -1034,17 +1034,17 @@ $scripts = @(
 	{
 		reg.exe add "HKU\DefaultUser\Software\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f;
 	};
-{% if 'Microsoft.WindowsNotepad' in pgs_windows_app_to_remove %}
+{% if 'Microsoft.WindowsNotepad' in lsw_windows_app_to_remove %}
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Notepad" /v ShowStoreBanner /t REG_DWORD /d 0 /f;
 	};
 {% endif %}
-{% if 'OneCoreUAP.OneSync' in pgs_windows_capability_to_remove %}
+{% if 'OneCoreUAP.OneSync' in lsw_windows_capability_to_remove %}
 	{
 		Remove-ItemProperty -LiteralPath 'Registry::HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'OneDriveSetup' -Force -ErrorAction 'Continue';
 	};
 {% endif %}
-{% if pgs_windows_app_to_remove | select('match', '^Microsoft\\.(Xbox|Gaming)') | list | length > 0 %}
+{% if lsw_windows_app_to_remove | select('match', '^Microsoft\\.(Xbox|Gaming)') | list | length > 0 %}
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f;
 	};

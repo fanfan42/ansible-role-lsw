@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Calculate number of hugepages to allocate from memory (in MB)
-HUGEPAGES="$(({{ pgs_config_vm_memory }}/$(($(grep Hugepagesize /proc/meminfo | awk '{print $2}')/1024))))"
+HUGEPAGES="$(({{ lsw_config_vm_memory }}/$(($(grep Hugepagesize /proc/meminfo | awk '{print $2}')/1024))))"
 
 echo "Allocating hugepages..."
 echo $HUGEPAGES > /proc/sys/vm/nr_hugepages

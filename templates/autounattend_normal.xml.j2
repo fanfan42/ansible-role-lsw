@@ -4,43 +4,43 @@
 	<settings pass="windowsPE">
 		<component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<SetupUILanguage>
-				<UILanguage>{{ pgs_windows_language }}</UILanguage>
+				<UILanguage>{{ lsw_windows_language }}</UILanguage>
 			</SetupUILanguage>
-			<InputLocale>{{ pgs_windows_keyboard }}</InputLocale>
-			<SystemLocale>{{ pgs_windows_language }}</SystemLocale>
-			<UILanguage>{{ pgs_windows_language }}</UILanguage>
-			<UserLocale>{{ pgs_windows_language }}</UserLocale>
+			<InputLocale>{{ lsw_windows_keyboard }}</InputLocale>
+			<SystemLocale>{{ lsw_windows_language }}</SystemLocale>
+			<UILanguage>{{ lsw_windows_language }}</UILanguage>
+			<UserLocale>{{ lsw_windows_language }}</UserLocale>
 		</component>
 		<component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
 			<DriverPaths>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="1">
-					<Path>D:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>D:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="2">
-					<Path>E:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>E:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="3">
-					<Path>F:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>F:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 			</DriverPaths>
 		</component>
 		<component name="Microsoft-Windows-PnpCustomizationsNonWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
 			<DriverPaths>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="1">
-					<Path>D:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>D:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="2">
-					<Path>E:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>E:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 				<PathAndCredentials wcm:action="add" wcm:keyValue="3">
-					<Path>F:\vioscsi\w{{ pgs_windows_version }}\amd64</Path>
+					<Path>F:\vioscsi\w{{ lsw_windows_version }}\amd64</Path>
 				</PathAndCredentials>
 			</DriverPaths>
 		</component>
 		<component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<UserData>
 				<ProductKey>
-					<Key>{{ pgs_windows_licence_key }}</Key>
+					<Key>{{ lsw_windows_licence_key }}</Key>
 					<WillShowUI>OnError</WillShowUI>
 				</ProductKey>
 				<AcceptEula>true</AcceptEula>
@@ -103,8 +103,8 @@
 	<settings pass="generalize"></settings>
 	<settings pass="specialize">
 		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-			<ComputerName>{{ pgs_windows_vm_name }}</ComputerName>
-			<TimeZone>{{ pgs_windows_timezone }}</TimeZone>
+			<ComputerName>{{ lsw_windows_vm_name }}</ComputerName>
+			<TimeZone>{{ lsw_windows_timezone }}</TimeZone>
 		</component>
 		<component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<RunSynchronous>
@@ -135,31 +135,31 @@
 	<settings pass="auditUser"></settings>
 	<settings pass="oobeSystem">
 		<component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-			<InputLocale>{{ pgs_windows_keyboard }}</InputLocale>
-			<SystemLocale>{{ pgs_windows_language }}</SystemLocale>
-			<UILanguage>{{ pgs_windows_language }}</UILanguage>
-			<UserLocale>{{ pgs_windows_language }}</UserLocale>
+			<InputLocale>{{ lsw_windows_keyboard }}</InputLocale>
+			<SystemLocale>{{ lsw_windows_language }}</SystemLocale>
+			<UILanguage>{{ lsw_windows_language }}</UILanguage>
+			<UserLocale>{{ lsw_windows_language }}</UserLocale>
 		</component>
 		<component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
 			<UserAccounts>
 				<LocalAccounts>
 					<LocalAccount wcm:action="add">
-						<Name>{{ pgs_windows_user }}</Name>
+						<Name>{{ lsw_windows_user }}</Name>
 						<DisplayName></DisplayName>
 						<Group>Administrators</Group>
 						<Password>
-							<Value>{{ pgs_windows_password }}</Value>
+							<Value>{{ lsw_windows_password }}</Value>
 							<PlainText>true</PlainText>
 						</Password>
 					</LocalAccount>
 				</LocalAccounts>
 			</UserAccounts>
 			<AutoLogon>
-				<Username>{{ pgs_windows_user }}</Username>
+				<Username>{{ lsw_windows_user }}</Username>
 				<Enabled>true</Enabled>
 				<LogonCount>1</LogonCount>
 				<Password>
-					<Value>{{ pgs_windows_password }}</Value>
+					<Value>{{ lsw_windows_password }}</Value>
 					<PlainText>true</PlainText>
 				</Password>
 			</AutoLogon>
@@ -226,19 +226,19 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
-        Start-Process -FilePath $exe -ArgumentList '{{ pgs_windows_gpu_install_options[pgs_windows_gpu_driver] }}' -Wait;
-{% if pgs_install_looking_glass %}
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
+{% if lsw_install_looking_glass %}
         Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
 {% endif %}
         return;
     }
 }
-'GPU driver {% if pgs_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
+'GPU driver {% if lsw_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
 Get-NetConnectionProfile -InterfaceAlias 'Ethernet*' | Set-NetConnectionProfile -NetworkCategory 'Private';
 
-{% if pgs_windows_install_app_from_ninite %}
+{% if lsw_windows_install_app_from_ninite %}
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\NiniteInstaller.exe";
     if( Test-Path -LiteralPath $exe ) {
@@ -269,7 +269,7 @@ $scripts = @(
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-02.ps1' -Raw | Invoke-Expression;
 	};
-{% if pgs_windows_activate_rdp %}
+{% if lsw_windows_activate_rdp %}
 	{
 		netsh.exe advfirewall firewall set rule group="@FirewallAPI.dll,-28752" new enable=Yes;
 		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f;

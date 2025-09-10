@@ -2,10 +2,10 @@
 
 # The maxperf playbook stands for "maximum performance"
 # The Windows VM is on a dedicated disk for the VM with passthrough PCI controller.
-# pgs_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
+# lsw_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
 # It gives you a dual boot system with Windows and Linux at boot.
-# pgs_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
-# pgs_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
+# lsw_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
+# lsw_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
 # It gives maximum performance.
 # Ninite programs are also installed.
 # Adjust the variables with documentation/VARIABLES.md
@@ -18,14 +18,15 @@
   gather_facts: true
   become: false
   vars:
-    pgs_virt_mode: sriov
-    pgs_windows_iso: windows11.iso
-    pgs_windows_version: 11
-    pgs_windows_img_size: 30G
-    pgs_windows_disk_device_path: '/dev/nvme0n1'
-    pgs_config_pass_disk_controller: true
-    pgs_windows_install_template: private
-    pgs_windows_install_app_from_ninite: true
-    pgs_windows_activate_rdp: true
+    lsw_virt_mode: sriov
+    lsw_windows_iso: windows11.iso
+    lsw_windows_version: 11
+    lsw_windows_img_size: 30G
+    lsw_windows_disk_device_path: '/dev/nvme0n1'
+    lsw_config_pass_disk_controller: true
+    lsw_windows_install_template: private
+    lsw_windows_install_app_from_ninite: true
+    lsw_windows_activate_rdp: true
+    lsw_windows_password: 'secret_password'
   roles:
-    - ansible-role-pgs
+    - ansible-role-lsw

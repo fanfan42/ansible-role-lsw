@@ -30,8 +30,8 @@ Start from a working Debian/Nobara/EndeavourOS desktop with Internet working and
 ```shell
 $ su
 # apt update && apt install ansible ansible-core git sudo gawk
-# usermod -aG sudo `whoami`
-# reboot
+# /sbin/usermod -aG sudo <your_username>
+# /sbin/reboot
 ```
 
 ##### On EndeavourOS
@@ -51,17 +51,17 @@ $ sudo dnf install ansible ansible-core git
 ```shell
 $ mkdir -p windowsvm/roles
 $ cd windowsvm/roles
-$ git clone https://github.com/fanfan42/ansible-role-pgs.git
+$ git clone https://github.com/fanfan42/ansible-role-lsw.git
 $ cd ..
 ```
 
-Follow the **README** instructions in **roles/ansible-role-pgs/build**, **roles/ansible-role-pgs/build/extra_packages** and **roles/ansible-role-pgs/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
+Follow the **README** instructions in **roles/ansible-role-lsw/build**, **roles/ansible-role-lsw/build/extra_packages** and **roles/ansible-role-lsw/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
 
-Copy the playbook you want as a base from **roles/ansible-role-pgs/playbook_examples** directory (ex: `cp roles/ansible-role-pgs/playbook_examples/playbook-sriov-minperf.yml sriov.yml`).
+Copy the playbook you want as a base from **roles/ansible-role-lsw/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/playbook_examples/playbook-sriov-minperf.yml sriov.yml`).
 
 Adapt the **vars** in the **sriov.yml** playbook following variable documentation [here](VARIABLES.md).
 
-**Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-pgs/vars/*yourdistro*.yml**.
+**Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-lsw/vars/*yourdistro*.yml**.
 
 ```shell
 $ ansible-playbook sriov.yml -t install,build,config,create -v --ask-become-pass
@@ -69,7 +69,7 @@ $ ansible-playbook sriov.yml -t install,build,config,create -v --ask-become-pass
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, the role starts installing all the needed packages. The **install** tag is only used once. If you need to run again the playbook, you can remove it. You know everything is installed when you enter the **build** stage.
+After the reboot, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag.
 
 During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "OK" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
@@ -88,9 +88,8 @@ If your Windows is on a dedicated disk, start the VM, search "Disk management" a
 
 ### Known Bugs
 
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f`
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* On Debian and EndeavourOS, the task which creates and (auto)start the default network silently fails and the VM won't boot. Please run: `sudo virsh net-autostart default && sudo virsh net-start default`.
 * Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
 * Windows 10 doesn't work. Windows 11 24H2 works.
-* For now, only one Intel driver allows the build part working but there are lag when running the VM. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.
+* For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.
+* System freezes when using Wayland. Uxe X11/X.org instead when login to your distro.

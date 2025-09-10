@@ -5,24 +5,24 @@
     cmd: >-
       {{
         'update-grub'
-        if pgs_distro_boot_loader == 'grub'
+        if lsw_distro_boot_loader == 'grub'
         else
         '/bin/true'
       }}
-  changed_when: pgs_distro_boot_loader == 'grub'
+  changed_when: lsw_distro_boot_loader == 'grub'
   become: true
 
 - name: Reload initramfs
   ansible.builtin.shell: >-
-    {% if pgs_distro_initramfs_binary == 'dracut' %}
-      {% if pgs_distro_boot_loader == 'systemd-boot' %}
+    {% if lsw_distro_initramfs_binary == 'dracut' %}
+      {% if lsw_distro_boot_loader == 'systemd-boot' %}
         for kv in $(ls /lib/modules); do
           krlpth="/usr/lib/modules/$kv/vmlinuz"
           [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
         done
       {% else %}
         for kv in $(ls /lib/modules); do
-          krlpth="/{{ pgs_distro_boot_location }}/vmlinuz-$kv"
+          krlpth="/{{ lsw_distro_boot_location }}/vmlinuz-$kv"
           [ -f "$krlpth" ] && kernel-install add "$kv" "$krlpth"
         done
       {% endif %}

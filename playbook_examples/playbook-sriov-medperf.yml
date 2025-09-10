@@ -2,7 +2,7 @@
 
 # The medperf playbook stands for "medium performance"
 # The Windows VM is on a dedicated disk for the VM but the PCI controller is "emulated".
-# pgs_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
+# lsw_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance.
 # Ninite programs are also installed.
@@ -16,12 +16,13 @@
   gather_facts: true
   become: false
   vars:
-    pgs_virt_mode: sriov
-    pgs_windows_iso: windows11.iso
-    pgs_windows_version: 11
-    pgs_windows_img_size: 30G
-    pgs_windows_disk_device_path: '/dev/nvme0n1'
-    pgs_windows_install_app_from_ninite: true
-    pgs_windows_activate_rdp: true
+    lsw_virt_mode: sriov
+    lsw_windows_iso: windows11.iso
+    lsw_windows_version: 11
+    lsw_windows_img_size: 30G
+    lsw_windows_disk_device_path: '/dev/nvme0n1'
+    lsw_windows_install_app_from_ninite: true
+    lsw_windows_activate_rdp: true
+    lsw_windows_password: 'secret_password'
   roles:
-    - ansible-role-pgs
+    - ansible-role-lsw

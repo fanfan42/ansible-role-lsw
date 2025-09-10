@@ -1,10 +1,10 @@
 ---
 
-pgs_distro_boot_location: /boot
-pgs_distro_boot_loader: grub
-pgs_distro_initramfs_binary: dracut
+lsw_distro_boot_location: /boot
+lsw_distro_boot_loader: grub
+lsw_distro_initramfs_binary: dracut
 
-pgs_packages:
+lsw_packages:
   - edk2-ovmf
   - qemu-common
   - qemu-img
@@ -22,10 +22,10 @@ pgs_packages:
   - python3-pycdlib
   - swtpm
 
-pgs_lg_version: B7
-pgs_lg_url: 'https://looking-glass.io/artifact/{{ pgs_lg_version }}/source'
+lsw_lg_version: B7
+lsw_lg_url: 'https://looking-glass.io/artifact/{{ lsw_lg_version }}/source'
 
-pgs_lg_dependencies:
+lsw_lg_dependencies:
   - cmake
   - gcc
   - gcc-c++
@@ -51,12 +51,12 @@ pgs_lg_dependencies:
   - libsamplerate-devel
   - pulseaudio-libs-devel
 
-pgs_rm_lg_dependencies: false
+lsw_rm_lg_dependencies: false
 
-pgs_packer_version: 1.13.1
-pgs_packer_url: 'https://releases.hashicorp.com/packer/{{ pgs_packer_version }}/packer_{{ pgs_packer_version }}'
+lsw_packer_version: 1.13.1
+lsw_packer_url: 'https://releases.hashicorp.com/packer/{{ lsw_packer_version }}/packer_{{ lsw_packer_version }}'
 
-pgs_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
-pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2
-pgs_windows_ovmf_vars_path: /usr/share/edk2/ovmf/OVMF_VARS_4M.qcow2
-pgs_windows_uefi_shell_path: /usr/share/edk2/ovmf/Shell.efi
+lsw_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
+lsw_windows_ovmf_code_secboot_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2
+lsw_windows_ovmf_vars_path: /usr/share/edk2/ovmf/OVMF_VARS_4M.qcow2
+lsw_windows_uefi_shell_path: /usr/share/edk2/ovmf/Shell.efi

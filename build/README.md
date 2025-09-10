@@ -2,6 +2,6 @@ Go to [Link for Windows 11](https://www.microsoft.com/en-us/software-download/wi
 
 Follow the process to get the ISO file starting from something like "Download Windows Disk Image (ISO) for x64 devices".
 
-Copy the file in this folder and rename it like in the **defaults/main.yml** var *pgs_windows_iso* .
+Copy the file in this folder and rename it like in the **defaults/main.yml** var *lsw_windows_iso* .
 
 Next, follow the steps described in the README.md in **build/extra_packages** and **build/virtio** directories.
