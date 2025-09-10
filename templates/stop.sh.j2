@@ -62,3 +62,7 @@ rm /dev/shm/looking-glass
 {% if pgs_virt_mode == 'gvtg' %}
 echo 1 > "/sys/bus/pci/devices/0000:{{ _pgs_pci_cpu.stdout }}/65e0c490-1f9f-47e2-87b4-3f3d14255b2f/remove"
 {% endif %}
+
+{% if pgs_virt_mode == 'sriov' %}
+echo 0 > "/sys/devices/pci0000:00/0000:{{ _pgs_pci_cpu.stdout }}/sriov_numvfs"
+{% endif %}

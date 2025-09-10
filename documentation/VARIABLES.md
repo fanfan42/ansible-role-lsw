@@ -5,6 +5,8 @@
 - [pgs_virt_mode](#pgs_virt_mode)
 - [pgs_windows_iso](#pgs_windows_iso)
 - [pgs_windows_vm_name](#pgs_windows_vm_name)
+- [pgs_windows_vm_private_ip](#pgs_windows_vm_private_ip)
+- [pgs_windows_vmlg_private_ip](#pgs_windows_vmlg_private_ip)
 - [pgs_windows_img_format](#pgs_windows_img_format)
 - [pgs_windows_img_size](#pgs_windows_img_size)
 - [pgs_windows_disk_device_path](#pgs_windows_disk_device_path)
@@ -32,13 +34,13 @@
 - [pgs_install_looking_glass](#pgs_install_looking_glass)
 - [pgs_looking_glass_memory](#pgs_looking_glass_memory)
 - [pgs_install_zen](#pgs_install_zen)
+- [pgs_windows_install_rdp](#pgs_windows_install_rdp)
 
 [**Passthrough variables**](#passthrough-variables)
 
 - [pgs_passthrough_gpu_pci_base_addr](#pgs_passthrough_gpu_pci_base_addr)
 - [pgs_config_is_laptop](#pgs_config_is_laptop)
 - [pgs_config_gpu_nvidia_gtx](#pgs_config_gpu_nvidia_gtx)
-
 
 [**OS specific variables**](#os-specific-variables)
 
@@ -62,6 +64,10 @@
 - [pgs_windows_ovmf_code_secboot_path](#pgs_windows_ovmf_code_secboot_path)
 - [pgs_windows_ovmf_vars_path](#pgs_windows_ovmf_vars_path)
 - [pgs_windows_uefi_shell_path](#pgs_windows_uefi_shell_path)
+- [pgs_sriov_rdp_packages](#pgs_sriov_rdp_packages)
+- [pgs_sriov_pkg_version](#pgs_sriov_pkg_version)
+- [pgs_sriov_i915_pkg](#pgs_sriov_i915_pkg)
+- [pgs_sriov_pkg_url](#pgs_sriov_pkg_url)
 
 ## Common variables
 
@@ -84,6 +90,14 @@ Follow the guide [here](../build/README.md) to get your windows ISO installation
 ### pgs_windows_vm_name
 
 The name you want to give to your Windows virtual machine. By default, it takes your hostname and add 'vm-' in front of it. If you install Looking Glass, the virtual machine created takes a 'lg' after its name, example: vm-legionlg.
+
+### pgs_windows_vm_private_ip
+
+Default to **192.168.122.42**. IP on the default network managed by Libvirt. Change it only if you set to **true** variable **pgs_windows_activate_rdp** and really need another IP.
+
+### pgs_windows_vmlg_private_ip
+
+Default to **192.168.122.21**. IP on the default network managed by Libvirt for Looking Glass VM. Change it only if you need to set to **true** variable **pgs_windows_activate_rdp** and really need another IP.
 
 ### pgs_windows_img_format
 
@@ -184,17 +198,17 @@ The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The rol
 
 ### pgs_config_usb_mouse
 
-Default to empty. This role creates a VM with nearly bare performance including devices connected to the Linux host. In order to perform this achievement, every computer, tower or laptop, should have 2 mice and 2 keyboards. Mousepad and laptop keyboard, in case of a laptop, count in the total. The device is passed on the VM via EVDEV. When you select the mouse dedicated to the VM, it becomes unavailable on the Linux host so be careful when passing a mouse/keyboard device to the VM. To find 2nd mouse or keyboard: `sudo ls -l /dev/input/by-id/usb-*-event-*`. It's possible to only have 2nd mouse or 2nd keyboard only attached to the VM. Here are multiple use case:
+Default to empty. Don't set this variable when using RDP or SR-IOV virtualization mode. This role creates a VM with nearly bare performance including devices connected to the Linux host. In order to perform this achievement, every computer, tower or laptop, should have 2 mice and 2 keyboards. Mousepad and laptop keyboard, in case of a laptop, count in the total. The device is passed on the VM via EVDEV. When you select the mouse dedicated to the VM, it becomes unavailable on the Linux host so be careful when passing a mouse/keyboard device to the VM. To find 2nd mouse or keyboard: `sudo ls -l /dev/input/by-id/usb-*-event-*`. It's possible to only have 2nd mouse or 2nd keyboard only attached to the VM. Here are multiple use case:
 
 
-|              | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
-| :------------- | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GVT-g/SR-IOV | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
-| GVT-g/SR-IOV | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
-| GVT-g/SR-IOV | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
-| Passthrough  | no        | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. NOK without Looking Glass, the VM has a display on second screen but is not useable.                                                                      |
-| Passthrough  | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
-| Passthrough  | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
+|             | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
+| :------------ | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GVT-g       | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
+| GVT-g       | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
+| GVT-g       | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
+| Passthrough | no        | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. NOK without Looking Glass, the VM has a display on second screen but is not useable.                                                                      |
+| Passthrough | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
+| Passthrough | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
 
 ### pgs_windows_usb_kbd
 
@@ -206,7 +220,7 @@ Default to **false**. Ninite is a web service which offers you to download one .
 
 ### pgs_install_looking_glass
 
-Default to **false**. Set it to **true** in case of **gvtg** or **sriov** value in the variable **pgs_virt_mode** or the role will fail. It's not mandatory to install it for **passthrough** mode but if you have a laptop (and a dummy HDMI plug), it can help you use the VM wherever you want only using your integrated screen so I really suggest you to also set this variable to true in all case. The guide to make you use it in your VM is [here](../build/extra_packages/README.md).
+Default to **false**. Set it to **true** in case of **gvtg** value in the variable **pgs_virt_mode** or the role will fail. It's not mandatory to install it for **passthrough** mode but if you have a laptop (and a dummy HDMI plug), it can help you use the VM wherever you want only using your integrated screen so I really suggest you to also set this variable to true in all case. The guide to make you use it in your VM is [here](../build/extra_packages/README.md).
 
 ### pgs_looking_glass_memory
 
@@ -215,6 +229,10 @@ It's the memory allocated to Looking Glass to interact with it's host applicatio
 ### pgs_install_zen
 
 Only applies for Debian and EndeavourOS, Nobara manages it's own optimized kernel. The default is **true** so you have a better kernel optimized for desktop and gaming usage but it's perfectly OK to not install it if you don't want it.
+
+### pgs_windows_activate_rdp
+
+Default to **false**. Set it to **true** in case of **sriov** value in the variable **pgs_virt_mode** or the role will fail. Set it to **true**, also if you need access to the VM via Remote Desktop Protocol. Remmina + FreeRDP will be installed and a basic configuration will be created for the VM(s).
 
 ## Passthrough variables
 
@@ -321,3 +339,19 @@ Common to all distros. Full path of the OVMF vars file. It shouldn't be changed 
 ### pgs_windows_uefi_shell_path
 
 Common to all distros. Full path of the UEFI shell file. It shouldn't be changed because these paths have been tested on all 3 distros. This variable is only needed if the boot loader is systemd-boot for managing dual boot with Windows.
+
+### pgs_sriov_rdp_packages
+
+Common to all distros. List of packages to be installed for using RDP with Remmina and FreeRDP.
+
+### pgs_sriov_pkg_version
+
+Only for Debian and EndeavourOS with **sriov** set in **pgs_virt_mode**. Go on [strongtz](https://github.com/strongtz/i915-sriov-dkms/releases) repository and choose the release name you want.
+
+### pgs_sriov_i915_pkg
+
+Only for Debian and EndeavourOS. Name of the i915 package you need on your distro.
+
+### pgs_sriov_pkg_url
+
+Only for Debian and EndeavourOS. URL of strongtz (or other fork if you want) github repository with i915 module for SR-IOV.

@@ -40,6 +40,9 @@
 {% if pgs_virt_mode == 'gvtg' %}
         ["-device", "driver=vfio-pci,id=hostdev0,sysfsdev=/sys/bus/mdev/devices/65e0c490-1f9f-47e2-87b4-3f3d14255b2f,display=off,bus=pci.2,addr=0x0"]
 {% endif %}
+{% if pgs_virt_mode == 'sriov' %}
+        ["-device", "driver=vfio-pci,id=hostdev0,host=0000:{{ (_pgs_pci_cpu.stdout | split('.'))[0] }}.1,bus=pci.2,addr=0x0"]
+{% endif %}
       ],
       "efi_boot": "true",
       "efi_firmware_code": "{% if pgs_windows_version == 11 and pgs_windows_install_template == 'normal' %}{{ pgs_windows_ovmf_code_secboot_path }}{% else %}{{ pgs_windows_ovmf_code_path }}{% endif %}",

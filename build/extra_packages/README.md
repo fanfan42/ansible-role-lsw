@@ -18,11 +18,16 @@ The Language, do I really have to help you choose ?
 
 ## Intel
 
-Go to [Intel download page](https://www.intel.com/content/www/us/en/search.html#sort=relevancy&f:@tabfilter=[Downloads]&f:@stm_10385_en=[Graphics])
+Go to [Intel download page](https://www.intel.com/content/www/us/en/search.html#sort=relevancy&f:@tabfilter=[Downloads]&f:@stm_10385_en=[Graphics]) for all case except SR-IOV virtualization mode. [Link](https://www.driverscloud.com/fr/services/GetInformationDriver/76514-0/intel-gfx-win-1016460-1016259exe) for SR-IOV virtualization mode.
 
-### SR-IOV or Passthrough with Intel dGPU
+### Passthrough with Intel dGPU
 
 Choose a file like "Intel Arc Iris Xe Graphics - Windows"
+
+### SR-IOV
+Download the file with "Download Now button" on the dedicated link.
+
+No idea why but only this file works for building the VM. The driver can be updated later on Windows VM.
 
 ### GVT-g
 

@@ -23,9 +23,7 @@
   become: true
 
 - name: Install Packer on Debian or Nobara
-  when:
-    - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
-    - not _pgs_pkr_bin.stat.exists
+  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux'] and not _pgs_pkr_bin.stat.exists
   block:
     - name: Get checksum list
       ansible.builtin.set_fact:
@@ -57,9 +55,7 @@
       become: true
 
 - name: Install pycdlib on EndeavourOS
-  when:
-    - ansible_facts['lsb']['id'] == 'EndeavourOS'
-    - "'python-pycdlib-git' not in _pgs_pacman_pkg.stdout"
+  when: "ansible_facts['lsb']['id'] == 'EndeavourOS' and 'python-pycdlib-git' not in _pgs_pacman_pkg.stdout"
   block:
     - name: Install requirements
       ansible.builtin.package:
@@ -92,10 +88,7 @@
       when: pgs_rm_pycdlib_dependencies
 
 - name: Install Looking Glass on EndeavourOS
-  when:
-    - ansible_facts['lsb']['id'] == 'EndeavourOS'
-    - pgs_install_looking_glass
-    - "'looking-glass' not in _pgs_pacman_pkg.stdout"
+  when: "ansible_facts['lsb']['id'] == 'EndeavourOS' and pgs_install_looking_glass and 'looking-glass' not in _pgs_pacman_pkg.stdout"
   block:
     - name: Install requirements
       ansible.builtin.package:
@@ -128,10 +121,7 @@
       when: pgs_rm_lg_dependencies
 
 - name: Install Looking Glass on Debian or Nobara
-  when:
-    - ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
-    - pgs_install_looking_glass
-    - not _pgs_lg_bin.stat.exists
+  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux'] and pgs_install_looking_glass and not _pgs_lg_bin.stat.exists
   block:
     - name: Install Looking Glass build dependencies
       ansible.builtin.package:
@@ -178,10 +168,7 @@
   register: _pgs_install_eos_zen
   changed_when: "'install' in _pgs_install_eos_zen.stdout.lower()"
   loop: "{{ pgs_zen_packages }}"
-  when:
-    - ansible_facts['lsb']['id'] == 'EndeavourOS'
-    - pgs_install_zen
-    - pgs_virt_mode != 'gvtg'
+  when: ansible_facts['lsb']['id'] == 'EndeavourOS' and pgs_install_zen and pgs_virt_mode != 'gvtg'
   notify:
     - Reboot
     - Pause
@@ -192,10 +179,7 @@
   register: _pgs_install_eos_zen
   changed_when: "'install' in _pgs_install_eos_zen.stdout.lower()"
   loop: "{{ pgs_zen_gvtg_packages }}"
-  when:
-    - ansible_facts['lsb']['id'] == 'EndeavourOS'
-    - pgs_install_zen
-    - pgs_virt_mode == 'gvtg'
+  when: ansible_facts['lsb']['id'] == 'EndeavourOS' and pgs_install_zen and pgs_virt_mode == 'gvtg'
   notify:
     - Reboot
     - Pause
@@ -205,10 +189,33 @@
   ansible.builtin.package:
     name: '{{ pgs_zen_packages }}'
     state: present
-  when:
-    - ansible_facts['lsb']['id'] == 'Debian'
-    - pgs_install_zen
+  when: ansible_facts['lsb']['id'] == 'Debian' and pgs_install_zen
   notify:
     - Reboot
     - Pause
   become: true
+
+- name: Install RDP client packages
+  ansible.builtin.package:
+    name: '{{ pgs_sriov_rdp_packages }}'
+    state: present
+  when: pgs_windows_activate_rdp
+
+- name: Install SR-IOV module and dependencies on Debian or EndeavourOS
+  become: true
+  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS'] and pgs_virt_mode == 'sriov' and not _pgs_sriov_conf.stat.exists
+  block:
+    - name: Get SR-IOV package
+      ansible.builtin.get_url:
+        url: '{{ pgs_sriov_pkg_url }}'
+        dest: '/tmp/{{ (pgs_sriov_pkg_url | split("/"))[-1] }}'
+        mode: "0644"
+      become: false
+    - name: Install SR-IOV package with pacman
+      ansible.builtin.shell: pacman -U --noconfirm /tmp/{{ pgs_sriov_i915_pkg }}
+      changed_when: true
+      when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+    - name: Install SR-IOV package with dpkg
+      ansible.builtin.shell: dpkg -i /tmp/{{ pgs_sriov_i915_pkg }}
+      changed_when: true
+      when: ansible_facts['lsb']['id'] == 'Debian'

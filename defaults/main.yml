@@ -50,6 +50,10 @@ pgs_windows_gpu_install_options:
   'intel': '-s -f'
   'nvidia': '-s -noreboot'
   'amd': '/INSTALL /QUIET /NORESTART'
+# Set it to true if you want to access your VM with RDP (not recommended but mandatory for sriov virtualization mode)
+pgs_windows_activate_rdp: false
+pgs_windows_vm_private_ip: 192.168.122.42
+pgs_windows_vmlg_private_ip: 192.168.122.21
 pgs_windows_app_to_remove:
   - Microsoft.Microsoft3DViewer
   - Microsoft.BingSearch
@@ -118,7 +122,6 @@ pgs_windows_capability_to_remove:
 
 pgs_windows_feature_to_remove:
   - MediaPlayback
-  - Microsoft-RemoteDesktopConnection
   - Recall
   - Microsoft-SnippingTool
 

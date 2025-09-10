@@ -64,7 +64,7 @@ Adapt the **vars** in the **passthrough.yml** playbook following variable docume
 **Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-pgs/vars/*yourdistro*.yml**.
 
 ```shell
-$ ansible-playbook gvtg.yml -t install,build,config,create -v --ask-become-pass
+$ ansible-playbook passthrough.yml -t install,build,config,create -v --ask-become-pass
 ```
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot. After reboot, the screen atatched to the dGPU doesn't display anything. It's normal.
@@ -85,7 +85,7 @@ By opening virt-manager, you can see the VM created, start it. Your Display Mana
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
-* create another partition called "DATA" for example which will be mounted on D:
+* or create another partition called "DATA" for example which will be mounted on D:
 
 ### Known Bugs
 
@@ -95,3 +95,4 @@ If your Windows is on a dedicated disk, start the VM, search "Disk management" a
 * On Debian and EndeavourOS, the task which creates and (auto)start the default network silently fails and the VM won't boot. Please run: `sudo virsh net-autostart default && sudo virsh net-start default`
 * Nobara with sddm or sddm DM: for still unknown reasons, sometimes, you have to write again your password when the VM shutdowns and sddm restarts as well (sddm issue).
 * The passthrough VM may have not any sound. The only way I found to get it back was to re build the VM with the **build** tag. Please ensure that gpudriver.exe is really for your card and system.
+* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.

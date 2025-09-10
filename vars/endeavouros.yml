@@ -76,3 +76,11 @@ pgs_windows_ovmf_code_path: /usr/share/edk2/x64/OVMF_CODE.4m.fd
 pgs_windows_ovmf_code_secboot_path: /usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd
 pgs_windows_ovmf_vars_path: /usr/share/edk2/x64/OVMF_VARS.4m.fd
 pgs_windows_uefi_shell_path: /usr/share/edk2-shell/x64/Shell.efi
+
+pgs_sriov_rdp_packages:
+  - remmina
+  - freerdp
+
+pgs_sriov_pkg_version: '2025.07.22'
+pgs_sriov_i915_pkg: 'i915-sriov-dkms_{{ pgs_sriov_pkg_version }}-1-x86_64.pkg.tar.zst'
+pgs_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/releases/download/{{ pgs_sriov_pkg_version }}/{{ pgs_sriov_i915_pkg }}'

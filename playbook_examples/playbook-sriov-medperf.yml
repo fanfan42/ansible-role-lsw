@@ -5,9 +5,10 @@
 # pgs_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance.
-# Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 # Ninite programs are also installed.
 # Adjust the variables with documentation/VARIABLES.md
+# Note 1: RDP musts be activated because it's the only way to access the VM
+# Note 2: Windows 10 doesn't work with this virtualization mode
 
 - name: A man needs a name
   hosts: localhost
@@ -15,13 +16,12 @@
   gather_facts: true
   become: false
   vars:
-    pgs_virt_mode: gvtg
-    pgs_windows_iso: windows10.iso
-    pgs_windows_version: 10
+    pgs_virt_mode: sriov
+    pgs_windows_iso: windows11.iso
+    pgs_windows_version: 11
     pgs_windows_img_size: 30G
-    pgs_windows_disk_device_path: '/dev/sda'
-    pgs_config_pass_disk_controller: false
+    pgs_windows_disk_device_path: '/dev/nvme0n1'
     pgs_windows_install_app_from_ninite: true
-    pgs_install_looking_glass: true
+    pgs_windows_activate_rdp: true
   roles:
     - ansible-role-pgs
