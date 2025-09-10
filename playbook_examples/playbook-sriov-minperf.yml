@@ -4,8 +4,9 @@
 # The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
 # Please take your time to adjust the size for "pgs_windows_img_size" you can give to your image depending
 # on the size you have on your only disk.
-# Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 # Adjust the variables with documentation/VARIABLES.md
+# Note 1: RDP musts be activated because it's the only way to access the VM
+# Note 2: Windows 10 doesn't work with this virtualization mode
 
 - name: A man needs a name
   hosts: localhost
@@ -13,12 +14,10 @@
   gather_facts: true
   become: false
   vars:
-    pgs_virt_mode: gvtg
-    pgs_windows_iso: windows10.iso
-    pgs_windows_version: 10
+    pgs_virt_mode: sriov
+    pgs_windows_iso: windows11.iso
+    pgs_windows_version: 11
     pgs_windows_img_size: 100G
-    pgs_windows_install_template: private
-    pgs_windows_install_app_from_ninite: true
-    pgs_install_looking_glass: true
+    pgs_windows_activate_rdp: true
   roles:
     - ansible-role-pgs

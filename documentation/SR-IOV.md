@@ -1,15 +1,14 @@
-# GVT-g
+# SR-IOV
+
+## Warning
+
+This mode is highly experimental and is the worst in terms of performance because there is no way to run the VM without activating RDP in the Windows VM.
 
 ## Requirements and recommendations
 
 ### Requirements
 
-An Intel Core i*n* CPU from 6th to 10th generation with an iGPU inside. It's really important for you to verify. In laptops, all mobile Intel Core have an iGPU but on towers, Intel Core CPU may only contain the CPU. It needs a dGPU to have display on screen. My first tests on these CPU were from the 8th generation (2018) to the 10th generation (2020), I don't know how it works on older generations. i7 are recommended for better VRAM quantity but **Warcraft III reforged** and **Age of Empires II Definitive Edition** perfectly work on a i5. In the BIOS, search for a graphical option like :
-
-* Large Aperture Graphics (Toshiba)
-* Total Memory Graphics (Lenovo)
-
-And set it to the maximum available (512MB or ~1GB of RAM). This option configures the memory allocated for the iGPU, the more allocated, the better the performance in the VM. **Note :** The role automatically creates the VM with the best option available when deploying.
+An Intel Core (Ultra) i*n* CPU from 11th generation or more with an iGPU inside. It's really important for you to verify. In laptops, all mobile Intel Core (Ultra) have an iGPU but on towers, Intel Core (Ultra) CPU may only contain the CPU. It needs a dGPU to have display on screen. My first tests on these CPU were from the 12th generation to the 13th generation for Intel Core and 14th generation for Intel Core Ultra, I don't know how it works on other CPU. In the BIOS, search for an option like SR-IOV and activate it. The option doesn't always exists so don't worry if you don't find it.
 
 Like in other virtualization modes, **Intel VT-d** and **Hyperthreading** must be activated in the BIOS.
 
@@ -17,7 +16,6 @@ No need for **Secure Boot** on your Linux host.
 
 ### Recommendations
 
-* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency.
 * At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal perforamce and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
@@ -59,14 +57,14 @@ $ cd ..
 
 Follow the **README** instructions in **roles/ansible-role-pgs/build**, **roles/ansible-role-pgs/build/extra_packages** and **roles/ansible-role-pgs/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
 
-Copy the playbook you want as a base from **roles/ansible-role-pgs/playbook_examples** directory (ex: `cp roles/ansible-role-pgs/playbook_examples/playbook-gvtg-minperf.yml gvtg.yml`).
+Copy the playbook you want as a base from **roles/ansible-role-pgs/playbook_examples** directory (ex: `cp roles/ansible-role-pgs/playbook_examples/playbook-sriov-minperf.yml sriov.yml`).
 
-Adapt the **vars** in the **gvtg.yml** playbook following variable documentation [here](VARIABLES.md).
+Adapt the **vars** in the **sriov.yml** playbook following variable documentation [here](VARIABLES.md).
 
 **Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-pgs/vars/*yourdistro*.yml**.
 
 ```shell
-$ ansible-playbook gvtg.yml -t install,build,config,create -v --ask-become-pass
+$ ansible-playbook sriov.yml -t install,build,config,create -v --ask-become-pass
 ```
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
@@ -79,19 +77,20 @@ During the **build** stage, a window appears with a text asking if you want to b
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the Looking Glass VM. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be reset.
+At last, the **create** stage creates the VM. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be reset.
 
-By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **pgs_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
+By opening virt-manager, you can see the VM created, start it. To access the VM, open Remmina and double click on your VM name to open a RDP connection to the VM.
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
+
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on D:
 
 ### Known Bugs
 
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`
+* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f`
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
-* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
 * On Debian and EndeavourOS, the task which creates and (auto)start the default network silently fails and the VM won't boot. Please run: `sudo virsh net-autostart default && sudo virsh net-start default`.
 * Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
+* Windows 10 doesn't work. Windows 11 24H2 works.
+* For now, only one Intel driver allows the build part working but there are lag when running the VM. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.

@@ -129,7 +129,7 @@
       changed_when: false
 
 - name: Facts for GVT-g
-  when: pgs_virt_mode == 'gvtg'
+  when: pgs_virt_mode == 'gvtg' and __pgs_iommu_param == 'intel_iommu=on'
   block:
     - name: Get PCI address for Intel VGA controller
       ansible.builtin.shell:
@@ -146,6 +146,21 @@
       register: _pgs_mdev_type
       changed_when: false
       ignore_errors: true
+
+- name: Facts for SR-IOV
+  when: pgs_virt_mode == 'sriov' and __pgs_iommu_param == 'intel_iommu=on'
+  block:
+    - name: Get PCI address for Intel VGA controller
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          lspci | grep -i Intel | grep VGA | cut -d' ' -f1
+      register: _pgs_pci_cpu
+      changed_when: false
+    - name: Check if module already installed
+      ansible.builtin.stat:
+        path: '/usr/src/i915-sriov-dkms-{{ pgs_sriov_pkg_version }}'
+      register: _pgs_sriov_conf
 
 - name: Read /etc/kernel/cmdline
   ansible.builtin.slurp:

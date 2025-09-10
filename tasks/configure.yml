@@ -31,6 +31,7 @@
     name: default
     state: present
     autostart: true
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
   become: true
 
 # BUG on Debian, VM doesn't start with no errors in logs
@@ -67,11 +68,11 @@
   notify: Restart libvirt
   become: true
 
-- name: Create scripts for Passthrough VM
+- name: Create scripts for Passthrough or SR-IOV VM
   become: true
   vars:
     _pgs_lg: false
-  when: pgs_virt_mode == 'passthrough'
+  when: pgs_virt_mode in ['passthrough', 'sriov']
   block:
     - name: Create libvirt hooks folders
       ansible.builtin.file:

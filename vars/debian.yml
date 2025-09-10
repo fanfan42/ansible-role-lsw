@@ -71,3 +71,11 @@ pgs_windows_ovmf_code_path: /usr/share/OVMF/OVMF_CODE_4M.fd
 pgs_windows_ovmf_code_secboot_path: /usr/share/OVMF/OVMF_CODE_4M.secboot.fd
 pgs_windows_ovmf_vars_path: /usr/share/OVMF/OVMF_VARS_4M.fd
 pgs_windows_uefi_shell_path: /usr/share/efi-shell-x64/shellx64.efi
+
+pgs_sriov_rdp_packages:
+  - remmina
+  - remmina-plugin-rdp
+
+pgs_sriov_pkg_version: '2025.07.22'
+pgs_sriov_i915_pkg: i915-sriov-dkms_{{ pgs_sriov_pkg_version }}_amd64.deb
+pgs_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/releases/download/{{ pgs_sriov_pkg_version }}/{{ pgs_sriov_i915_pkg }}'

@@ -269,6 +269,12 @@ $scripts = @(
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-02.ps1' -Raw | Invoke-Expression;
 	};
+{% if pgs_windows_activate_rdp %}
+	{
+		netsh.exe advfirewall firewall set rule group="@FirewallAPI.dll,-28752" new enable=Yes;
+		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f;
+	};
+{% endif %}
 );
 
 &amp; {

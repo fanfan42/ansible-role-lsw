@@ -174,7 +174,7 @@
       <model type="none"/>
     </video>
 {% endif %}
-{% if _pgs_lg %}
+{% if _pgs_lg or pgs_virt_mode == 'sriov' %}
     <sound model="ich9">
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
@@ -207,6 +207,14 @@
       <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
+{% if pgs_virt_mode == 'sriov' %}
+    <hostdev mode="subsystem" type="pci" managed="yes">
+      <source>
+        <address domain='0x0000' bus='0x{{ (_pgs_pci_cpu.stdout | split(':'))[0] }}' slot='0x{{ ((_pgs_pci_cpu.stdout | split('.'))[0] | split(':'))[1] }}' function='0x1'/>
+      </source>
+      <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
+    </hostdev>
+{% endif %}
 {% if pgs_config_pass_disk_controller %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
@@ -216,7 +224,6 @@
       <address type="pci" domain="0x0000" bus="0x1b" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
-    <memballoon model="none"/>
 {% if _pgs_lg %}
     <shmem name="looking-glass">
       <model type="ivshmem-plain"/>
@@ -224,6 +231,7 @@
       <address type="pci" domain="0x0000" bus="0x12" slot="0x00" function="0x0"/>
     </shmem>
 {% endif %}
+    <memballoon model="none"/>
   </devices>
   <qemu:commandline>
 {% if pgs_config_is_laptop and pgs_virt_mode == 'passthrough' %}

@@ -7,7 +7,7 @@
 # pgs_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
 # pgs_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
 # You have to find the path of your pgs_config_usb_kbd and pgs_config_usb_mouse to have low latency on these devices.
-# Note: pgs_config_usb_kbd and pgs_config_usb_mouse wont work on Linux host 
+# Note: pgs_config_usb_kbd and pgs_config_usb_mouse wont work on Linux host
 # It gives maximum performance.
 # Ninite programs are also installed.
 # Adjust the variables with documentation/VARIABLES.md.
