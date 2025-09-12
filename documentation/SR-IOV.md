@@ -4,6 +4,18 @@
 
 This mode is highly experimental and is the worst in terms of performance because there is no way to run the VM without activating RDP in the Windows VM.
 
+## Known Bugs
+
+* If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
+* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
+* Windows 10 doesn't work. Windows 11 24H2 works.
+* For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.
+* System freezes when using Wayland (Debian GNOME and Nobara custom KDE). Uxe X11/X.org instead when login to your distro when on Debian GNOME (the wheel at bottom right of the login screen when asking your password). It's really hard to fix on Nobara because they abandoned X11. The only workaround found was from a Nobara GNOME iso installation. And needs a workaround. The system freezes around 58% of Windows installation when the Intel driver installs. When you see the screen becoming unresponsive. Connect a second screen to "reset" the graphic's driver, go on the window with Windows building, in the menu, reinitialize/reboot the VM, focus on it and press "Enter" when asked to start from the CD/DVD to re launch the installation normally.
+* On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
+* Looking Glass (B7) doesn't work even with a Virtual Display Driver. Don't install it, only RDP works.
+
+**Note:** For now, Intel Core i7-1255U (12th generation Alder Lake) and Intel Core i7-13650HX (13th generation Raptor Lake) didn't need any ROM file for the Vitual Function to work in the VM, as documented in Strongtz i915-sriov-dkms repository.
+
 ## Requirements and recommendations
 
 ### Requirements
@@ -18,14 +30,15 @@ No need for **Secure Boot** on your Linux host.
 
 * At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal perforamce and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
+* Build and use the VM on a X11 DE (EndeavourOS with XFCE for example). Use Wayland at your own risks.
 
-### How to use the role
+## How to use the role
 
-#### Install needed packages (only once)
+### Install needed packages (only once)
 
 Start from a working Debian/Nobara/EndeavourOS desktop with Internet working and open a terminal.
 
-##### On Debian
+#### On Debian
 
 ```shell
 $ su
@@ -34,19 +47,19 @@ $ su
 # /sbin/reboot
 ```
 
-##### On EndeavourOS
+#### On EndeavourOS
 
 ```shell
 $ sudo pacman -Sy ansible ansible-core git
 ```
 
-##### On Nobara
+#### On Nobara
 
 ```shell
 $ sudo dnf install ansible ansible-core git
 ```
 
-#### Prepare and launch the Ansible Playbook
+### Prepare and launch the Ansible Playbook
 
 ```shell
 $ mkdir -p windowsvm/roles
@@ -64,14 +77,18 @@ Adapt the **vars** in the **sriov.yml** playbook following variable documentatio
 **Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-lsw/vars/*yourdistro*.yml**.
 
 ```shell
-$ ansible-playbook sriov.yml -t install,build,config,create -v --ask-become-pass
+$ ansible-playbook sriov.yml -t install -v --ask-become-pass
 ```
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag.
+After the reboot, play again the same command as above the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag at the next step.
 
-During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "OK" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
+```shell
+$ ansible-playbook sriov.yml -t build,config,create -v --ask-become-pass
+```
+
+During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "Done" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
 **Note:** If you need to exit focus during the window's build: `Ctrl + Alt + g`
 
@@ -85,11 +102,3 @@ If your Windows is on a dedicated disk, start the VM, search "Disk management" a
 
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on D:
-
-### Known Bugs
-
-* If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
-* Windows 10 doesn't work. Windows 11 24H2 works.
-* For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.
-* System freezes when using Wayland. Uxe X11/X.org instead when login to your distro.

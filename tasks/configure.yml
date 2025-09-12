@@ -30,14 +30,13 @@
   become: true
   when: ansible_facts['lsb']['id'] == 'Debian'
 
-# Bug on Debian and EndeavourOS, delete default network before adding it
+# Bug: delete default network before adding it
 - name: Disable and stop default network
   community.libvirt.virt_net:
     name: default
     state: absent
     autostart: false
   become: true
-  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS']
 
 - name: Enable and start default network
   community.libvirt.virt_net:
@@ -50,7 +49,7 @@
 - name: Enable and start default network for Debian and EndeavourOS
   ansible.builtin.shell: virsh net-start default && virsh net-autostart default
   become: true
-  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS']
+  changed_when: true
 
 - name: Replace libvirt QEMU user
   ansible.builtin.replace:

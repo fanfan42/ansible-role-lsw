@@ -346,7 +346,7 @@ Common to all distros. List of packages to be installed for using RDP with Remmi
 
 ### lsw_sriov_pkg_version
 
-Only for Debian and EndeavourOS with **sriov** set in **lsw_virt_mode**. Go on [strongtz](https://github.com/strongtz/i915-sriov-dkms/releases) repository and choose the release name you want.
+Common to all distros. Needed when **sriov** set in **lsw_virt_mode**. Go on [strongtz](https://github.com/strongtz/i915-sriov-dkms/releases) repository and choose the release name you want.
 
 ### lsw_sriov_i915_pkg
 
@@ -354,4 +354,4 @@ Only for Debian and EndeavourOS. Name of the i915 package you need on your distr
 
 ### lsw_sriov_pkg_url
 
-Only for Debian and EndeavourOS. URL of strongtz (or other fork if you want) github repository with i915 module for SR-IOV.
+Common to all distros. URL of strongtz (or other fork if you want) github repository with i915 module for SR-IOV. URL of the package for Debian and EndeavourOS. URL of the tarball (minus the .tar.gz suffix) for Nobara.
