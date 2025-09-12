@@ -1,5 +1,13 @@
 # GVT-g
 
+## Known Bugs
+
+* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`
+* If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
+* When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
+* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
+* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
+
 ## Requirements and recommendations
 
 ### Requirements
@@ -21,13 +29,13 @@ No need for **Secure Boot** on your Linux host.
 * At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal perforamce and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
-### How to use the role
+## How to use the role
 
-#### Install needed packages (only once)
+### Install needed packages (only once)
 
 Start from a working Debian/Nobara/EndeavourOS desktop with Internet working and open a terminal.
 
-##### On Debian
+#### On Debian
 
 ```shell
 $ su
@@ -36,19 +44,19 @@ $ su
 # /sbin/reboot
 ```
 
-##### On EndeavourOS
+#### On EndeavourOS
 
 ```shell
 $ sudo pacman -Sy ansible ansible-core git
 ```
 
-##### On Nobara
+#### On Nobara
 
 ```shell
 $ sudo dnf install ansible ansible-core git
 ```
 
-#### Prepare and launch the Ansible Playbook
+### Prepare and launch the Ansible Playbook
 
 ```shell
 $ mkdir -p windowsvm/roles
@@ -66,14 +74,18 @@ Adapt the **vars** in the **gvtg.yml** playbook following variable documentation
 **Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-lsw/vars/*yourdistro*.yml**.
 
 ```shell
-$ ansible-playbook gvtg.yml -t install,build,config,create -v --ask-become-pass
+$ ansible-playbook sriov.yml -t install -v --ask-become-pass
 ```
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag.
+After the reboot, play again the same command as above the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag at the next step.
 
-During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "OK" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
+```shell
+$ ansible-playbook sriov.yml -t build,config,create -v --ask-become-pass
+```
+
+During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "Done" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
 **Note:** If you need to exit focus during the window's build: `Ctrl + Alt + g`
 
@@ -86,11 +98,3 @@ By opening virt-manager, you can see the VM created, start it. For seeing the Wi
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on D:
-
-### Known Bugs
-
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`
-* If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
-* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
-* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.

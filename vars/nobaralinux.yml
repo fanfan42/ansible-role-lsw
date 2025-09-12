@@ -60,3 +60,10 @@ lsw_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
 lsw_windows_ovmf_code_secboot_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.secboot.qcow2
 lsw_windows_ovmf_vars_path: /usr/share/edk2/ovmf/OVMF_VARS_4M.qcow2
 lsw_windows_uefi_shell_path: /usr/share/edk2/ovmf/Shell.efi
+
+lsw_sriov_rdp_packages:
+  - remmina
+  - remmina-plugins-rdp
+
+lsw_sriov_pkg_version: '2025.07.22'
+lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/archive/refs/tags/{{ lsw_sriov_pkg_version }}'
