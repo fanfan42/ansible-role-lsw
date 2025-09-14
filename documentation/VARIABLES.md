@@ -42,6 +42,12 @@
 - [lsw_config_is_laptop](#lsw_config_is_laptop)
 - [lsw_config_gpu_nvidia_gtx](#lsw_config_gpu_nvidia_gtx)
 
+[**SR-IOV variables**](#sr-iov-variables)
+
+* [lsw_vdd_version](#lsw_vdd_version)
+* [lsw_vdd_devcon_sha_windows](#lsw_vdd_devcon_sha_windows)
+* [lsw_vdd_devcon_version](#lsw_vdd_devcon_version)
+
 [**OS specific variables**](#os-specific-variables)
 
 - [lsw_distro_boot_location](#lsw_distro_boot_location)
@@ -198,17 +204,19 @@ The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The rol
 
 ### lsw_config_usb_mouse
 
-Default to empty. Don't set this variable when using RDP or SR-IOV virtualization mode. This role creates a VM with nearly bare performance including devices connected to the Linux host. In order to perform this achievement, every computer, tower or laptop, should have 2 mice and 2 keyboards. Mousepad and laptop keyboard, in case of a laptop, count in the total. The device is passed on the VM via EVDEV. When you select the mouse dedicated to the VM, it becomes unavailable on the Linux host so be careful when passing a mouse/keyboard device to the VM. To find 2nd mouse or keyboard: `sudo ls -l /dev/input/by-id/usb-*-event-*`. It's possible to only have 2nd mouse or 2nd keyboard only attached to the VM. Here are multiple use case:
+Default to empty. This role creates a VM with nearly bare performance including devices connected to the Linux host. In order to perform this achievement, every computer, tower or laptop, should have 2 mice and 2 keyboards. Mousepad and laptop keyboard, in case of a laptop, count in the total. The device is passed on the VM via EVDEV. When you select the mouse dedicated to the VM, it becomes unavailable on the Linux host so be careful when passing a mouse/keyboard device to the VM. To find 2nd mouse or keyboard: `sudo ls -l /dev/input/by-id/usb-*-event-*`. It's possible to only have 2nd mouse or 2nd keyboard only attached to the VM. Here are multiple use case:
 
 
-|             | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
-| :------------ | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GVT-g       | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
-| GVT-g       | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
-| GVT-g       | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
-| Passthrough | no        | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. NOK without Looking Glass, the VM has a display on second screen but is not useable.                                                                      |
-| Passthrough | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
-| Passthrough | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
+|              | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
+| :------------- | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GVT-g/SR-IOV | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
+| GVT-g/SR-IOV | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
+| GVT-g/SR-IOV | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
+| Passthrough  | no        | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. NOK without Looking Glass, the VM has a display on second screen but is not useable.                                                                      |
+| Passthrough  | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
+| Passthrough  | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
+
+**Note**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
 
 ### lsw_windows_usb_kbd
 
@@ -256,6 +264,20 @@ If your computer is a laptop, dGPU cards like Nvidia need to "see" a battery in 
 
 Default to **false**. This variable is only for Nvidia GTX dGPU. No need to set it to **true** when you have a Nvidia RTX dGPU. Follow the guide [here](PATCH_NVIDIA_FW.md) to create a patched firmware.
 
+## SR-IOV variables
+
+### lsw_vdd_version
+
+Virtual Display Driver version from [Virtual Display Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases) release page.
+
+### lsw_vdd_devcon_sha_windows
+
+A sha256 signature for the version of Windows 11 used (Remember, Windows 10 doesn't work with SR-IOV). Default to 23H2 sha256, more information [here](https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json). Devcon is needed to install the Virtual Display Driver but it needs to know with which version of Windows 11 it "talks".
+
+### lsw_vdd_devcon_version
+
+Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
+
 ## OS specific variables
 
 **NOTE:** these variables cannot be overloaded in a playbook. If you need to modify them, modify them directly in the vars folder or use other Ansible ways to modifify.
@@ -302,11 +324,11 @@ Only for EndeavourOS. Default to **false**. If you want to remove Python pycdlib
 
 ### lsw_lg_version
 
-Only for Debian and Nobara. See the guide for Looking Glass installation [here](../build/extra_packages/README.md) to select the same version for the Linux host and Windows VM.
+Common to all distros. See the guide for Looking Glass installation [here](../build/extra_packages/README.md) to select the same version for the Linux host and Windows VM.
 
 ### lsw_lg_url
 
-Only for Debian and Nobara. Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
+Common to all distros. Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
 
 ### lsw_lg_dependencies
 

@@ -745,6 +745,69 @@ foreach( $letter in 'DEF'.ToCharArray() ) {
 }
 'GPU driver {% if lsw_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
 		</File>
+{% if lsw_virt_mode == 'sriov' %}
+		<File path="C:\Windows\Setup\Scripts\SystemDriverInstall.ps1">
+Start-Transcript -Path "C:\SystemDriverInstall.log" -Force
+$ErrorActionPreference = "Stop"
+
+try {
+	schtasks /Delete /TN "SystemDriverInstall" /F
+
+    $tempDir = "C:\VDDInstall"
+    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+
+    $devconPath = Join-Path $tempDir "Devcon.Installer.exe"
+    Invoke-WebRequest -Uri "https://github.com/Drawbackz/DevCon-Installer/releases/download/{{ lsw_vdd_devcon_version }}/Devcon.Installer.exe" -OutFile $devconPath -UseBasicParsing -ErrorAction Stop
+	Start-Process -FilePath $devconPath -ArgumentList "install -hash {{ lsw_vdd_devcon_sha_windows }} -update -dir `"$tempDir`"" -Wait -WindowStyle Hidden
+	$devconExe = Join-Path $tempDir "devcon.exe"
+
+    $downloadUrl = "https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/download/{{ lsw_vdd_version }}/VirtualDisplayDriver-x86.Driver.Only.zip"
+    $driverZipPath = Join-Path $tempDir "driver.zip"
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $driverZipPath -UseBasicParsing -ErrorAction Stop
+    Expand-Archive -Path $driverZipPath -DestinationPath $tempDir -Force -ErrorAction Stop
+
+    Push-Location $tempDir
+
+    $catFile = Join-Path $tempDir "VirtualDisplayDriver\mttvdd.cat"
+    $catBytes = [System.IO.File]::ReadAllBytes($catFile)
+    $certificates = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
+    $certificates.Import($catBytes)
+
+    $certsFolder = Join-Path $tempDir "ExportedCerts"
+    New-Item -ItemType Directory -Path $certsFolder -Force | Out-Null
+
+    foreach ($cert in $certificates) {
+        $certFilePath = Join-Path -Path $certsFolder -ChildPath "$($cert.Thumbprint).cer"
+        $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert) | Set-Content -Path $certFilePath -Encoding Byte
+        Start-Process -FilePath "certutil.exe" -ArgumentList "-addstore TrustedPublisher `"$certFilePath`"" -Wait -WindowStyle Hidden
+    }
+
+	$check = &amp; $devconExe find "Root\MttVDD"
+	if ($check -match "Root\\MttVDD") {
+    	Write-Output "Virtual Display Driver already present. No installation."
+	} else {
+    	&amp; $devconExe install .\VirtualDisplayDriver\MttVDD.inf "Root\MttVDD"
+	}
+
+    Pop-Location
+}
+catch {
+    Write-Error "Error in SystemDriverInstall.ps1 : $_"
+}
+finally {
+    Stop-Transcript
+    Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+exit 0
+		</File>
+		<File path="C:\Windows\Setup\Scripts\SetupComplete.cmd">
+@echo off
+echo [%date% %time%] Starting SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
+schtasks /Create /TN "SystemDriverInstall" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Setup\Scripts\SystemDriverInstall.ps1" /SC ONSTART /RU SYSTEM /RL HIGHEST /F &gt;&gt; C:\setupcomplete.log 2&gt;&amp;1
+echo [%date% %time%] End of SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
+exit /b 0
+		</File>
+{% endif %}
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
 Get-NetConnectionProfile -InterfaceAlias 'Ethernet*' | Set-NetConnectionProfile -NetworkCategory 'Private';
 

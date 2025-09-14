@@ -12,7 +12,7 @@ freerdp_log_level=OFF
 serialname=
 sound=remote
 printer_overrides=
-name={{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}
+name={{ lsw_windows_vm_name }}{% if lsw_install_looking_glass %}lg{% endif %}
 
 console=0
 colordepth=99
@@ -23,7 +23,7 @@ postcommand=
 left-handed=0
 multitransport=0
 group=
-server={% if _lsw_lg %}{{ lsw_windows_vmlg_private_ip }}{% else %}{{ lsw_windows_vm_private_ip }}{% endif %}
+server={% if lsw_install_looking_glass %}{{ lsw_windows_vmlg_private_ip }}{% else %}{{ lsw_windows_vm_private_ip }}{% endif %}
 
 ssh_tunnel_certfile=
 glyph-cache=0

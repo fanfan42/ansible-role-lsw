@@ -9,8 +9,8 @@ systemctl set-property --runtime -- system.slice AllowedCPUs={{ _lsw_host_cpus.s
 systemctl set-property --runtime -- init.scope AllowedCPUs={{ _lsw_host_cpus.stdout }}
 
 {% if _lsw_lg | default(false) %}
-# Create looking glass shm
-systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
+modprobe kvmfr static_size_mb=64
+chown {{ ansible_env['LOGNAME'] }}:kvm /dev/kvmfr0
 {% endif %}
 
 {% if lsw_config_pass_disk_controller %}

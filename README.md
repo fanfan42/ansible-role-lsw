@@ -6,7 +6,7 @@ LSW stands for Linux Sub Windows, the reverse application of Windows WSL. The go
 
 * Passthrough
 * Intel GVT-g
-* Intel SR-IOV (In progress)
+* Intel SR-IOV
 
 The VM built runs with QEMU+KVM and Libvirt is used to manage the VM.
 
@@ -23,6 +23,6 @@ For my tests, I used 2 laptops :
 * [Lenovo Legion Y540-15IRH](https://www.laptopspirit.fr/266282/lenovo-legion-y540-15irh-81sx003bfr-pc-portable-15-144hz-joueur-et-createurs-gtx-1660-ti.html), compatible with Passthrough and GVT-g. It has an Intel Core i7-9750H, a Nvidia Geforce GTX 1660Ti, 16GB of RAM, a NVMe drive and a SSD SATA drive.
 * [Asus ROG Strix G814 (2023)](https://laptopmedia.com/fr/series/asus-rog-strix-g18-g814-2023/), compatible with Passthrough and SR-IOV. It has an Intel Core i7-13650HX and Nvidia Geforce RTX 4080, 32 GB of RAM, 2 NVMe drives.
 
-I also used old step by step on my old Github [repository](https://github.com/fanfan42/VFIO-Passthrough-dual-running-systems-on-laptop) especially to help me with AMD CPU on Passthrough virtualization mode.
+Other recent Lenovo Thinkpad (L14 Gen3 and T16 gen3) were also used for SR-IOV virtualization. I also used old step by step on my old Github [repository](https://github.com/fanfan42/VFIO-Passthrough-dual-running-systems-on-laptop) especially to help me with AMD CPU on Passthrough virtualization mode.
 
 Depending on the virtualization mode you want, please go and follow instructions in **documentation** directory, **example:** Passthrough.md
