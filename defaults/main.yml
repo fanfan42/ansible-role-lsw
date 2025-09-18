@@ -154,3 +154,11 @@ lsw_looking_glass_memory: 64
 # If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 # Only Nobara won't have zen kernels, they use their own kernel for specific Gaming PC
 lsw_install_zen: true
+
+# Virtual Display Driver - vdd
+lsw_vdd_version: '25.7.23'
+# Sha of Windows 11 23H2
+# See https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json
+lsw_vdd_devcon_sha_windows: '6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8'
+# See https://github.com/Drawbackz/DevCon-Installer/releases
+lsw_vdd_devcon_version: '1.4-rc'

@@ -87,41 +87,8 @@
       become: true
       when: lsw_rm_pycdlib_dependencies
 
-- name: Install Looking Glass on EndeavourOS
-  when: "ansible_facts['lsb']['id'] == 'EndeavourOS' and lsw_install_looking_glass and 'looking-glass' not in _lsw_pacman_pkg.stdout"
-  block:
-    - name: Install requirements
-      ansible.builtin.package:
-        name: '{{ lsw_lg_dependencies }}'
-        state: present
-      become: true
-    - name: Clone AUR repository for looking-glass
-      ansible.builtin.git:
-        repo: https://aur.archlinux.org/looking-glass.git
-        dest: /tmp/looking-glass
-        version: master
-        force: true
-        update: true
-    - name: Build looking-glass from AUR
-      ansible.builtin.command: makepkg -s --noconfirm
-      args:
-        chdir: /tmp/looking-glass
-        creates: /tmp/looking-glass/*.pkg.tar.zst
-      environment:
-        MAKEPKG: /usr/bin/makepkg
-    - name: Install built looking-glass package with pacman
-      ansible.builtin.shell: pacman -U --noconfirm /tmp/looking-glass/*.pkg.tar.zst
-      changed_when: true
-      become: true
-    - name: Uninstall requirements
-      ansible.builtin.package:
-        name: '{{ lsw_lg_dependencies }}'
-        state: absent
-      become: true
-      when: lsw_rm_lg_dependencies
-
-- name: Install Looking Glass on Debian or Nobara
-  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux'] and lsw_install_looking_glass and not _lsw_lg_bin.stat.exists
+- name: Install Looking Glass
+  when: lsw_install_looking_glass and not _lsw_lg_bin.stat.exists
   block:
     - name: Install Looking Glass build dependencies
       ansible.builtin.package:
@@ -155,6 +122,12 @@
       community.general.make:
         chdir: '/tmp/looking-glass-{{ lsw_lg_version }}/client/build'
         target: install
+      become: true
+    - name: Install dkms kvmfr module
+      ansible.builtin.command:
+        cmd: dkms install "."
+        chdir: '/tmp/looking-glass-{{ lsw_lg_version }}/module'
+      changed_when: true
       become: true
     - name: Remove Looking Glass build dependencies
       ansible.builtin.package:
@@ -202,17 +175,19 @@
   when: lsw_windows_activate_rdp
   become: true
 
-- name: Install SR-IOV module and dependencies on Debian or EndeavourOS
+- name: Install SR-IOV module on Debian or EndeavourOS
   become: true
   when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS'] and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
   notify:
+    - Reload Boot Loader
+    - Reload initramfs
     - Reboot
     - Pause
   block:
     - name: Get SR-IOV package
       ansible.builtin.get_url:
         url: '{{ lsw_sriov_pkg_url }}'
-        dest: '/tmp/{{ (lsw_sriov_pkg_url | split("/"))[-1] }}'
+        dest: '/tmp/{{ lsw_sriov_i915_pkg }}'
         mode: "0644"
       become: false
     - name: Install SR-IOV package with pacman
@@ -223,6 +198,32 @@
       ansible.builtin.command: dpkg -i /tmp/{{ lsw_sriov_i915_pkg }}
       changed_when: true
       when: ansible_facts['lsb']['id'] == 'Debian'
+
+- name: Install SR-IOV module and dependencies on Nobara
+  when: ansible_facts['lsb']['id'] == 'NobaraLinux' and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
+  notify:
+    - Reload Boot Loader
+    - Reload initramfs
+    - Reboot
+    - Pause
+  block:
+    - name: Get SR-IOV sources
+      ansible.builtin.get_url:
+        url: '{{ lsw_sriov_pkg_url }}.tar.gz'
+        dest: '/tmp/i915-sriov-dkms.tar.gz'
+        mode: "0644"
+    - name: Unarchive SR-IOV sources
+      ansible.builtin.unarchive:
+        src: /tmp/i915-sriov-dkms.tar.gz
+        dest: /tmp
+    - name: Install SR-IOV package with dkms
+      ansible.builtin.shell:
+        chdir: /tmp
+        cmd: |
+          dkms add ./i915-sriov-dkms-{{ lsw_sriov_pkg_version }} && \
+          dkms install i915-sriov-dkms/{{ lsw_sriov_pkg_version }}
+      changed_when: true
+      become: true
 
 - name: Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers

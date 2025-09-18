@@ -55,8 +55,7 @@ sed -i '/^User={{ ansible_env['LOGNAME'] }}$/d' /etc/sddm.conf
 {% endif %}
 
 {% if _lsw_lg | default(false) %}
-# Delete looking glass shm
-rm /dev/shm/looking-glass
+modprobe -r kvmfr
 {% endif %}
 
 {% if lsw_virt_mode == 'gvtg' %}

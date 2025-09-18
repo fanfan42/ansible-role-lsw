@@ -4,9 +4,10 @@
 # The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
 # Please take your time to adjust the size for "lsw_windows_img_size" you can give to your image depending
 # on the size you have on your only disk.
-# Adjust the variables with documentation/VARIABLES.md
-# Note 1: RDP musts be activated because it's the only way to access the VM
+# Adjust the variables with documentation/VARIABLES.md.
+# Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
 # Note 2: Windows 10 doesn't work with this virtualization mode
+# Note 3: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 
 - name: A man needs a name
   hosts: localhost
@@ -20,5 +21,6 @@
     lsw_windows_img_size: 100G
     lsw_windows_activate_rdp: true
     lsw_windows_password: 'secret_password'
+    lsw_install_looking_glass: true
   roles:
     - ansible-role-lsw
