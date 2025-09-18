@@ -185,18 +185,10 @@
       ansible.builtin.fail:
         msg: "SR-IOV virtualization mode is not supported on this CPU !!!"
       when: not 'intel' in __lsw_iommu_param or (__lsw_intel_generation | int) < 11
-    - name: Fail when Looking Glass is enabled
+    - name: Fail when Looking Glass is disabled
       ansible.builtin.fail:
-        msg: "Virtualization mode sriov doesn't need Looking Glass !!!"
-      when: lsw_install_looking_glass
-    - name: Fail when 2nd mouse/keyboard passed on SR-IOV virtualization mode
-      ansible.builtin.fail:
-        msg: "Don't pass 2nd mouse or keyboard when in SR-IOV virtualization mode !!!"
-      when: lsw_config_usb_kbd != '' or lsw_config_usb_mouse != ''
-    - name: Fail when RDP is not set
-      ansible.builtin.fail:
-        msg: "Virtualization mode sriov needs RDP !!!"
-      when: not lsw_windows_activate_rdp
+        msg: "Virtualization mode sriov needs Looking Glass !!!"
+      when: not lsw_install_looking_glass
     - name: Copy modprobe options for i915 module
       ansible.builtin.copy:
         src: i915.sriov.conf

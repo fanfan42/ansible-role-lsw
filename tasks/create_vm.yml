@@ -33,7 +33,7 @@
     command: define
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_vm.xml.j2') }}"
   become: true
-  when: lsw_virt_mode in ['passthrough', 'sriov']
+  when: lsw_virt_mode == 'passthrough'
 
 - name: Define the VM with Looking Glass
   vars:
@@ -66,22 +66,9 @@
         owner: "{{ ansible_env['LOGNAME'] }}"
         group: "{{ ansible_env['LOGNAME'] }}"
     - name: Create remmina VM conf
-      vars:
-        _lsw_lg: false
       ansible.builtin.template:
         src: group_rdp_template.j2
         dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
         mode: "0600"
         owner: "{{ ansible_env['LOGNAME'] }}"
         group: "{{ ansible_env['LOGNAME'] }}"
-      when: lsw_virt_mode in ['passthrough', 'sriov']
-    - name: Create remmina VM conf for Looking Glass
-      vars:
-        _lsw_lg: true
-      ansible.builtin.template:
-        src: group_rdp_template.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}lg.remmina"
-        mode: "0600"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
-      when: lsw_virt_mode == 'gvtg' or (lsw_virt_mode == 'passthrough' and lsw_install_looking_glass)

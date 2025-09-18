@@ -50,7 +50,7 @@
           "/dev/null", "/dev/full", "/dev/zero",
           "/dev/random", "/dev/urandom",
           "/dev/ptmx", "/dev/kvm",
-          "/dev/rtc","/dev/hpet"
+          "/dev/rtc","/dev/hpet"{% if lsw_install_looking_glass %},"/dev/kvmfr0"{% endif %}
       ]
 
 - name: Check Windows ISO file exists
@@ -223,8 +223,7 @@
   register: _lsw_pkr_bin
   when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
 
-- name: Check if Looking Glass already installed on Debian or Nobara
+- name: Check if Looking Glass already installed
   ansible.builtin.stat:
     path: /usr/local/bin/looking-glass-client
   register: _lsw_lg_bin
-  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']

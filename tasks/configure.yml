@@ -46,7 +46,7 @@
     xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
   become: true
 
-- name: Enable and start default network for Debian and EndeavourOS
+- name: Enable and start default network (force)
   ansible.builtin.shell: virsh net-start default && virsh net-autostart default
   become: true
   changed_when: true
@@ -75,11 +75,11 @@
   notify: Restart libvirt
   become: true
 
-- name: Create scripts for Passthrough or SR-IOV VM
+- name: Create scripts for Passthrough
   become: true
   vars:
     _lsw_lg: false
-  when: lsw_virt_mode in ['passthrough', 'sriov']
+  when: lsw_virt_mode == 'passthrough'
   block:
     - name: Create libvirt hooks folders
       ansible.builtin.file:
@@ -194,13 +194,6 @@
         mode: "0755"
         owner: root
         group: root
-    - name: Create tmpfiles for Looking Glass
-      ansible.builtin.copy:
-        src: lg_tmpfile
-        dest: /etc/tmpfiles.d/10-looking-glass.conf
-        mode: "0644"
-        owner: root
-        group: libvirt
 
 - name: Copy QEMU hook manager
   ansible.builtin.copy:

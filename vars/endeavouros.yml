@@ -46,6 +46,9 @@ lsw_pycdlib_dependencies:
 
 lsw_rm_pycdlib_dependencies: false
 
+lsw_lg_version: B7
+lsw_lg_url: 'https://looking-glass.io/artifact/{{ lsw_lg_version }}/source'
+
 lsw_lg_dependencies:
   - cppdap
   - double-conversion
@@ -69,6 +72,28 @@ lsw_lg_dependencies:
   - xcb-util-wm
   - cmake
   - obs-studio
+  - linux-headers
+  - linux-lts-headers
+  - gcc
+  - libgl
+  - libegl
+  - fontconfig
+  - spice-protocol
+  - make
+  - nettle
+  - pkgconf
+  - binutils
+  - libxi
+  - libxinerama
+  - libxss
+  - libxcursor
+  - libxpresent
+  - libdecor
+  - libxkbcommon
+  - wayland-protocols
+  - ttf-dejavu
+  - libsamplerate
+  - dkms
 
 lsw_rm_lg_dependencies: false
 
@@ -82,5 +107,5 @@ lsw_sriov_rdp_packages:
   - freerdp
 
 lsw_sriov_pkg_version: '2025.07.22'
-lsw_sriov_i915_pkg: 'i915-sriov-dkms_{{ lsw_sriov_pkg_version }}-1-x86_64.pkg.tar.zst'
+lsw_sriov_i915_pkg: 'i915-sriov-dkms-{{ lsw_sriov_pkg_version }}-1-x86_64.pkg.tar.zst'
 lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/releases/download/{{ lsw_sriov_pkg_version }}/{{ lsw_sriov_i915_pkg }}'
