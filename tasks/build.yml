@@ -3,25 +3,25 @@
 - name: Copy Packer template
   ansible.builtin.template:
     src: packer.json.j2
-    dest: '{{ role_path }}/build/packer.json'
+    dest: "{{ role_path }}/files/build/packer.json"
     mode: preserve
 
 - name: Copy Windows Unattend template
   ansible.builtin.template:
-    src: 'autounattend_{{ lsw_windows_install_template }}.xml.j2'
-    dest: '{{ role_path }}/build/autounattend.xml'
+    src: "autounattend_{{ lsw_windows_install_template }}.xml.j2"
+    dest: "{{ role_path }}/files/build/autounattend.xml"
     mode: preserve
 
 - name: Generate ISO file for drivers and packages
   community.general.iso_create:
-    src_files: '{{ role_path }}/build/extra_packages'
-    dest_iso: '{{ role_path }}/build/extra_packages/packages.iso'
+    src_files: "{{ role_path }}/files/build/extra_packages"
+    dest_iso: "{{ role_path }}/files/build/extra_packages/packages.iso"
     interchange_level: 3
   when: not _lsw_pkgiso.stat.exists
 
 - name: Delete Windows destination directory if exists
   ansible.builtin.file:
-    path: '{{ role_path }}/build/windows_img_dir'
+    path: "{{ role_path }}/files/build/windows_img_dir"
     state: absent
   become: true
 
@@ -43,12 +43,12 @@
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
         cmd: packer plugins install github.com/hashicorp/qemu
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       changed_when: true
     - name: Build Windows image for passthrough
       ansible.builtin.command:
         cmd: packer build packer.json
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       environment:
         PACKER_LOG: "1"
       changed_when: true
@@ -65,12 +65,12 @@
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
         cmd: packer plugins install github.com/hashicorp/qemu
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       changed_when: true
     - name: Build Windows image for gvtg
       ansible.builtin.command:
         cmd: packer build packer.json
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       environment:
         PACKER_LOG: "1"
       changed_when: true
@@ -103,12 +103,12 @@
     - name: Init Packer plugin QEMU
       ansible.builtin.command:
         cmd: packer plugins install github.com/hashicorp/qemu
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       changed_when: true
     - name: Build Windows image for sriov
       ansible.builtin.command:
         cmd: packer build packer.json
-        chdir: '{{ role_path }}/build'
+        chdir: "{{ role_path }}/files/build"
       environment:
         PACKER_LOG: "1"
       changed_when: true
@@ -119,7 +119,8 @@
 - name: Copy img to disk
   ansible.builtin.command:
     cmd: |
-      qemu-img convert -f {{ lsw_windows_img_format }} -O raw {{ role_path }}/build/windows_img_dir/{{ lsw_windows_vm_name }} {{ lsw_windows_disk_device_path }}
+      qemu-img convert -f {{ lsw_windows_img_format }} \
+      -O raw {{ role_path }}/files/build/windows_img_dir/{{ lsw_windows_vm_name }} {{ lsw_windows_disk_device_path }}
   when: lsw_windows_disk_device_path != ''
   changed_when: true
   become: true
@@ -127,7 +128,7 @@
 
 - name: Remove vfio build configuration for Passthrough Virtualization mode
   ansible.builtin.file:
-    path: '{{ item }}'
+    path: "{{ item }}"
     state: absent
   loop:
     - /etc/dracut.conf.d/vfio.conf

@@ -10,7 +10,7 @@
 
 - name: Change right for VM and its EFI vars
   ansible.builtin.file:
-    path: "{{ role_path }}/build/windows_img_dir/{{ item }}"
+    path: "{{ role_path }}/files/build/windows_img_dir/{{ item }}"
     mode: "0600"
     owner: "{{ ansible_env['LOGNAME'] }}"
     group: kvm
@@ -21,7 +21,7 @@
 
 - name: Copy VM EFI vars
   ansible.builtin.copy:
-    src: "{{ role_path }}/build/windows_img_dir/efivars.fd"
+    src: "{{ role_path }}/files/build/windows_img_dir/efivars.fd"
     dest: "/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd"
     mode: preserve
   become: true

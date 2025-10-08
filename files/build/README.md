@@ -4,4 +4,4 @@ Follow the process to get the ISO file starting from something like "Download Wi
 
 Copy the file in this folder and rename it like in the **defaults/main.yml** var *lsw_windows_iso* .
 
-Next, follow the steps described in the README.md in **build/extra_packages** and **build/virtio** directories.
+Next, follow the steps described in the README.md in **files/build/extra_packages** and **files/build/virtio** directories.

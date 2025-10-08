@@ -1,8 +1,12 @@
 # GVT-g
 
+## Warning
+
+This virtualization mode is abandoned by Intel since 2020. I don't know how much time the Linux kernel will still support it.
+
 ## Known Bugs
 
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
+* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*lg.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
 * When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows (not Windows) dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
@@ -26,9 +30,9 @@ No need for **Secure Boot** on your Linux host.
 
 ### Recommendations
 
-* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad.
+* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
 * At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
-* Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal perforamce and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
+* Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal performance and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
 ## How to use the role
 
@@ -66,9 +70,9 @@ $ git clone https://github.com/fanfan42/ansible-role-lsw.git
 $ cd ..
 ```
 
-Follow the **README** instructions in **roles/ansible-role-lsw/build**, **roles/ansible-role-lsw/build/extra_packages** and **roles/ansible-role-lsw/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
+Follow the **README** instructions in **roles/ansible-role-lsw/files/build**, **roles/ansible-role-lsw/files/build/extra_packages** and **roles/ansible-role-lsw/files/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
 
-Copy the playbook you want as a base from **roles/ansible-role-lsw/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/playbook_examples/playbook-gvtg-minperf.yml gvtg.yml`).
+Copy the playbook you want as a base from **roles/ansible-role-lsw/files/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/files/playbook_examples/playbook-gvtg-minperf.yml gvtg.yml`).
 
 Adapt the **vars** in the **gvtg.yml** playbook following variable documentation [here](VARIABLES.md).
 
@@ -92,7 +96,7 @@ During the **build** stage, a window appears with a text asking if you want to b
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the Looking Glass VM. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be reset.
+At last, the **create** stage creates the Looking Glass VM. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
 
 By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
 

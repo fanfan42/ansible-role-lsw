@@ -18,13 +18,13 @@
 * In case of a Laptop (maybe for a Tower but not tested), go in the BIOS and activate an option like "Switchable Graphics", set it to something like "Dynamic".
 * Like in other virtualization modes, **Intel VT-d** (or **AMD-Vi**) and **Hyperthreading** must be activated in the BIOS.
 * No need for **Secure Boot** on your Linux host.
-* If you want to also install Looking Glass, you will need to buy a "Dummy HDMI Plug" (or Dummy USB-C Plug) on your favorite retailer and plug it in the HDMI port before staring the VM. It costs less than 10 bucks. **Note:** it's also "possible" to install Virtual Display Driver like in SR-IOV mode but I didn't make it possible in the code because of performance reasons. Install it by yourself if you need it.
+* If you want to also install Looking Glass, you will need to buy a "Dummy HDMI Plug" (or Dummy USB-C Plug) on your favorite retailer and plug it in the HDMI port before staring the VM. It costs less than 10 bucks. **Note:** it's also "possible" to install [Virtual Display Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver) like in SR-IOV mode but I didn't make it possible in the code because of performance reasons. Install it by yourself if you need it and don't want to buy the Dummy HDMI Plug.
 
 ### Recommendations
 
-* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad.
+* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
 * At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. For information, Windows 11 needs, at least, 4GB of RAM and you cannot use more than 3/4 of your Linux host maximum RAM.
-* Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal perforamce and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
+* Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal performance and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
 ## How to use the role
 
@@ -62,11 +62,11 @@ $ git clone https://github.com/fanfan42/ansible-role-lsw.git
 $ cd ..
 ```
 
-Follow the **README** instructions in **roles/ansible-role-lsw/build**, **roles/ansible-role-lsw/build/extra_packages** and **roles/ansible-role-lsw/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
+Follow the **README** instructions in **roles/ansible-role-lsw/files/build**, **roles/ansible-role-lsw/files/build/extra_packages** and **roles/ansible-role-lsw/files/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
 
 **Special note for Nvidia GTX dGPU :** On GTX cards, you will have to modify the ROM of the GPU. Don't know why but Nvidia blocked their ROMs to prevent Passthrough of their cards. Please follow this guide [here](PATCH_NVIDIA_FW.md) to generate a patched ROM and copy it in **roles/ansible-role-lsw/files/patched-bios.rom**. 
 
-Copy the playbook you want as a base from **roles/ansible-role-lsw/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/playbook_examples/playbook-passthrough-minperf.yml passthrough.yml`).
+Copy the playbook you want as a base from **roles/ansible-role-lsw/files/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/files/playbook_examples/playbook-passthrough-minperf.yml passthrough.yml`).
 
 Adapt the **vars** in the **passthrough.yml** playbook following variable documentation [here](VARIABLES.md).
 
@@ -88,11 +88,11 @@ During the **build** stage, a window appears with a text asking if you want to b
 
 **Note 1:** If you need to exit focus during the window's build: `Ctrl + Alt + g`.
 
-**Note 2:** During the build, the second screen attached to the dGPU will display Windows installation after some time. It means the GPU driver has been succesfully installed during the image build.
+**Note 2:** During the build, the second screen attached to the dGPU will display Windows installation after some time. It means the GPU driver has been succesfully installed during the image building.
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the Passthrough VM. If Looking Glass has been set to be installed, you also have a second VM that ends with "lg". The 2 VM share the same disk and same EFI variables files. If you make changes on these VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be reset.
+At last, the **create** stage creates the Passthrough VM. If Looking Glass has been set to be installed, you also have a second VM that ends with "lg". The 2 VM share the same disk and same EFI variables files. If you make changes on these VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
 
 By opening virt-manager, you can see the VM created, start it. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. For seeing the Windows VM on 1st screen with Looking Glass, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. When the VM stops, DM also restarts.
 

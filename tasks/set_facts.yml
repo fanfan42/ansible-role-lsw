@@ -55,27 +55,27 @@
 
 - name: Check Windows ISO file exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/{{ lsw_windows_iso }}'
+    path: '{{ role_path }}/files/build/{{ lsw_windows_iso }}'
   register: _lsw_windows_iso
 
 - name: Check GPU driver exe file exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/extra_packages/gpudriver.exe'
+    path: '{{ role_path }}/files/build/extra_packages/gpudriver.exe'
   register: _lsw_gpu_driver
 
 - name: Check Virtio win ISO file exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/virtio/virtio-win.iso'
+    path: '{{ role_path }}/files/build/virtio/virtio-win.iso'
   register: _lsw_virtio_win
 
 - name: Check Ninite Installer file exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/extra_packages/NiniteInstaller.exe'
+    path: '{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe'
   register: _lsw_ninite_file
 
 - name: Check Looking Glass file exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/extra_packages/looking_glass_host_setup.exe'
+    path: '{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe'
   register: _lsw_lg_driver
 
 - name: Check 2nd mouse exists
@@ -188,7 +188,7 @@
 
 - name: Verify if packages.iso exists
   ansible.builtin.stat:
-    path: '{{ role_path }}/build/extra_packages/packages.iso'
+    path: '{{ role_path }}/files/build/extra_packages/packages.iso'
   register: _lsw_pkgiso
   when: "'build' in ansible_run_tags"
 

@@ -29,7 +29,7 @@
 - [lsw_windows_feature_to_remove](#lsw_windows_feature_to_remove)
 - [lsw_config_vm_memory](#lsw_config_vm_memory)
 - [lsw_config_usb_mouse](#lsw_config_usb_mouse)
-- [lsw_windows_usb_kbd](#lsw_windows_usb_kbd)
+- [lsw_config_usb_kbd](#lsw_config_usb_kbd)
 - [lsw_windows_install_app_from_ninite](#lsw_windows_install_app_from_ninite)
 - [lsw_install_looking_glass](#lsw_install_looking_glass)
 - [lsw_looking_glass_memory](#lsw_looking_glass_memory)
@@ -216,11 +216,13 @@ Default to empty. This role creates a VM with nearly bare performance including 
 | Passthrough  | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
 | Passthrough  | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
 
-**Note**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
+**Note 1**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
 
-### lsw_windows_usb_kbd
+**Note 2**: With these examples, when you want to exit Looking Glass, press `Right-Ctrl + q`. 
 
-See **lsw_windows_usb_mouse**.
+### lsw_config_usb_kbd
+
+See **lsw_config_usb_mouse**.
 
 ### lsw_windows_install_app_from_ninite
 
