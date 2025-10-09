@@ -54,6 +54,8 @@ lsw_windows_gpu_install_options:
 lsw_windows_activate_rdp: false
 lsw_windows_vm_private_ip: 192.168.122.42
 lsw_windows_vmlg_private_ip: 192.168.122.21
+
+# All the 3 next lists only apply for lsw_windows_install_template set to private
 lsw_windows_app_to_remove:
   - Microsoft.Microsoft3DViewer
   - Microsoft.BingSearch
@@ -65,6 +67,7 @@ lsw_windows_app_to_remove:
   - Microsoft.Windows.DevHome
   - MicrosoftCorporationII.MicrosoftFamily
   - Microsoft.WindowsFeedbackHub
+  - Microsoft.Edge.GameAssist
   - Microsoft.GetHelp
   - Microsoft.Getstarted
   - microsoft.windowscommunicationsapps
@@ -108,7 +111,6 @@ lsw_windows_capability_to_remove:
   - Browser.InternetExplorer
   - MathRecognizer
   - OneCoreUAP.OneSync
-  - OpenSSH.Client
   - Microsoft.Windows.MSPaint
   - App.Support.QuickAssist
   - Microsoft.Windows.SnippingTool
@@ -119,6 +121,7 @@ lsw_windows_capability_to_remove:
   - Hello.Face.Migration.18967
   - Hello.Face.20134
   - Media.WindowsMediaPlayer
+  - Microsoft.Windows.WordPad
 
 lsw_windows_feature_to_remove:
   - MediaPlayback
