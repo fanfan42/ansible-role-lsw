@@ -29,5 +29,7 @@
     lsw_windows_install_app_from_ninite: true
     lsw_config_usb_kbd: "/dev/input/by-id/usb-mykeyboard-event-kbd"
     lsw_config_usb_mouse: "/dev/input/by-id/usb-mymouse-event-mouse"
+    # lsw_config_gpu_nvidia_gtx: true
+    # lsw_config_is_laptop: true
   roles:
     - ansible-role-lsw
