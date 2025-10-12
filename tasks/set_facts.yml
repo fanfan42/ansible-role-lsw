@@ -73,6 +73,11 @@
     path: '{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe'
   register: _lsw_ninite_file
 
+- name: Check Dotnet Runtime file exists
+  ansible.builtin.stat:
+    path: '{{ role_path }}/files/build/extra_packages/dotnetruntime.exe'
+  register: _lsw_dotnetruntime_file
+
 - name: Check Looking Glass file exists
   ansible.builtin.stat:
     path: '{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe'

@@ -48,12 +48,18 @@ Click on continue, choose the Windows version you want according to your Windows
 * an "auto detect and install", don't download it.
 * Something like "AMD Software: Adrenalin Edition", the file is ~800MB, download this one.
 
+# Dotnet Runtime 9 
+
+Since Windows 11 25H2, the Intel driver for using GVT-g virtualization mode needs .NET Desktop Runtime 9.
+
+Go [here](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) and download the latest **.NET Desktop Runtime** x64 installer. Copy the file in this folder and rename it to **dotnetruntime.exe**.
+
 # Ninite
 
-If you want to install apps with Ninite, go to [https://ninite.com/](https://ninite.com), choose the apps wanted and download the file. Copy the file in this folder and rename it to **NiniteInstaller.exe** . I highly recommend these packages:
+If you want to install apps with Ninite, go to [https://ninite.com/](https://ninite.com), choose the apps wanted and download the file. Copy the file in this folder and rename it to **NiniteInstaller.exe**. I highly recommend these packages:
 
 * a web browser (Chrome, Opera, Firefox, Brave).
-* .NET Destktop Runtime x64 8.
+* .NET Destktop Runtime x64 8 (or 9 if Windows 11 when using GVT-g virtualization mode).
 * an anti virus (Malwarebytes, Avast, AVG, Spybot 2, Avira, SUPERAntiSpyware) if security is your top priority.
 * 7-Zip and WinRAR.
 * All the VC++ Redistributables.

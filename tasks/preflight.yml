@@ -65,6 +65,11 @@
     msg: "{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
   when: "lsw_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _lsw_ninite_file.stat.exists"
 
+- name: Fail when missing Dotnet Runtime file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/files/build/extra_packages/dotnetruntime.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
+  when: "'build' in ansible_run_tags and not _lsw_dotnetruntime_file.stat.exists and lsw_virt_mode == 'gvtg' and lsw_windows_version == 11"
+
 - name: Fail when missing Looking Glass driver file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe dont exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"

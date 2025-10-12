@@ -226,6 +226,9 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
+{% if lsw_virt_mode == 'gvtg' and lsw_windows_version == 11 %}
+		Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
+{% endif %}
         Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
 {% if lsw_install_looking_glass %}
         Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
