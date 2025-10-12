@@ -1,4 +1,4 @@
-Go to [Link for Windows 11](https://www.microsoft.com/en-us/software-download/windows11) or [Link for Windows 10](https://www.microsoft.com/en-us/software-download/windows10) .
+Go to [Link for Windows 11](https://www.microsoft.com/en-us/software-download/windows11) or [Link for Windows 10](https://www.microsoft.com/en-us/software-download/windows10).
 
 Follow the process to get the ISO file starting from something like "Download Windows Disk Image (ISO) for x64 devices".
 

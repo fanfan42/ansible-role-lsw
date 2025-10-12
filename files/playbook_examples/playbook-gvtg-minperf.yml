@@ -4,6 +4,9 @@
 # The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
 # Please take your time to adjust the size for "lsw_windows_img_size" you can give to your image depending
 # on the size you have on your only disk.
+# lsw_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
+# lsw_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
+# You have to find the path of your lsw_config_usb_kbd and lsw_config_usb_mouse to have low latency on these devices.
 # Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 # Adjust the variables with documentation/VARIABLES.md
 

@@ -131,18 +131,18 @@
 - name: Facts for GVT-g
   when: lsw_virt_mode == 'gvtg' and __lsw_iommu_param == 'intel_iommu=on'
   block:
-    - name: Get PCI address for Intel VGA controller
+    - name: Get PCI address for Intel VGA controller - GVT-g
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
           lspci | grep -i Intel | grep VGA | cut -d' ' -f1
-      register: _lsw_pci_cpu
+      register: _lsw_pci_gvtg_cpu
       changed_when: false
     - name: Get MDEV best type for GVT-g
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
-          ls -1 /sys/bus/pci/devices/0000:{{ _lsw_pci_cpu.stdout }}/mdev_supported_types/ | head -n1
+          ls -1 /sys/bus/pci/devices/0000:{{ _lsw_pci_gvtg_cpu.stdout }}/mdev_supported_types/ | head -n1
       register: _lsw_mdev_type
       changed_when: false
       ignore_errors: true
@@ -150,12 +150,12 @@
 - name: Facts for SR-IOV
   when: lsw_virt_mode == 'sriov' and __lsw_iommu_param == 'intel_iommu=on'
   block:
-    - name: Get PCI address for Intel VGA controller
+    - name: Get PCI address for Intel VGA controller - SRIOV
       ansible.builtin.shell:
         cmd: |
           set -o pipefail
           lspci | grep -i Intel | grep VGA | cut -d' ' -f1
-      register: _lsw_pci_cpu
+      register: _lsw_pci_sriov_cpu
       changed_when: false
     - name: Check if module already installed
       ansible.builtin.stat:
