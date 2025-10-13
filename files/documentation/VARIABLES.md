@@ -91,7 +91,7 @@ Other values will make the role fail.
 
 Follow the guide [here](../build/README.md) to get your windows ISO installation file. Default value: **windows10.iso**
 
-**WARNING:** All tests have been done with Official Microsoft Windows 10/11 Pro ISO files. I don't guarantee any results with other ISO. No tests will be performed with unofficial Microsoft Windows ISO files.
+**WARNING:** All tests have been done with Official Microsoft Windows 10/11 Pro (N) ISO files. I don't guarantee any results with other ISO. No tests will be performed with unofficial Microsoft Windows ISO files.
 
 ### lsw_windows_vm_name
 
