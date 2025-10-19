@@ -226,7 +226,7 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
-{% if lsw_virt_mode == 'gvtg' and lsw_windows_version == 11 %}
+{% if lsw_windows_gpu_driver == 'intel' %}
 		Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
 {% endif %}
         Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;

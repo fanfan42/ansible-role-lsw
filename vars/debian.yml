@@ -35,9 +35,6 @@ lsw_zen_packages:
   - linux-image-6.12.17-1-liquorix-amd64
   - linux-headers-6.12.17-1-liquorix-amd64
 
-lsw_lg_version: B7
-lsw_lg_url: 'https://looking-glass.io/artifact/{{ lsw_lg_version }}/source'
-
 lsw_lg_dependencies:
   - binutils-dev
   - cmake
@@ -63,8 +60,6 @@ lsw_lg_dependencies:
   - libpipewire-0.3-dev
   - libpulse-dev
   - libsamplerate0-dev
-
-lsw_rm_lg_dependencies: false
 
 lsw_packer_version: 1.13.1
 lsw_packer_url: 'https://releases.hashicorp.com/packer/{{ lsw_packer_version }}/packer_{{ lsw_packer_version }}'

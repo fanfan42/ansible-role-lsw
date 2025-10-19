@@ -148,11 +148,16 @@ lsw_config_pass_disk_controller: false
 
 # Other vars
 lsw_windows_install_app_from_ninite: false
+
 lsw_install_looking_glass: false
+lsw_lg_version: B7
+lsw_lg_url: 'https://looking-glass.io/artifact/{{ lsw_lg_version }}/source'
+lsw_rm_lg_dependencies: false
 # The best for 1920x1080
 # See other possible values here:
 # https://looking-glass.io/docs/B7/install_libvirt/#determining-memory
 lsw_looking_glass_memory: 64
+
 # Highly recommended to install to have better performance for a desktop Linux
 # If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 # Only Nobara won't have zen kernels, they use their own kernel for specific Gaming PC
@@ -163,5 +168,9 @@ lsw_vdd_version: '25.7.23'
 # Sha of Windows 11 23H2
 # See https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json
 lsw_vdd_devcon_sha_windows: '6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8'
+# Use devcon when lsw_windows_install_template is set to normal
 # See https://github.com/Drawbackz/DevCon-Installer/releases
 lsw_vdd_devcon_version: '1.4-rc'
+# Use nefcon when lsw_windows_install_template is set to private
+# See https://github.com/nefarius/nefcon/releases
+lsw_vdd_nefcon_version: 'v1.14.0'
