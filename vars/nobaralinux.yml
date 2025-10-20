@@ -22,9 +22,6 @@ lsw_packages:
   - python3-pycdlib
   - swtpm
 
-lsw_lg_version: B7
-lsw_lg_url: 'https://looking-glass.io/artifact/{{ lsw_lg_version }}/source'
-
 lsw_lg_dependencies:
   - cmake
   - gcc
@@ -51,8 +48,6 @@ lsw_lg_dependencies:
   - libsamplerate-devel
   - pulseaudio-libs-devel
 
-lsw_rm_lg_dependencies: false
-
 lsw_packer_version: 1.13.1
 lsw_packer_url: 'https://releases.hashicorp.com/packer/{{ lsw_packer_version }}/packer_{{ lsw_packer_version }}'
 
@@ -65,5 +60,5 @@ lsw_sriov_rdp_packages:
   - remmina
   - remmina-plugins-rdp
 
-lsw_sriov_pkg_version: '2025.07.22'
+lsw_sriov_pkg_version: '2025.10.10'
 lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/archive/refs/tags/{{ lsw_sriov_pkg_version }}'

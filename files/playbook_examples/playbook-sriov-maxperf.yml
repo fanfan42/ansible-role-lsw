@@ -6,12 +6,12 @@
 # It gives you a dual boot system with Windows and Linux at boot.
 # lsw_windows_install_template is set to private mode for performance but less security and no Microsoft EULA support.
 # lsw_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
-# You have to find the path of your lsw_config_usb_kbd and lsw_config_usb_mouse to have low latency on these devices.
-# Note: lsw_config_usb_kbd and lsw_config_usb_mouse wont work on Linux host
 # It gives maximum performance.
 # Ninite programs are also installed.
-# Adjust the variables with documentation/VARIABLES.md
-# Note: Windows 10 has still better performance than Windows 11 but support may end in October 2025
+# Adjust the variables with documentation/VARIABLES.md.
+# Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
+# Note 2: Looking Glass musts be installed because it's a requirement for this virtualization mode.
+# Note 3: Contrary to lsw_windows_install_template set to normal, it doesn't need to change the variable lsw_vdd_devcon_sha_windows.
 
 - name: A man needs a name
   hosts: localhost
@@ -19,15 +19,16 @@
   gather_facts: true
   become: false
   vars:
+    lsw_virt_mode: sriov
     lsw_windows_iso: windows10.iso
     lsw_windows_version: 10
     lsw_windows_img_size: 30G
     lsw_windows_disk_device_path: '/dev/nvme0n1'
     lsw_config_pass_disk_controller: true
     lsw_windows_install_template: private
-    lsw_windows_gpu_driver: nvidia
     lsw_windows_install_app_from_ninite: true
-    lsw_config_usb_kbd: "/dev/input/by-id/usb-mykeyboard-event-kbd"
-    lsw_config_usb_mouse: "/dev/input/by-id/usb-mymouse-event-mouse"
+    lsw_windows_activate_rdp: true
+    lsw_windows_password: 'secret_password'
+    lsw_install_looking_glass: true
   roles:
     - ansible-role-lsw

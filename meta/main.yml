@@ -3,24 +3,18 @@
 dependencies: []
 
 galaxy_info:
-  author: "FanfanKTA"
+  author: "fanfan42"
   role_name: "lsw"
-  namespace: "fanfankta"
+  namespace: "fanfan42"
   description: "Linux Sub Windows - Manage personal GVT-g, SR-IOV or Passthrough Windows based Virtual Machines"
   issue_tracker_url: https://github.com/fanfan42/ansible-role-lsw/issues
   license: "AGPL-3.0-or-later"
   min_ansible_version: "2.9"
   github_branch: master
   platforms:
-    - name: ArchLinux
-      versions:
-        - all
     - name: Debian
       versions:
         - trixie
-    - name: Fedora
-      versions:
-        - "42"
   galaxy_tags:
     - virtualization
     - libvirt

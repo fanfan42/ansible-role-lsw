@@ -29,9 +29,12 @@
 - [lsw_windows_feature_to_remove](#lsw_windows_feature_to_remove)
 - [lsw_config_vm_memory](#lsw_config_vm_memory)
 - [lsw_config_usb_mouse](#lsw_config_usb_mouse)
-- [lsw_windows_usb_kbd](#lsw_windows_usb_kbd)
+- [lsw_config_usb_kbd](#lsw_config_usb_kbd)
 - [lsw_windows_install_app_from_ninite](#lsw_windows_install_app_from_ninite)
 - [lsw_install_looking_glass](#lsw_install_looking_glass)
+- [lsw_lg_version](#lsw_lg_version)
+- [lsw_lg_url](#lsw_lg_url)
+- [lsw_rm_lg_dependencies](#lsw_rm_lg_dependencies)
 - [lsw_looking_glass_memory](#lsw_looking_glass_memory)
 - [lsw_install_zen](#lsw_install_zen)
 - [lsw_windows_install_rdp](#lsw_windows_install_rdp)
@@ -47,6 +50,7 @@
 * [lsw_vdd_version](#lsw_vdd_version)
 * [lsw_vdd_devcon_sha_windows](#lsw_vdd_devcon_sha_windows)
 * [lsw_vdd_devcon_version](#lsw_vdd_devcon_version)
+* [lsw_vdd_nefcon_version](#lsw_vdd_nefcon_version)
 
 [**OS specific variables**](#os-specific-variables)
 
@@ -60,10 +64,7 @@
 - [lsw_zen_gvtg_packages](#lsw_zen_gvtg_packages)
 - [lsw_pycdlib_dependencies](#lsw_pycdlib_dependencies)
 - [lsw_rm_pycdlib_dependencies](#lsw_rm_pycdlib_dependencies)
-- [lsw_lg_version](#lsw_lg_version)
-- [lsw_lg_url](#lsw_lg_url)
 - [lsw_lg_dependencies](#lsw_lg_dependencies)
-- [lsw_rm_lg_dependencies](#lsw_rm_lg_dependencies)
 - [lsw_packer_version](#lsw_packer_version)
 - [lsw_packer_url](#lsw_packer_url)
 - [lsw_windows_ovmf_code_path](#lsw_windows_ovmf_code_path)
@@ -91,7 +92,7 @@ Other values will make the role fail.
 
 Follow the guide [here](../build/README.md) to get your windows ISO installation file. Default value: **windows10.iso**
 
-**WARNING:** All tests have been done with Official Microsoft Windows 10/11 Pro ISO files. I don't guarantee any results with other ISO. No tests will be performed with unofficial Microsoft Windows ISO files.
+**WARNING:** All tests have been done with Official Microsoft Windows 10/11 Pro (N) ISO files. I don't guarantee any results with other ISO. No tests will be performed with unofficial Microsoft Windows ISO files.
 
 ### lsw_windows_vm_name
 
@@ -216,11 +217,13 @@ Default to empty. This role creates a VM with nearly bare performance including 
 | Passthrough  | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
 | Passthrough  | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
 
-**Note**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
+**Note 1**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
 
-### lsw_windows_usb_kbd
+**Note 2**: With these examples, when you want to exit Looking Glass, press `Right-Ctrl + q`. 
 
-See **lsw_windows_usb_mouse**.
+### lsw_config_usb_kbd
+
+See **lsw_config_usb_mouse**.
 
 ### lsw_windows_install_app_from_ninite
 
@@ -229,6 +232,18 @@ Default to **false**. Ninite is a web service which offers you to download one .
 ### lsw_install_looking_glass
 
 Default to **false**. Set it to **true** in case of **gvtg** value in the variable **lsw_virt_mode** or the role will fail. It's not mandatory to install it for **passthrough** mode but if you have a laptop (and a dummy HDMI plug), it can help you use the VM wherever you want only using your integrated screen so I really suggest you to also set this variable to true in all case. The guide to make you use it in your VM is [here](../build/extra_packages/README.md).
+
+### lsw_lg_version
+
+Common to all distros. See the guide for Looking Glass installation [here](../build/extra_packages/README.md) to select the same version for the Linux host and Windows VM.
+
+### lsw_lg_url
+
+Common to all distros. Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
+
+### lsw_rm_lg_dependencies
+
+Common to all distros. Default to false. If you want to remove Looking Glass dependencies, set the variable to **true**. Most of the time, these dependencies are needed by other packages on your Linux host. Removing them can lead to errors during the role's execution, that's why it's set to **false** by default.
 
 ### lsw_looking_glass_memory
 
@@ -276,7 +291,10 @@ A sha256 signature for the version of Windows 11 used (Remember, Windows 10 does
 
 ### lsw_vdd_devcon_version
 
-Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
+Devcon still works better when lsw_windows_install_template is set to normal. Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
+
+### lsw_vdd_nefcon_version
+Nevcon works better when lsw_windows_install_template is set to private. Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
 
 ## OS specific variables
 
@@ -322,21 +340,9 @@ Only for EndeavourOS. List of packages needed to build and install Python pycdli
 
 Only for EndeavourOS. Default to **false**. If you want to remove Python pycdlib dependencies, set the variable to **true**. Most of the time, these dependencies are needed by other packages on your Linux host. Removing them can lead to errors during the role's execution, that's why it's set to **false** by default.
 
-### lsw_lg_version
-
-Common to all distros. See the guide for Looking Glass installation [here](../build/extra_packages/README.md) to select the same version for the Linux host and Windows VM.
-
-### lsw_lg_url
-
-Common to all distros. Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
-
 ### lsw_lg_dependencies
 
 Common to all distros. List of packages needed to build and install Looking Glass on the Linux host.
-
-### lsw_rm_lg_dependencies
-
-Common to all distros. Default to false. If you want to remove Looking Glass dependencies, set the variable to **true**. Most of the time, these dependencies are needed by other packages on your Linux host. Removing them can lead to errors during the role's execution, that's why it's set to **false** by default.
 
 ### lsw_packer_version
 
@@ -369,6 +375,7 @@ Common to all distros. List of packages to be installed for using RDP with Remmi
 ### lsw_sriov_pkg_version
 
 Common to all distros. Needed when **sriov** set in **lsw_virt_mode**. Go on [strongtz](https://github.com/strongtz/i915-sriov-dkms/releases) repository and choose the release name you want.
+**Note:** the version released since october doesn't work at least on EndeavourOS and Debian 13, keep the default (july 2025) version when still using the Zen/Liquorix 6.12 LTS version.
 
 ### lsw_sriov_i915_pkg
 

@@ -1,8 +1,8 @@
 profile: production
 exclude_paths:
-  - build/
-  - playbook_examples/
-  - documentation/
+  - files/build/
+  - files/playbook_examples/
+  - files/documentation/
 var_naming_pattern: "^(_)?lsw_[a-z0-9_]*$"
 skip_list:
   - schema[meta]

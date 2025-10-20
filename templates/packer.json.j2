@@ -2,7 +2,7 @@
   "builders": [
     {
       "type": "qemu",
-      "iso_url": "file:///{{ role_path }}/build/{{ lsw_windows_iso }}",
+      "iso_url": "file:///{{ role_path }}/files/build/{{ lsw_windows_iso }}",
       "iso_checksum": "none",
       "output_directory": "windows_img_dir",
       "format": "{{ lsw_windows_img_format }}",
@@ -41,7 +41,7 @@
         ["-device", "driver=vfio-pci,id=hostdev0,sysfsdev=/sys/bus/mdev/devices/65e0c490-1f9f-47e2-87b4-3f3d14255b2f,display=off,bus=pci.2,addr=0x0"]
 {% endif %}
 {% if lsw_virt_mode == 'sriov' %}
-        ["-device", "driver=vfio-pci,id=hostdev0,host=0000:{{ (_lsw_pci_cpu.stdout | split('.'))[0] }}.1,bus=pci.2,addr=0x0"]
+        ["-device", "driver=vfio-pci,id=hostdev0,host=0000:{{ (_lsw_pci_sriov_cpu.stdout | split('.'))[0] }}.1,bus=pci.2,addr=0x0"]
 {% endif %}
       ],
       "efi_boot": "true",

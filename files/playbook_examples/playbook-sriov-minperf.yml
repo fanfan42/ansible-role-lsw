@@ -6,7 +6,6 @@
 # on the size you have on your only disk.
 # Adjust the variables with documentation/VARIABLES.md.
 # Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
-# Note 2: Windows 10 doesn't work with this virtualization mode
 # Note 3: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 
 - name: A man needs a name
@@ -16,11 +15,12 @@
   become: false
   vars:
     lsw_virt_mode: sriov
-    lsw_windows_iso: windows11.iso
-    lsw_windows_version: 11
+    lsw_windows_iso: windows10.iso
+    lsw_windows_version: 10
     lsw_windows_img_size: 100G
     lsw_windows_activate_rdp: true
     lsw_windows_password: 'secret_password'
     lsw_install_looking_glass: true
+    lsw_vdd_devcon_sha_windows: "C3816F79DEAC8E26C4A5C5791FE3F1F8104392D077D16941E7CCB6418FB3467A"
   roles:
     - ansible-role-lsw
