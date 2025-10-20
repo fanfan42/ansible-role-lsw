@@ -210,7 +210,7 @@
 {% if lsw_virt_mode == 'sriov' %}
     <hostdev mode="subsystem" type="pci" managed="yes">
       <source>
-        <address domain='0x0000' bus='0x{{ (_lsw_pci_cpu.stdout | split(':'))[0] }}' slot='0x{{ ((_lsw_pci_cpu.stdout | split('.'))[0] | split(':'))[1] }}' function='0x1'/>
+        <address domain='0x0000' bus='0x{{ (_lsw_pci_sriov_cpu.stdout | split(':'))[0] }}' slot='0x{{ ((_lsw_pci_sriov_cpu.stdout | split('.'))[0] | split(':'))[1] }}' function='0x1'/>
       </source>
       <address type="pci" domain="0x0000" bus="0x15" slot="0x00" function="0x0"/>
     </hostdev>

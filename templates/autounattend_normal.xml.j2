@@ -171,11 +171,15 @@
 			</OOBE>
 			<FirstLogonCommands>
 				<SynchronousCommand wcm:action="add">
-					<Order>1</Order>
+                                        <Order>1</Order>
+                                        <CommandLine>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f</CommandLine>
+                                </SynchronousCommand>
+				<SynchronousCommand wcm:action="add">
+					<Order>2</Order>
 					<CommandLine>powershell.exe -WindowStyle Normal -NoProfile -Command "Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\FirstLogon.ps1' -Raw | Invoke-Expression;"</CommandLine>
 				</SynchronousCommand>
 				<SynchronousCommand wcm:action="add">
-    				<Order>2</Order>
+    				<Order>3</Order>
     				<CommandLine>cmd.exe /c shutdown /s /t 0 /f</CommandLine>
  				</SynchronousCommand>
 			</FirstLogonCommands>
@@ -222,18 +226,6 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 } else {
     'Could not enable Ultimate Performance power scheme.' | Write-Warning;
 }
-
-foreach( $letter in 'DEF'.ToCharArray() ) {
-    $exe = "${letter}:\extra_packages\gpudriver.exe";
-    if( Test-Path -LiteralPath $exe ) {
-        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
-{% if lsw_install_looking_glass %}
-        Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
-{% endif %}
-        return;
-    }
-}
-'GPU driver {% if lsw_install_looking_glass %}or looking-glass {% endif %}not found' | Write-Warning;
 		</File>
 {% if lsw_virt_mode == 'sriov' %}
 		<File path="C:\Windows\Setup\Scripts\SystemDriverInstall.ps1">
@@ -301,16 +293,25 @@ exit /b 0
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
 Get-NetConnectionProfile -InterfaceAlias 'Ethernet*' | Set-NetConnectionProfile -NetworkCategory 'Private';
 
-{% if lsw_windows_install_app_from_ninite %}
 foreach( $letter in 'DEF'.ToCharArray() ) {
-    $exe = "${letter}:\extra_packages\NiniteInstaller.exe";
+    $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
-        Start-Process -FilePath $exe -Wait;
+{% if lsw_virt_mode == 'sriov' %}
+                Start-Sleep -Seconds 90;
+{% endif %}
+{% if lsw_windows_gpu_driver == 'intel' %}
+                Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
+{% endif %}
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
+{% if lsw_install_looking_glass %}
+        Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
+{% endif %}
+{% if lsw_windows_install_app_from_ninite %}
+                Start-Process -FilePath "${letter}:\extra_packages\NiniteInstaller.exe" -Wait;
+{% endif %}
         return;
     }
 }
-'NiniteInstaller not found' | Write-Warning;
-{% endif %}
 		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(

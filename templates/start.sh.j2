@@ -54,10 +54,10 @@ systemctl start display-manager.service
 {% endif %}
 
 {% if lsw_virt_mode == 'gvtg' %}
-echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > "/sys/bus/pci/devices/0000:{{ _lsw_pci_cpu.stdout }}/mdev_supported_types/{{ _lsw_mdev_type.stdout }}/create"
+echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > "/sys/bus/pci/devices/0000:{{ _lsw_pci_gvtg_cpu.stdout }}/mdev_supported_types/{{ _lsw_mdev_type.stdout }}/create"
 {% endif %}
 
 {% if lsw_virt_mode == 'sriov' %}
-echo 1 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_cpu.stdout }}/sriov_numvfs"
-virsh nodedev-detach pci_0000_{{ (_lsw_pci_cpu.stdout | replace(':', '_') | split('.'))[0] }}_1
+echo 1 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_sriov_cpu.stdout }}/sriov_numvfs"
+virsh nodedev-detach pci_0000_{{ (_lsw_pci_sriov_cpu.stdout | replace(':', '_') | split('.'))[0] }}_1
 {% endif %}
