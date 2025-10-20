@@ -19,8 +19,8 @@ This virtualization mode is abandoned by Intel since 2020. I don't know how much
 
 An Intel Core i*n* CPU from 6th to 10th generation with an iGPU inside. It's really important for you to verify. In laptops, all mobile Intel Core have an iGPU but on towers, Intel Core CPU may only contain the CPU. It needs a dGPU to have display on screen. My first tests on these CPU were from the 8th generation (2018) to the 10th generation (2020), I don't know how it works on older generations. i7 are recommended for better VRAM quantity but **Warcraft III reforged** and **Age of Empires II Definitive Edition** perfectly work on a i5. In the BIOS, search for a graphical option like :
 
-* Large Aperture Graphics (Toshiba)
-* Total Memory Graphics (Lenovo)
+* Large Aperture Graphics (Toshiba).
+* Total Memory Graphics (Lenovo).
 
 And set it to the maximum available (512MB or ~1GB of RAM). This option configures the memory allocated for the iGPU, the more allocated, the better the performance in the VM. **Note :** The role automatically creates the VM with the best option available when deploying.
 

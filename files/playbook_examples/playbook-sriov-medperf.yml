@@ -8,8 +8,7 @@
 # Ninite programs are also installed.
 # Adjust the variables with documentation/VARIABLES.md.
 # Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
-# Note 2: Windows 10 doesn't work with this virtualization mode
-# Note 3: Looking Glass musts be installed because it's a requirement for this virtualization mode.
+# Note 2: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 
 - name: A man needs a name
   hosts: localhost
@@ -21,7 +20,7 @@
     lsw_windows_iso: windows11.iso
     lsw_windows_version: 11
     lsw_windows_img_size: 30G
-    lsw_windows_disk_device_path: '/dev/nvme0n1'
+    lsw_windows_disk_device_path: '/dev/sda'
     lsw_windows_install_app_from_ninite: true
     lsw_windows_activate_rdp: true
     lsw_windows_password: 'secret_password'

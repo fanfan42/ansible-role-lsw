@@ -165,7 +165,8 @@ lsw_install_zen: true
 
 # Virtual Display Driver - vdd
 lsw_vdd_version: '25.7.23'
-# Sha of Windows 11 23H2
+# Sha of Windows 11 23H2: 6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8
+# Sha of Windows 10 and 11 22H2: C3816F79DEAC8E26C4A5C5791FE3F1F8104392D077D16941E7CCB6418FB3467A
 # See https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json
 lsw_vdd_devcon_sha_windows: '6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8'
 # Use devcon when lsw_windows_install_template is set to normal
