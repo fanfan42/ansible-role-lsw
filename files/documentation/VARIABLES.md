@@ -294,7 +294,7 @@ A sha256 signature for the version of Windows 11 used (Remember, Windows 10 does
 Devcon still works better when lsw_windows_install_template is set to normal. Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
 
 ### lsw_vdd_nefcon_version
-Nevcon works better when lsw_windows_install_template is set to private. Nevcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
+Nevcon works better when lsw_windows_install_template is set to private. Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
 
 ## OS specific variables
 
