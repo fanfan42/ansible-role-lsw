@@ -118,8 +118,10 @@
 
 - name: Copy img to disk
   ansible.builtin.command:
-    cmd: |
-      qemu-img convert -f {{ lsw_windows_img_format }} -O raw {{ role_path }}/files/build/windows_img_dir/{{ lsw_windows_vm_name }} {{ lsw_windows_disk_device_path }}
+    cmd: >
+      qemu-img convert -f {{ lsw_windows_img_format }}
+      -O raw {{ role_path }}/files/build/windows_img_dir/{{ lsw_windows_vm_name }}
+      {{ lsw_windows_disk_device_path }}
   when: lsw_windows_disk_device_path != ''
   changed_when: true
   become: true

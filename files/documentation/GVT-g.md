@@ -4,7 +4,7 @@
 
 This virtualization mode is abandoned by Intel since 2020. I don't know how much time the Linux kernel will still support it.
 
-## Known Bugs
+## Troubleshooting
 
 * Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*lg.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.

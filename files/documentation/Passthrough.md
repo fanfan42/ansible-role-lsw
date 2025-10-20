@@ -1,5 +1,5 @@
 # Passthrough
-## Known Bugs
+## Troubleshooting
 
 * Debian only: Boot the 2 VM, one after the other, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f`. If you also have the Looking Glass VM, run: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
@@ -73,7 +73,7 @@ Adapt the **vars** in the **passthrough.yml** playbook following variable docume
 **Note:** Variables in the role **vars** folder can't be overloaded in the playbook, you have to modify them directly in **roles/ansible-role-lsw/vars/*yourdistro*.yml**.
 
 ```shell
-$ ansible-playbook passthrough.yml -t install -v --ask-become-pass
+$ ansible-playbook passthrough.yml -t install,build,config,create -v --ask-become-pass
 ```
 
 You will be asked your sudo password, enter it. For the very first install or **build** tag usage, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot. After reboot, the screen attached to the dGPU doesn't display anything. It's normal.
