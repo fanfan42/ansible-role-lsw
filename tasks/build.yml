@@ -88,7 +88,7 @@
       ansible.builtin.systemd:
         name: libvirtd
         state: started
-      when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+      when: ansible_facts.lsb.id == 'EndeavourOS'
     - name: Create Virtual Function device
       ansible.builtin.shell: echo 1 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_sriov_cpu.stdout }}/sriov_numvfs"
       changed_when: true

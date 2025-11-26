@@ -8,7 +8,7 @@ lsw_apt_keys:
   - https://liquorix.net/liquorix-keyring.gpg
 
 lsw_apt_repos:
-  - 'deb [arch=amd64] https://liquorix.net/debian {{ ansible_distribution_release }} main'
+  - 'deb [arch=amd64] https://liquorix.net/debian {{ ansible_facts.distribution_release }} main'
 
 lsw_packages:
   - ovmf

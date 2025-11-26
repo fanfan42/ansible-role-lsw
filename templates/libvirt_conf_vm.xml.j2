@@ -18,8 +18,8 @@
       <feature enabled="no" name="enrolled-keys"/>
       <feature enabled="{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}</loader>
-    <nvram template="{{ lsw_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts['lsb']['id'] == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd</nvram>
+    <loader readonly="yes" type="pflash" format="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}</loader>
+    <nvram template="{{ lsw_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -179,7 +179,7 @@
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
     </sound>
-    <audio id="1" type="pipewire" runtimeDir="/run/user/{{ ansible_effective_user_id }}">
+    <audio id="1" type="pipewire" runtimeDir="/run/user/{{ ansible_facts.effective_user_id }}">
       <input mixingEngine="no"/>
       <output mixingEngine="no"/>
     </audio>
@@ -224,8 +224,22 @@
       <address type="pci" domain="0x0000" bus="0x1b" slot="0x00" function="0x0"/>
     </hostdev>
 {% endif %}
+{% if lsw_config_add_bluetooth %}
+  <hostdev mode="subsystem" type="usb" managed="yes">
+      <source startupPolicy="optional">
+        <vendor id="0x{{ (lsw_config_bluetooth_address | split(':'))[0] }}"/>
+        <product id="0x{{ (lsw_config_bluetooth_address | split(':'))[1] }}"/>
+      </source>
+      <address type="usb" bus="0" port="1"/>
+  </hostdev>
+{% endif %}
     <memballoon model="none"/>
   </devices>
+{% if lsw_config_add_bluetooth %}
+  <qemu:capabilities>
+    <qemu:del capability="usb-host.hostdevice"/>
+  </qemu:capabilities>
+{% endif %}
   <qemu:commandline>
 {% if lsw_config_is_laptop and lsw_virt_mode == 'passthrough' %}
     <qemu:arg value="-acpitable"/>

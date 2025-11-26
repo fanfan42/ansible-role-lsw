@@ -3,7 +3,7 @@
 - name: Fail when Distro is not supported
   ansible.builtin.fail:
     msg: "Distribution not supported !!!"
-  when: ansible_facts['lsb']['id'] not in ['EndeavourOS','Debian','NobaraLinux']
+  when: ansible_facts.lsb.id not in ['EndeavourOS','Debian','NobaraLinux']
 
 - name: Fail when Virtualization mode is wrong
   ansible.builtin.fail:
@@ -18,7 +18,7 @@
 - name: Fail when Ansible runs with root user
   ansible.builtin.fail:
     msg: "Don't run Ansible with root user, use your personal user !!!"
-  when: ansible_user_uid == 0
+  when: ansible_facts.user_uid == 0
 
 - name: Fail when driver not Nvidia, Intel or AMD
   ansible.builtin.fail:
@@ -28,7 +28,7 @@
 - name: Fail when VM memory exceeds 3/4 of total memory available on Host
   ansible.builtin.fail:
     msg: "VM memory (RAM) too high, host also needs memory !!!"
-  when: lsw_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
+  when: lsw_config_vm_memory > ( ansible_facts.memtotal_mb * 3 / 4 )
 
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:

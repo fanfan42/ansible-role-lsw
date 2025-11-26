@@ -8,7 +8,7 @@
 
 - name: Add current (non root) user to some groups
   ansible.builtin.user:
-    name: "{{ ansible_env['LOGNAME'] }}"
+    name: "{{ ansible_facts.env.LOGNAME }}"
     groups: libvirt,kvm,input,disk,autologin
     append: true
   become: true
@@ -28,7 +28,7 @@
     enabled: false
     state: stopped
   become: true
-  when: ansible_facts['lsb']['id'] == 'Debian'
+  when: ansible_facts.lsb.id == 'Debian'
 
 # Bug: delete default network before adding it
 - name: Disable and stop default network
@@ -55,7 +55,7 @@
   ansible.builtin.replace:
     path: /etc/libvirt/qemu.conf
     regexp: '^#?\s*user\s*=.*'
-    replace: user = "{{ ansible_env['LOGNAME'] }}"
+    replace: user = "{{ ansible_facts.env.LOGNAME }}"
   notify: Restart libvirt
   become: true
 

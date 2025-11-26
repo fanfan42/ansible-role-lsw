@@ -9,8 +9,8 @@ systemctl set-property --runtime -- system.slice AllowedCPUs={{ _lsw_host_cpus.s
 systemctl set-property --runtime -- init.scope AllowedCPUs={{ _lsw_host_cpus.stdout }}
 
 {% if _lsw_lg | default(false) %}
-modprobe kvmfr static_size_mb=64
-chown {{ ansible_env['LOGNAME'] }}:kvm /dev/kvmfr0
+modprobe kvmfr static_size_mb={{ lsw_looking_glass_memory }}
+chown {{ ansible_facts.env.LOGNAME }}:kvm /dev/kvmfr0
 {% endif %}
 
 {% if lsw_config_pass_disk_controller %}
@@ -23,13 +23,13 @@ systemctl stop display-manager.service
 
 # Uncomment autologin lines in Display manager
 {% if _lsw_dm.stdout == 'lightdm' %}
-sed -i 's/^#autologin-user=/autologin-user={{ ansible_env['LOGNAME'] }}/' /etc/lightdm/lightdm.conf
+sed -i 's/^#autologin-user=/autologin-user={{ ansible_facts.env.LOGNAME }}/' /etc/lightdm/lightdm.conf
 {% elif _lsw_dm.stdout == 'gdm' %}
 sed -i 's/^#  AutomaticLoginEnable = true/AutomaticLoginEnable = true/' /etc/gdm3/daemon.conf
-sed -i 's/^#  AutomaticLogin = user1/AutomaticLogin = {{ ansible_env['LOGNAME'] }}/' /etc/gdm3/daemon.conf
+sed -i 's/^#  AutomaticLogin = user1/AutomaticLogin = {{ ansible_facts.env.LOGNAME }}/' /etc/gdm3/daemon.conf
 {% elif _lsw_dm.stdout == 'sddm' %}
-if ! grep -q "^User={{ ansible_env['LOGNAME'] }}$" /etc/sddm.conf; then
-    sed -i '/^\[Autologin\]/a User={{ ansible_env['LOGNAME'] }}' /etc/sddm.conf
+if ! grep -q "^User={{ ansible_facts.env.LOGNAME }}$" /etc/sddm.conf; then
+    sed -i '/^\[Autologin\]/a User={{ ansible_facts.env.LOGNAME }}' /etc/sddm.conf
 fi
 {% endif %}
 
@@ -60,4 +60,9 @@ echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > "/sys/bus/pci/devices/0000:{{ _lsw_p
 {% if lsw_virt_mode == 'sriov' %}
 echo 1 > "/sys/devices/pci0000:00/0000:{{ _lsw_pci_sriov_cpu.stdout }}/sriov_numvfs"
 virsh nodedev-detach pci_0000_{{ (_lsw_pci_sriov_cpu.stdout | replace(':', '_') | split('.'))[0] }}_1
+{% endif %}
+
+{% if lsw_config_add_bluetooth %}
+systemctl mask bluetooth
+systemctl stop bluetooth
 {% endif %}

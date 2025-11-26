@@ -30,6 +30,8 @@
 - [lsw_config_vm_memory](#lsw_config_vm_memory)
 - [lsw_config_usb_mouse](#lsw_config_usb_mouse)
 - [lsw_config_usb_kbd](#lsw_config_usb_kbd)
+- [lsw_config_add_bluetooth](#lsw_config_add_bluetooth)
+- [lsw_config_bluetooth_address](#lsw_config_bluetooth_address)
 - [lsw_windows_install_app_from_ninite](#lsw_windows_install_app_from_ninite)
 - [lsw_install_looking_glass](#lsw_install_looking_glass)
 - [lsw_lg_version](#lsw_lg_version)
@@ -224,6 +226,12 @@ Default to empty. This role creates a VM with nearly bare performance including 
 ### lsw_config_usb_kbd
 
 See **lsw_config_usb_mouse**.
+
+### lsw_config_add_bluetooth
+Default to **false**. Define if you want to passthrough your Bluetooth controller. Not tested on every possible device but works on Intel AX210 and AX211.
+
+### lsw_config_bluetooth_address
+Default to **8087:0033**, an Intel AX211 USB controller. Set this var only if **lsw_config_add_bluetooth** is set to **true**. In order to find your Bluetooth USB address, use `lsusb | grep -i bluetooth`. You should find a line which looks like this: `Bus 001 Device 006: ID 8087:0033 Intel Corp. AX211 Bluetooth`.
 
 ### lsw_windows_install_app_from_ninite
 
