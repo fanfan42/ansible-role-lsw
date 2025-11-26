@@ -12,7 +12,7 @@
   ansible.builtin.file:
     path: "{{ role_path }}/files/build/windows_img_dir/{{ item }}"
     mode: "0600"
-    owner: "{{ ansible_env['LOGNAME'] }}"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
     group: kvm
   loop:
     - efivars.fd
@@ -49,26 +49,26 @@
   block:
     - name: Create remmina conf directories
       ansible.builtin.file:
-        path: "/home/{{ ansible_env['LOGNAME'] }}/{{ item }}"
+        path: "/home/{{ ansible_facts.env.LOGNAME }}/{{ item }}"
         state: directory
         recurse: true
         mode: "0755"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"
       loop:
         - .config/remmina/plugins
         - .local/share/remmina
     - name: Create remmina preferences
       ansible.builtin.template:
         src: remmina.pref.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.config/remmina/remmina.pref"
+        dest: "/home/{{ ansible_facts.env.LOGNAME }}/.config/remmina/remmina.pref"
         mode: "0600"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"
     - name: Create remmina VM conf
       ansible.builtin.template:
         src: group_rdp_template.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+        dest: "/home/ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
         mode: "0600"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"

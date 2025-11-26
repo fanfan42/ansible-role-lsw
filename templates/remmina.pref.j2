@@ -1,7 +1,7 @@
 [remmina_pref]
-datadir_path=/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina
+datadir_path=/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina
 remmina_file_name=%G_%P_%N
-screenshot_path=/home/{{ ansible_env['LOGNAME'] }}/Images
+screenshot_path=/home/{{ ansible_facts.env.LOGNAME }}/Images
 screenshot_name=remmina_%p_%h_%Y%m%d-%H%M%S
 deny_screenshot_clipboard=true
 save_view_mode=true

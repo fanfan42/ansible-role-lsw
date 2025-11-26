@@ -3,7 +3,7 @@
 - name: Set IOMMU kernel parameter based on CPU vendor
   ansible.builtin.set_fact:
     __lsw_iommu_param: >-
-      {{ 'intel_iommu=on' if 'GenuineIntel' in ansible_facts['processor'][1] else 'amd_iommu=on' }}
+      {{ 'intel_iommu=on' if 'GenuineIntel' in ansible_facts.processor[1] else 'amd_iommu=on' }}
 
 - name: Get Intel CPU generation
   ansible.builtin.command: bash {{ role_path }}/files/intelcpuversion.sh
@@ -108,7 +108,7 @@
   ansible.builtin.command: pacman -Q
   register: _lsw_pacman_pkg
   changed_when: false
-  when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+  when: ansible_facts.lsb.id == 'EndeavourOS'
 
 - name: Collect PCI information
   ansible.builtin.command: lspci -mm
@@ -226,7 +226,7 @@
   ansible.builtin.stat:
     path: /usr/local/bin/packer
   register: _lsw_pkr_bin
-  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux']
+  when: ansible_facts.lsb.id in ['Debian', 'NobaraLinux']
 
 - name: Check if Looking Glass already installed
   ansible.builtin.stat:
