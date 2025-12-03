@@ -18,11 +18,11 @@
         ["-cpu", "host,migratable=on,hv-time=on,hv-relaxed=on,hv-vapic=on,hv-spinlocks=0x1fff,hv-vpindex=on,hv-runtime=on,hv-synic=on,hv-stimer=on,hv-frequencies=on,hv-tlbflush=on,hv-ipi=on,hv-evmcs=on,hv-avic=on"],
         ["-drive", "if=none,file=windows_img_dir/{{ lsw_windows_vm_name }},id=drive0,cache=writeback,discard=ignore,format={{ lsw_windows_img_format }}"],
         ["-drive", "file={{ lsw_windows_iso }},media=cdrom"],
-        ["-drive", "file={% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %},if=pflash,unit=0,format={% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %},readonly=on"],
+        ["-drive", "file={% if lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %},if=pflash,unit=0,format={% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %},readonly=on"],
         ["-drive", "file=windows_img_dir/efivars.fd,if=pflash,unit=1,format=raw"],
         ["-drive", "file=virtio/virtio-win.iso,media=cdrom"],
         ["-drive", "file=extra_packages/packages.iso,media=cdrom"],
-{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}
+{% if lsw_windows_install_template == 'normal' %}
         ["-device", "driver=tpm-crb,tpmdev=tpm0,id=tpm0"],
 {% endif %}
         ["-device", "virtio-scsi-pci,id=scsi0"],
@@ -45,9 +45,9 @@
 {% endif %}
       ],
       "efi_boot": "true",
-      "efi_firmware_code": "{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}",
+      "efi_firmware_code": "{% if lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}",
       "efi_firmware_vars": "{{ lsw_windows_ovmf_vars_path }}",
-{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}
+{% if lsw_windows_install_template == 'normal' %}
       "vtpm": "true",
 {% endif %}
       "machine_type": "q35",
