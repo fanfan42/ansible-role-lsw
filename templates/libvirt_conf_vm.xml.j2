@@ -16,9 +16,9 @@
     <type arch="x86_64" machine="pc-q35-{{ _lsw_qemu_machine.stdout }}">hvm</type>
     <firmware>
       <feature enabled="no" name="enrolled-keys"/>
-      <feature enabled="{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
+      <feature enabled="{% lsw_windows_install_template == 'normal' %}yes{% else %}no{% endif %}" name="secure-boot"/>
     </firmware>
-    <loader readonly="yes" type="pflash" format="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}</loader>
+    <loader readonly="yes" type="pflash" format="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">{% if lsw_windows_install_template == 'normal' %}{{ lsw_windows_ovmf_code_secboot_path }}{% else %}{{ lsw_windows_ovmf_code_path }}{% endif %}</loader>
     <nvram template="{{ lsw_windows_ovmf_vars_path }}" templateFormat="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}" format="{% if ansible_facts.lsb.id == 'NobaraLinux' %}qcow2{% else %}raw{% endif %}">/var/lib/libvirt/qemu/nvram/{{ lsw_windows_vm_name }}_VARS.4m.fd</nvram>
   </os>
   <features>
@@ -161,7 +161,7 @@
       <address type="pci" domain="0x0000" bus="0x1d" slot="0x00" function="0x0"/>
     </input>
 {% endif %}
-{% if lsw_windows_version == 11 and lsw_windows_install_template == 'normal' %}
+{% if lsw_windows_install_template == 'normal' %}
     <tpm model="tpm-crb">
       <backend type="emulator" version="2.0"/>
     </tpm>
