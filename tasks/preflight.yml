@@ -25,10 +25,10 @@
     msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
   when: lsw_windows_gpu_driver not in ['intel','nvidia','amd']
 
-- name: Fail when VM memory exceeds 3/4 of total memory available on Host
+- name: Fail when VM memory exceeds 4/5 of total memory available on Host
   ansible.builtin.fail:
     msg: "VM memory (RAM) too high, host also needs memory !!!"
-  when: lsw_config_vm_memory > ( ansible_facts.memtotal_mb * 3 / 4 )
+  when: lsw_config_vm_memory > ( ansible_facts.memtotal_mb * 4 / 5 )
 
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:
