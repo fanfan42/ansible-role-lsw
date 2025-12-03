@@ -6,7 +6,7 @@
     state: present
   become: true
 
-- name: Add current (non root) user to some groups
+- name: Add current user to some groups
   ansible.builtin.user:
     name: "{{ ansible_facts.env.LOGNAME }}"
     groups: libvirt,kvm,input,disk,autologin
@@ -91,6 +91,7 @@
         group: root
       loop:
         - prepare,begin
+        - started,begin
         - release,end
     - name: Create Start script for VM
       ansible.builtin.template:
@@ -99,6 +100,30 @@
         mode: "0755"
         owner: root
         group: root
+    - name: Create dynamic conf for VM second mouse
+      ansible.builtin.template:
+        src: evdev-mouse.xml.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/evdev-mouse.xml"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_mouse != ''
+    - name: Create dynamic conf for VM second keyboard
+      ansible.builtin.template:
+        src: evdev-kbd.xml.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/evdev-kbd.xml"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_kbd != ''
+    - name: Create Started script for VM
+      ansible.builtin.template:
+        src: started.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/started/begin/started.sh"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_kbd != '' or lsw_config_usb_mouse != ''
     - name: Create Stop script for VM
       ansible.builtin.template:
         src: stop.sh.j2
@@ -151,6 +176,7 @@
         group: root
       loop:
         - prepare,begin
+        - started,begin
         - release,end
     - name: Create Start script for Looking Glass VM
       ansible.builtin.template:
@@ -159,6 +185,30 @@
         mode: "0755"
         owner: root
         group: root
+    - name: Create dynamic conf for Looking Glass VM second mouse
+      ansible.builtin.template:
+        src: evdev-mouse.xml.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/evdev-mouse.xml"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_mouse != ''
+    - name: Create dynamic conf for Looking Glass VM second keyboard
+      ansible.builtin.template:
+        src: evdev-kbd.xml.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}/evdev-kbd.xml"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_kbd != ''
+    - name: Create Started script for Looking Glass VM
+      ansible.builtin.template:
+        src: started.sh.j2
+        dest: "/etc/libvirt/hooks/qemu.d/{{ lsw_windows_vm_name }}lg/started/begin/started.sh"
+        mode: "0755"
+        owner: root
+        group: root
+      when: lsw_config_usb_kbd != '' or lsw_config_usb_mouse != ''
     - name: Create Stop script for Looking Glass VM
       ansible.builtin.template:
         src: stop.sh.j2

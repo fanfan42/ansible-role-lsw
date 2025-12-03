@@ -203,7 +203,7 @@ See **lsw_windows_app_to_remove**.
 
 ### lsw_config_vm_memory
 
-The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The role will fail if the memory allocated for the VM exceeds 3/4 of the total memory on your Linux host. This variable is different from **lsw_windows_build_mem** because this variable only affects memory allocated for the build stage.
+The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The role will fail if the memory allocated for the VM exceeds 4/5 of the total memory on your Linux host. This variable is different from **lsw_windows_build_mem** because this variable only affects memory allocated for the build stage.
 
 ### lsw_config_usb_mouse
 

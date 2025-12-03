@@ -1,0 +1,12 @@
+#!/bin/bash
+
+VM="{{ lsw_windows_vm_name }}"
+
+sleep 5
+
+{% if lsw_config_usb_mouse != '' %}
+systemd-run --on-active=3s "/usr/bin/virsh" "attach-device" "${VM}" "/etc/libvirt/hooks/qemu.d/${VM}/evdev-mouse.xml"
+{% endif %}
+{% if lsw_config_usb_kbd != '' %}
+systemd-run --on-active=3s "/usr/bin/virsh" "attach-device" "${VM}" "/etc/libvirt/hooks/qemu.d/${VM}/evdev-kbd.xml"
+{% endif %}

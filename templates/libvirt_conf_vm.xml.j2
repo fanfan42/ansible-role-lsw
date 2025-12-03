@@ -245,14 +245,6 @@
     <qemu:arg value="-acpitable"/>
     <qemu:arg value="file={{ role_path }}/files/acpitable.bin"/>
 {% endif %}
-{% if lsw_config_usb_mouse != '' %}
-    <qemu:arg value="-object"/>
-    <qemu:arg value="input-linux,id=mouse1,evdev={{ lsw_config_usb_mouse }}"/>
-{% endif %}
-{% if lsw_config_usb_kbd != '' %}
-    <qemu:arg value="-object"/>
-    <qemu:arg value="input-linux,id=kbd1,evdev={{ lsw_config_usb_kbd }},grab_all=on,repeat=on"/>
-{% endif %}
 {% if _lsw_lg %}
     <qemu:arg value="-device"/>
     <qemu:arg value="{'driver':'ivshmem-plain','id':'shmem0','memdev':'looking-glass'}"/>
