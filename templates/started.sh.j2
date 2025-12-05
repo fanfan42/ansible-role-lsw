@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VM="{{ lsw_windows_vm_name }}"
+VM="{{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}"
 
-sleep 5
+sleep 10
 
 {% if lsw_config_usb_mouse != '' %}
 systemd-run --on-active=3s "/usr/bin/virsh" "attach-device" "${VM}" "/etc/libvirt/hooks/qemu.d/${VM}/evdev-mouse.xml"

@@ -130,7 +130,7 @@ lsw_windows_feature_to_remove:
 
 # Configuration vars
 lsw_config_is_laptop: false
-# In MB, cannot exceed 3/4 of Host memory or this role will fail
+# In MB, cannot exceed 4/5 of Host memory or this role will fail
 lsw_config_vm_memory: 8192
 # You need 2 keyboards to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-kbd
@@ -166,7 +166,6 @@ lsw_rm_lg_dependencies: false
 lsw_looking_glass_memory: 64
 
 # Highly recommended to install to have better performance for a desktop Linux
-# If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 # Only Nobara won't have zen kernels, they use their own kernel for specific Gaming PC
 lsw_install_zen: true
 

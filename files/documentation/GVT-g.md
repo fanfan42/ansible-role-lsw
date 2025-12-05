@@ -30,8 +30,8 @@ No need for **Secure Boot** on your Linux host.
 
 ### Recommendations
 
-* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
-* At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
+* Have two mice and two keyboards connected via USB to the computer (or screen). Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
+* 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal performance and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
 ## How to use the role
@@ -96,10 +96,21 @@ During the **build** stage, a window appears with a text asking if you want to b
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the Looking Glass VM. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
+At last, the **create** stage creates the Looking Glass VM, maybe RDP if you set its variable and creates the launchers. If you make changes on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
 
-By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
+## Launch the VM
+
+#### Automatic way
+
+Click on **LSW LG** launcher in **System** category in your application menu. You will see Looking Glass appear after ~10 seconds. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
+
+#### Manual or debug way
+
+By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus`.
+
+## Optional - expand the Windows disk
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
+
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on `D:`.

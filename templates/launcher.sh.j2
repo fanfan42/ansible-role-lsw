@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 {RDP|Passthrough|LG}"
+    exit 1
+fi
+
+if [[ "$1" != "RDP" && "$1" != "Passthrough" && "$1" != "LG" ]]; then
+    echo "Error: parameter musts be RDP, Passthrough or LG."
+    exit 1
+fi
+
+VM_STATE=$(LC_ALL=C virsh --connect qemu:///system domstate "{{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}" 2>/dev/null)
+
+if [[ "$1" == "LG" ]]; then
+    if [[ "${VM_STATE}" == "shut off" ]]; then
+        systemd-run --user --on-active=15s "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
+
+    else
+        systemd-run --user --on-active=1s "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
+
+    fi
+fi
+
+if [[ "$1" == "RDP" ]]; then
+    if [[ "${VM_STATE}" == "shut off" ]]; then
+        systemd-run --user --on-active=10s "/usr/bin/remmina" "-c" "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+    else
+        systemd-run --user --on-active=1s "/usr/bin/remmina" "-c" "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+    fi
+fi
+
+if [[ "${VM_STATE}" == "shut off" ]]; then
+    virsh --connect qemu:///system start "{{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}"
+fi
+
+exit 0

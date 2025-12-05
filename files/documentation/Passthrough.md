@@ -1,4 +1,5 @@
 # Passthrough
+
 ## Troubleshooting
 
 * Debian only: Boot the 2 VM, one after the other, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f`. If you also have the Looking Glass VM, run: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
@@ -22,8 +23,8 @@
 
 ### Recommendations
 
-* Have two mice and two keyboards connected via USB to the computer. Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
-* At least, 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. For information, Windows 11 needs, at least, 4GB of RAM and you cannot use more than 3/4 of your Linux host maximum RAM.
+* Have two mice and two keyboards connected via USB to the computer (or screen). Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
+* 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. For information, Windows 11 needs, at least, 4GB of RAM and you cannot use more than 4/5 of your Linux host maximum RAM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal performance and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
 
 ## How to use the role
@@ -64,7 +65,7 @@ $ cd ..
 
 Follow the **README** instructions in **roles/ansible-role-lsw/files/build**, **roles/ansible-role-lsw/files/build/extra_packages** and **roles/ansible-role-lsw/files/build/virtio** directories. This step is only needed when using the **build** tag or the role will fail. So, do it only for the very first install or create again the VM from scratch.
 
-**Special note for Nvidia GTX dGPU :** On GTX cards, you will have to modify the ROM of the GPU. Don't know why but Nvidia blocked their ROMs to prevent Passthrough of their cards. Please follow this guide [here](PATCH_NVIDIA_FW.md) to generate a patched ROM and copy it in **roles/ansible-role-lsw/files/patched-bios.rom**. 
+**Special note for Nvidia GTX dGPU :** On GTX cards, you will have to modify the ROM of the GPU. Don't know why but Nvidia blocked their ROMs to prevent Passthrough of their cards. Please follow this guide [here](PATCH_NVIDIA_FW.md) to generate a patched ROM and copy it in **roles/ansible-role-lsw/files/patched-bios.rom**.
 
 Copy the playbook you want as a base from **roles/ansible-role-lsw/files/playbook_examples** directory (ex: `cp roles/ansible-role-lsw/files/playbook_examples/playbook-passthrough-minperf.yml passthrough.yml`).
 
@@ -92,10 +93,23 @@ During the **build** stage, a window appears with a text asking if you want to b
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the Passthrough VM. If Looking Glass has been set to be installed, you also have a second VM that ends with "lg". The 2 VM share the same disk and same EFI variables files. If you make changes on these VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
+At last, the **create** stage creates the Passthrough VM, maybe RDP if you set its variable and creates the launchers. If Looking Glass has been set to be installed, you also have a second VM that ends with "lg". The 2 VM share the same disk and same EFI variables files. If you make changes on these VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
 
-By opening virt-manager, you can see the VM created, start it. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. For seeing the Windows VM on 1st screen with Looking Glass, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`. When the VM stops, DM also restarts.
+## Launch the VM
+
+#### Automatic way
+
+Click on **LSW Passthrough** launcher in **System** category in your application menu. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. If you also have Looking Glass VM, click on **LSW LG** launcher in **System** category in your application menu. Like for Passthrough launcher, DM restarts. Looking Glass screen appears ~10 seconds after the restart. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
+
+In any case, when you shutdown the VM, DM restarts again.
+
+#### Manual way
+
+By opening virt-manager, you can see the VM created, start it. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. For seeing the Windows VM on 1st screen with Looking Glass, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus`. When the VM stops, DM also restarts.
+
+## Optional - expand the Windows disk
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
+
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on `D:`.
