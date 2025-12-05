@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=LSW {{ _lsw_type }}
+Comment=Linux Sub Windows with {{ _lsw_type }}
+Exec=bash -c "/usr/local/bin/lsw-launcher{% if _lsw_type == 'LG' %}lg{% endif %}-{{ ansible_facts.env.LOGNAME }}.sh {{ _lsw_type }}"
+Icon=/home/{{ ansible_facts.env.LOGNAME }}/.local/share/icons/hicolor/256x256/emblems/lsw{{ _lsw_type }}.png
+Terminal=false
+Categories=Application;Games;System;{% if _lsw_type == 'RDP' %}Network;{% endif %}
