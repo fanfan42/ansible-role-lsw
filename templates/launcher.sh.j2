@@ -17,7 +17,7 @@ if [[ "$1" == "LG" ]]; then
         systemd-run --user --on-active=15s "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
 
     else
-        systemd-run --user --on-active=1s "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
+        systemd-run --user "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
 
     fi
 fi
