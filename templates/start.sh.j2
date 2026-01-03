@@ -50,7 +50,6 @@ virsh nodedev-detach pci_0000_{{ lsw_passthrough_gpu_pci_base_addr | replace(':'
 modprobe vfio
 modprobe vfio_pci
 modprobe vfio_iommu_type1
-systemctl start display-manager.service
 {% endif %}
 
 {% if lsw_virt_mode == 'gvtg' %}

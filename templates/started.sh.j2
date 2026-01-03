@@ -2,6 +2,10 @@
 
 VM="{{ lsw_windows_vm_name }}{% if _lsw_lg %}lg{% endif %}"
 
+{% if lsw_virt_mode == 'passthrough' %}
+systemctl start display-manager
+{% endif %}
+
 sleep 10
 
 {% if lsw_config_usb_mouse != '' %}

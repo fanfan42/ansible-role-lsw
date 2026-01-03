@@ -26,7 +26,7 @@ if [[ "$1" == "RDP" ]]; then
     if [[ "${VM_STATE}" == "shut off" ]]; then
         systemd-run --user --on-active=10s "/usr/bin/remmina" "-c" "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
     else
-        systemd-run --user --on-active=1s "/usr/bin/remmina" "-c" "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+        systemd-run --user "/usr/bin/remmina" "-c" "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
     fi
 fi
 
