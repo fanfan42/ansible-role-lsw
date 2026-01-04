@@ -1294,6 +1294,11 @@ $scripts = @(
 	{
 		cmd.exe /c "rmdir C:\Windows.old";
 	};
+{% if lsw_windows_access_host_files %}
+	{
+		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
+	};
+{% endif %}
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-03.ps1' -Raw | Invoke-Expression;
 	};

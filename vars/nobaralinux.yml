@@ -60,5 +60,8 @@ lsw_sriov_rdp_packages:
   - remmina
   - remmina-plugins-rdp
 
+lsw_config_samba_packages:
+  - samba
+
 lsw_sriov_pkg_version: '2025.10.10'
 lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/archive/refs/tags/{{ lsw_sriov_pkg_version }}'

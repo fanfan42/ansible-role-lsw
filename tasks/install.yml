@@ -175,6 +175,13 @@
   when: lsw_windows_activate_rdp
   become: true
 
+- name: Install Samba server packages
+  ansible.builtin.package:
+    name: '{{ lsw_config_samba_packages }}'
+    state: present
+  when: lsw_windows_access_host_files
+  become: true
+
 - name: Install SR-IOV module on Debian or EndeavourOS
   become: true
   when: ansible_facts.lsb.id in ['Debian', 'EndeavourOS'] and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists

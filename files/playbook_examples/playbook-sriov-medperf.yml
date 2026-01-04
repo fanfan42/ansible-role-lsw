@@ -6,7 +6,7 @@
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance.
 # Ninite programs are also installed.
-# Adjust the variables with documentation/VARIABLES.md.
+# Adjust the variables with files/documentation/VARIABLES.md.
 # Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
 # Note 2: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 

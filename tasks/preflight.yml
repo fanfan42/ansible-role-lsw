@@ -97,7 +97,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=[\"'](.*)[\"']"
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __lsw_iommu_param }} iommu=pt{% if lsw_virt_mode == 'passthrough' %} pci=noaer{% endif %}"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __lsw_iommu_param }} iommu=pt{% if lsw_virt_mode == "passthrough" %} pci=noaer{% endif %}"'
     backrefs: true
   when: lsw_distro_boot_loader == 'grub' and _lsw_grub_check.stdout == 'absent'
   become: true
