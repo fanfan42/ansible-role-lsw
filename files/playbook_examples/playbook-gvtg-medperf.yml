@@ -7,7 +7,7 @@
 # It gives good performance.
 # Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 # Ninite programs are also installed.
-# Adjust the variables with documentation/VARIABLES.md
+# Adjust the variables with files/documentation/VARIABLES.md
 
 - name: A man needs a name
   hosts: localhost

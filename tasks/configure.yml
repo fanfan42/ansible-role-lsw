@@ -253,3 +253,31 @@
     owner: root
     group: root
   become: true
+
+- name: Configure Host file share for VM
+  become: true
+  when: lsw_windows_access_host_files
+  block:
+    - name: Copy samba configuration
+      ansible.builtin.template:
+        src: smb.conf.j2
+        dest: /etc/samba/smb.conf
+        mode: "0640"
+        owner: root
+        group: root
+    - name: Enable and activate samba standalone server
+      ansible.builtin.systemd:
+        name: smb
+        enabled: true
+        state: started
+    - name: Check if samba user exists
+      ansible.builtin.command: pdbedit -L {{ lsw_windows_user }}
+      register: _lsw_user_check
+      changed_when: false
+    - name: Add password if samba user does not exist
+      ansible.builtin.shell: |
+        printf "%s\n%s\n" "{{ lsw_windows_access_host_files_pass }}" "{{ lsw_windows_access_host_files_pass }}" \
+        | smbpasswd -a -s {{ lsw_windows_user }}
+      when: _lsw_user_check.rc != 0
+      changed_when: true
+      no_log: true

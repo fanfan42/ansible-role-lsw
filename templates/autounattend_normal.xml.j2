@@ -171,9 +171,9 @@
 			</OOBE>
 			<FirstLogonCommands>
 				<SynchronousCommand wcm:action="add">
-                                        <Order>1</Order>
-                                        <CommandLine>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f</CommandLine>
-                                </SynchronousCommand>
+                    <Order>1</Order>
+                    <CommandLine>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" /v SearchOrderConfig /t REG_DWORD /d 0 /f</CommandLine>
+                </SynchronousCommand>
 				<SynchronousCommand wcm:action="add">
 					<Order>2</Order>
 					<CommandLine>powershell.exe -WindowStyle Normal -NoProfile -Command "Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\FirstLogon.ps1' -Raw | Invoke-Expression;"</CommandLine>
@@ -446,6 +446,11 @@ $scripts = @(
 	{
 		cmd.exe /c "rmdir C:\Windows.old";
 	};
+{% if lsw_windows_access_host_files %}
+	{
+		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
+	};
+{% endif %}
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-03.ps1' -Raw | Invoke-Expression;
 	};

@@ -27,6 +27,9 @@
 - [lsw_windows_app_to_remove](#lsw_windows_app_to_remove)
 - [lsw_windows_capability_to_remove](#lsw_windows_capability_to_remove)
 - [lsw_windows_feature_to_remove](#lsw_windows_feature_to_remove)
+- [lsw_windows_access_host_files](#lsw_windows_access_host_files)
+- [lsw_windows_access_host_files_dir](#lsw_windows_access_host_files_dir)
+- [lsw_windows_access_host_files_pass](#lsw_windows_access_host_files_pass)
 - [lsw_config_vm_memory](#lsw_config_vm_memory)
 - [lsw_config_usb_mouse](#lsw_config_usb_mouse)
 - [lsw_config_usb_kbd](#lsw_config_usb_kbd)
@@ -201,6 +204,18 @@ See **lsw_windows_app_to_remove**.
 
 See **lsw_windows_app_to_remove**.
 
+### lsw_windows_access_host_files
+
+Default to **false**. If you set it to **true**, the VM created can access to some files on your computer (host). Useful when you want to share files between the host and the VM.
+
+### lsw_windows_access_host_files_dir
+
+Default to **/home/<your_user>** (**your_user** is set in [lsw_windows_user](#lsw_windows_user)). Define the path of the host you want to share to the VM.
+
+### lsw_windows_access_host_files_pass
+
+Default to an unsecured password. Give a password to access your files from the VM to your host.
+
 ### lsw_config_vm_memory
 
 The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The role will fail if the memory allocated for the VM exceeds 4/5 of the total memory on your Linux host. This variable is different from **lsw_windows_build_mem** because this variable only affects memory allocated for the build stage.
@@ -211,7 +226,7 @@ Default to empty. This role creates a VM with nearly bare performance including 
 
 
 |              | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
-| :------------- | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :----------- | --------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GVT-g/SR-IOV | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
 | GVT-g/SR-IOV | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
 | GVT-g/SR-IOV | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
@@ -221,16 +236,18 @@ Default to empty. This role creates a VM with nearly bare performance including 
 
 **Note 1**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
 
-**Note 2**: With these examples, when you want to exit Looking Glass, press `Right-Ctrl + q`. 
+**Note 2**: With these examples, when you want to exit Looking Glass, press `Right-Ctrl + q`.
 
 ### lsw_config_usb_kbd
 
 See **lsw_config_usb_mouse**.
 
 ### lsw_config_add_bluetooth
+
 Default to **false**. Define if you want to passthrough your Bluetooth controller. Not tested on every possible device but works on Intel AX210 and AX211.
 
 ### lsw_config_bluetooth_address
+
 Default to **8087:0033**, an Intel AX211 USB controller. Set this var only if **lsw_config_add_bluetooth** is set to **true**. In order to find your Bluetooth USB address, use `lsusb | grep -i bluetooth`. You should find a line which looks like this: `Bus 001 Device 006: ID 8087:0033 Intel Corp. AX211 Bluetooth`.
 
 ### lsw_windows_install_app_from_ninite
@@ -302,6 +319,7 @@ A sha256 signature for the version of Windows 11 used (Remember, Windows 10 does
 Devcon still works better when lsw_windows_install_template is set to normal. Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
 
 ### lsw_vdd_nefcon_version
+
 Nevcon works better when lsw_windows_install_template is set to private. Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
 
 ## OS specific variables
@@ -379,6 +397,10 @@ Common to all distros. Full path of the UEFI shell file. It shouldn't be changed
 ### lsw_sriov_rdp_packages
 
 Common to all distros. List of packages to be installed for using RDP with Remmina and FreeRDP.
+
+### lsw_config_samba_packages
+
+Common to all distros. List of packages to be installed for installing a file share between VM and host.
 
 ### lsw_sriov_pkg_version
 

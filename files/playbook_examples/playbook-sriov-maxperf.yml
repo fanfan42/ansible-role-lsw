@@ -8,7 +8,8 @@
 # lsw_windows_install_template set to private should only be used for private or educational purpose. Use at your own risks.
 # It gives maximum performance.
 # Ninite programs are also installed.
-# Adjust the variables with documentation/VARIABLES.md.
+# An access to the Host files is added in this playbook
+# Adjust the variables with files/documentation/VARIABLES.md.
 # Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
 # Note 2: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 # Note 3: Contrary to lsw_windows_install_template set to normal, it doesn't need to change the variable lsw_vdd_devcon_sha_windows.
@@ -30,5 +31,7 @@
     lsw_windows_activate_rdp: true
     lsw_windows_password: 'secret_password'
     lsw_install_looking_glass: true
+    lsw_windows_access_host_files: true
+    lsw_windows_access_host_files_pass: S3cretP4ssw0rd
   roles:
     - ansible-role-lsw

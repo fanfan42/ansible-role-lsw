@@ -7,7 +7,7 @@
 # It gives good performance. It also installs Looking Glass on both Linux host and Windows VM.
 # Ninite programs are also installed.
 # Note: Looking Glass musts be installed because no 2nd keyboard and mouse are set.
-# Adjust the variables with documentation/VARIABLES.md
+# Adjust the variables with files/documentation/VARIABLES.md
 
 - name: A man needs a name
   hosts: localhost

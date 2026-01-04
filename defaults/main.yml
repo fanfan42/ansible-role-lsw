@@ -128,6 +128,11 @@ lsw_windows_feature_to_remove:
   - Recall
   - Microsoft-SnippingTool
 
+# Configure an access to host files from the VM
+lsw_windows_access_host_files: false
+lsw_windows_access_host_files_dir: '/home/{{ ansible_facts.env.LOGNAME }}'
+lsw_windows_access_host_files_pass: S3cretP4ssw0rd
+
 # Configuration vars
 lsw_config_is_laptop: false
 # In MB, cannot exceed 4/5 of Host memory or this role will fail
