@@ -873,25 +873,37 @@ Start-Process -FilePath "diskpart.exe" -ArgumentList "/s `"$scriptPath`"" -Wait 
 Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
 {% endif %}
 
-foreach( $letter in 'DEF'.ToCharArray() ) {
-    $exe = "${letter}:\extra_packages\gpudriver.exe";
-    if( Test-Path -LiteralPath $exe ) {
-{% if lsw_virt_mode == 'sriov' %}
-		Start-Sleep -Seconds 90;
-{% endif %}
 {% if lsw_windows_gpu_driver == 'intel' %}
-		Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
+winget install --accept-package-agreements --accept-source-agreements --silent --id Microsoft.DotNet.AspNetCore.10
 {% endif %}
-        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
+
 {% if lsw_install_looking_glass %}
-        Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
+winget install --accept-package-agreements --accept-source-agreements --silent --id gnif.LookingGlass --version {{ lsw_lg_version }}
 {% endif %}
-{% if lsw_windows_install_app_from_ninite %}
-		Start-Process -FilePath "${letter}:\extra_packages\NiniteInstaller.exe" -Wait;
-{% endif %}
-        return;
+
+{% if lsw_windows_app_to_add | default([]) | length > 0 %}
+$packages = @(
+{% for app in lsw_windows_app_to_add %}
+    @{
+        id = "{{ app[0] }}";
+        version = {% if app[1] is not none %}"{{ app[1] }}"{% else %}$null{% endif %}
+    }{% if not loop.last %},{% endif %}
+{% endfor %}
+)
+
+foreach ($pkg in $packages) {
+    try {
+        $cmd = "winget install --accept-package-agreements --accept-source-agreements --silent --id $($pkg.id)"
+        if ($pkg.version) {
+            $cmd += " --version $($pkg.version)"
+        }
+        Invoke-Expression $cmd
+    }
+    catch {
+        Write-Warning "Package $($pkg.id) failed to install, continuing..."
     }
 }
+{% endif %}
 		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(

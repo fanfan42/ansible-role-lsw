@@ -60,21 +60,6 @@
     msg: "{{ role_path }}/files/build/virtio/virtio-win.iso doesn't exist, read {{ role_path }}/files/build/virtio/README.md !!!"
   when: "'build' in ansible_run_tags and not _lsw_virtio_win.stat.exists"
 
-- name: Fail when missing Ninite Installer file for building
-  ansible.builtin.fail:
-    msg: "{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
-  when: "lsw_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _lsw_ninite_file.stat.exists"
-
-- name: Fail when missing Dotnet Runtime file for building
-  ansible.builtin.fail:
-    msg: "{{ role_path }}/files/build/extra_packages/dotnetruntime.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
-  when: "'build' in ansible_run_tags and not _lsw_dotnetruntime_file.stat.exists and lsw_windows_gpu_driver == 'intel'"
-
-- name: Fail when missing Looking Glass driver file for building
-  ansible.builtin.fail:
-    msg: "{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe dont exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
-  when: "lsw_install_looking_glass and 'build' in ansible_run_tags and not _lsw_lg_driver.stat.exists"
-
 - name: Fail when password for the VM not set with RDP activated
   ansible.builtin.fail:
     msg: "Windows VM password cannot be empty !!!"
