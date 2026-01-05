@@ -27,6 +27,7 @@
 - [lsw_windows_app_to_remove](#lsw_windows_app_to_remove)
 - [lsw_windows_capability_to_remove](#lsw_windows_capability_to_remove)
 - [lsw_windows_feature_to_remove](#lsw_windows_feature_to_remove)
+- [lsw_windows_app_to_add](#lsw_windows_app_to_add)
 - [lsw_windows_access_host_files](#lsw_windows_access_host_files)
 - [lsw_windows_access_host_files_dir](#lsw_windows_access_host_files_dir)
 - [lsw_windows_access_host_files_pass](#lsw_windows_access_host_files_pass)
@@ -35,7 +36,6 @@
 - [lsw_config_usb_kbd](#lsw_config_usb_kbd)
 - [lsw_config_add_bluetooth](#lsw_config_add_bluetooth)
 - [lsw_config_bluetooth_address](#lsw_config_bluetooth_address)
-- [lsw_windows_install_app_from_ninite](#lsw_windows_install_app_from_ninite)
 - [lsw_install_looking_glass](#lsw_install_looking_glass)
 - [lsw_lg_version](#lsw_lg_version)
 - [lsw_lg_url](#lsw_lg_url)
@@ -204,13 +204,17 @@ See **lsw_windows_app_to_remove**.
 
 See **lsw_windows_app_to_remove**.
 
+### lsw_windows_app_to_add
+
+Default to a list of useful packages to install to not rely on Windows Update. Everything is installed via winget during build time. A complete list of supported packages is available [here](https://github.com/svrooij/winget-pkgs-index/blob/main/index.v2.csv).
+
 ### lsw_windows_access_host_files
 
 Default to **false**. If you set it to **true**, the VM created can access to some files on your computer (host). Useful when you want to share files between the host and the VM.
 
 ### lsw_windows_access_host_files_dir
 
-Default to **/home/<your_user>** (**your_user** is set in [lsw_windows_user](#lsw_windows_user)). Define the path of the host you want to share to the VM.
+Default to **/home/<your_user>** (**your_user** is set in [lsw_windows_user](#lsw_windows_user) variable). Define the path of the host you want to share to the VM.
 
 ### lsw_windows_access_host_files_pass
 
@@ -234,9 +238,9 @@ Default to empty. This role creates a VM with nearly bare performance including 
 | Passthrough  | yes       | no           | OK with Looking Glass installed. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`. "OK" without Looking Glass, the VM has a display on second screen but only the 2nd mouse can control it. |
 | Passthrough  | yes       | yes          | OK with Looking Glass installed. SPICE is not in use. 2nd mouse and keyboard are linked via EVDEV to the VM. Linux host cannot use 2nd mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 -s`. OK without Looking Glass, the VM has a display on second screen with 2nd mouse and keyboard working. You have maximum performance.                   |
 
-**Note 1**: If you plan to only RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
+**Note 1**: If you plan to only use RDP, don't pass a 2nd mouse/keyboard. It won't be used and the device(s) become unavailable when VM is running.
 
-**Note 2**: With these examples, when you want to exit Looking Glass, press `Right-Ctrl + q`.
+**Note 2**: With these examples, when you want to exit Looking Glass to return on the host without shutting down the VM, press `Right-Ctrl + q`.
 
 ### lsw_config_usb_kbd
 
@@ -250,25 +254,21 @@ Default to **false**. Define if you want to passthrough your Bluetooth controlle
 
 Default to **8087:0033**, an Intel AX211 USB controller. Set this var only if **lsw_config_add_bluetooth** is set to **true**. In order to find your Bluetooth USB address, use `lsusb | grep -i bluetooth`. You should find a line which looks like this: `Bus 001 Device 006: ID 8087:0033 Intel Corp. AX211 Bluetooth`.
 
-### lsw_windows_install_app_from_ninite
-
-Default to **false**. Ninite is a web service which offers you to download one .exe file with many applications to install directly after a fresh install of Windows. Really helpful when you want your favorite Web browser (and more) directly at first login. If that interests you, set this var to **true** and follow the guide [here](../build/extra_packages/README.md).
-
 ### lsw_install_looking_glass
 
-Default to **false**. Set it to **true** in case of **gvtg** value in the variable **lsw_virt_mode** or the role will fail. It's not mandatory to install it for **passthrough** mode but if you have a laptop (and a dummy HDMI plug), it can help you use the VM wherever you want only using your integrated screen so I really suggest you to also set this variable to true in all case. The guide to make you use it in your VM is [here](../build/extra_packages/README.md).
+Default to **false**. Set it to **true** in case of **gvtg** value in the variable **lsw_virt_mode** or the role will fail. It's not mandatory to install it for **passthrough** mode but if you have a laptop (and a dummy HDMI plug), it can help you use the VM wherever you want only using your integrated screen so I really suggest you to also set this variable to true in all case.
 
 ### lsw_lg_version
 
-Common to all distros. See the guide for Looking Glass installation [here](../build/extra_packages/README.md) to select the same version for the Linux host and Windows VM.
+The Looking Glass version you want to install on host and VM. Put the latest stable version found in your distro package manager, ex: B7.
 
 ### lsw_lg_url
 
-Common to all distros. Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
+Normally, don't change this setting except if it's not working. This variable is linked to **lsw_lg_version**.
 
 ### lsw_rm_lg_dependencies
 
-Common to all distros. Default to false. If you want to remove Looking Glass dependencies, set the variable to **true**. Most of the time, these dependencies are needed by other packages on your Linux host. Removing them can lead to errors during the role's execution, that's why it's set to **false** by default.
+Default to **false**. If you want to remove Looking Glass dependencies, set the variable to **true**. Most of the time, these dependencies are needed by other packages on your Linux host. Removing them can lead to errors during the role's execution, that's why it's set to **false** by default.
 
 ### lsw_looking_glass_memory
 

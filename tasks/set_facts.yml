@@ -68,21 +68,6 @@
     path: '{{ role_path }}/files/build/virtio/virtio-win.iso'
   register: _lsw_virtio_win
 
-- name: Check Ninite Installer file exists
-  ansible.builtin.stat:
-    path: '{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe'
-  register: _lsw_ninite_file
-
-- name: Check Dotnet Runtime file exists
-  ansible.builtin.stat:
-    path: '{{ role_path }}/files/build/extra_packages/dotnetruntime.exe'
-  register: _lsw_dotnetruntime_file
-
-- name: Check Looking Glass file exists
-  ansible.builtin.stat:
-    path: '{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe'
-  register: _lsw_lg_driver
-
 - name: Check 2nd mouse exists
   ansible.builtin.stat:
     path: '{{ lsw_config_usb_mouse }}'

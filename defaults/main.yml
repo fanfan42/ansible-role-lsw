@@ -128,6 +128,26 @@ lsw_windows_feature_to_remove:
   - Recall
   - Microsoft-SnippingTool
 
+# Full list of 10K+ packages available here: https://github.com/svrooij/winget-pkgs-index/blob/main/index.v2.csv
+lsw_windows_app_to_add:
+  - ['Microsoft.VCRedist.2005.x64', null]
+  - ['Microsoft.VCRedist.2008.x64', null]
+  - ['Microsoft.VCRedist.2010.x64', null]
+  - ['Microsoft.VCRedist.2012.x64', null]
+  - ['Microsoft.VCRedist.2013.x64', null]
+  - ['Microsoft.VCRedist.2015+.x64', null]
+  - ['7zip.7zip', null]
+  - ['RARLab.Winrar', null]
+  - ['Notepad++.Notepad++', null]
+  - ['Mozilla.Firefox.fr', null]
+  # - ['Brave.Brave', null]
+  # - ['Google.Chrome', null]
+  # - ['Opera.Opera', null]
+  # - ['Valve.Steam', null]
+  # - ['ClamWin.ClamWin', null]
+  # Note: Dotnet runtime is automatically installed when Intel driver musts be installed
+  # - ['Microsoft.DotNet.AspNetCore.10', null]
+
 # Configure an access to host files from the VM
 lsw_windows_access_host_files: false
 lsw_windows_access_host_files_dir: '/home/{{ ansible_facts.env.LOGNAME }}'
@@ -159,7 +179,6 @@ lsw_config_add_bluetooth: false
 lsw_config_bluetooth_address: 8087:0033
 
 # Other vars
-lsw_windows_install_app_from_ninite: false
 
 lsw_install_looking_glass: false
 lsw_lg_version: B7
