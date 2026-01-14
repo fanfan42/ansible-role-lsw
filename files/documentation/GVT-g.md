@@ -6,7 +6,6 @@ This virtualization mode is abandoned by Intel since 2020. I don't know how much
 
 ## Troubleshooting
 
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*lg.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
 * When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows (not Windows) dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
@@ -106,11 +105,19 @@ Click on **LSW LG** launcher in **System** category in your application menu. Yo
 
 #### Manual or debug way
 
-By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus`.
+Note: This way is only for debugging problems. In case you passthrough keyboard and mouse, these devices will be unavailable by launching the VM this way.
 
-## Optional - expand the Windows disk
+By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F input:rawMouse input:GrabKeyboardOnFocus`.
+
+## Optional actions
+
+### Expand your Windows storage drive
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
 
 * expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on `D:`.
+
+### Install Bluetooth driver
+
+In case you wanted to passthrough your Bluetooth card, you will have to manually install the driver after starting your VM. Example for Intel Bluetooth card: Go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver in the VM.

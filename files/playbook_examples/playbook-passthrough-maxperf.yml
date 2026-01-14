@@ -9,7 +9,6 @@
 # You have to find the path of your lsw_config_usb_kbd and lsw_config_usb_mouse to have low latency on these devices.
 # Note: lsw_config_usb_kbd and lsw_config_usb_mouse wont work on Linux host
 # It gives maximum performance.
-# Ninite programs are also installed.
 # An access to the Host files is added in this playbook
 # Adjust the variables with files/documentation/VARIABLES.md
 # Note: Windows 10 has still better performance than Windows 11 but support may end in October 2025
@@ -27,10 +26,8 @@
     lsw_config_pass_disk_controller: true
     lsw_windows_install_template: private
     lsw_windows_gpu_driver: nvidia
-    lsw_windows_install_app_from_ninite: true
     lsw_config_usb_kbd: "/dev/input/by-id/usb-mykeyboard-event-kbd"
     lsw_config_usb_mouse: "/dev/input/by-id/usb-mymouse-event-mouse"
-    # lsw_config_gpu_nvidia_gtx: true
     # lsw_config_is_laptop: true
     lsw_windows_access_host_files: true
     lsw_windows_access_host_files_pass: S3cretP4ssw0rd

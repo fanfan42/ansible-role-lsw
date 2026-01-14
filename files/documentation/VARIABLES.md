@@ -48,7 +48,6 @@
 
 - [lsw_passthrough_gpu_pci_base_addr](#lsw_passthrough_gpu_pci_base_addr)
 - [lsw_config_is_laptop](#lsw_config_is_laptop)
-- [lsw_config_gpu_nvidia_gtx](#lsw_config_gpu_nvidia_gtx)
 
 [**SR-IOV variables**](#sr-iov-variables)
 
@@ -299,10 +298,6 @@ In this example, the VGA compatible controller needed for a pasthrough virtualiz
 ### lsw_config_is_laptop
 
 If your computer is a laptop, dGPU cards like Nvidia need to "see" a battery in the system. A file called "acpitable.bin" is [here](../files/acpitable.bin). This file is needed for Nvidia works on laptop VM. The case of AMD and Intel dGPU are not tested if this is a need. Default value is **false**. Set it to **true** if you use this Ansible role on a laptop with Nvidia dGPU.
-
-### lsw_config_gpu_nvidia_gtx
-
-Default to **false**. This variable is only for Nvidia GTX dGPU. No need to set it to **true** when you have a Nvidia RTX dGPU. Follow the guide [here](PATCH_NVIDIA_FW.md) to create a patched firmware.
 
 ## SR-IOV variables
 

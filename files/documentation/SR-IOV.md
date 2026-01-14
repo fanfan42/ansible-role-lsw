@@ -9,8 +9,6 @@ This mode is highly experimental and has many problems:
 * Despite more recent CPU with iGPU, performance is a little bit less than GVT-g. using screen refresh with more than 30 FPS can be complicated.
 
 ## Troubleshooting
-
-* Debian only: Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/*vm-name*.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
 * Debian only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
 * Intel 12th and 13th: ~~For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.~~ Found 2nd driver (september 2025) that can do the trick, see SR-IOV [VARIABLES](./VARIABLES.md) and GPU driver [README](../build/extra_packages/README.md).
@@ -38,7 +36,6 @@ No need for **Secure Boot** on your Linux host.
 * Have two mice and two keyboards connected via USB to the computer (or screen). Mousepad and internal keyboard on a laptop count in the total. So you can pass 1 mouse and 1 keyboard to the Windows VM with low latency. For a laptop, never pass the internal keyboard or mousepad. **Note:** If only using RDP, these devices are completely unavailable. If you intend to only access to your VM via RDP, you don't need a 2nd mouse/keyboard connected.
 * 16GB of RAM. RAM allocated by default to the Windows VM is 8192MB. Windows 11 needs, at least, 4GB of RAM. So at least, you should need 8GB of RAM (4 for the VM) to correctly run the VM.
 * Two disks, one dedicated to the Linux host, one for the Windows VM. It gives Bare Metal performance and allows **medperf** or **maxperf** playbook to be used as a base. It also allows to have a dual boot with Windows and Linux at boot. Perfect for firmware upgrades for example.
-* ~~Build and use the VM on a X11 DE (EndeavourOS with XFCE for example). Use Wayland at your own risks.~~
 * Set the var **lsw_windows_activate_rdp** to true and also set a password for the VM (**lsw_windows_password**) or deal with bugs at your own risks. Remmina will help you after VM build to update the driver if necessary and manually install Virtual Display Driver. If everything works, Looking Glass will be available and you have won.
 
 ## How to use the role
@@ -115,11 +112,19 @@ Click on **LSW LG** launcher in **System** category in your application menu. Yo
 
 ### Manual way
 
-By opening virt-manager, you can see the VM created, start it. To access the VM, open Remmina and double click on your VM name to open a RDP connection to the VM. If everything worked well, including Troubleshooting, stop the VM and start it againg, Looking Glass should now work (Best performance). Examples for using Looking Glass are in [variables](./VARIABLES.md) documentation, search for the variable **lsw_config_usb_mouse**. Example: `looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
+Note: This way is only for debugging problems. In case you passthrough keyboard and mouse, these devices will be unavailable by launching the VM this way.
 
-## Optional - expand the Windows disk
+By opening virt-manager, you can see the VM created, start it. To access the VM, open Remmina and double click on your VM name to open a RDP connection to the VM. If everything worked well, including Troubleshooting, stop the VM and start it againg, Looking Glass should now work (Best performance). Examples for using Looking Glass are in [variables](./VARIABLES.md) documentation, search for the variable **lsw_config_usb_mouse**. Example: `looking-glass-client -m 97 -F input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
+
+## Optional actions
+
+### Expand your Windows storage drive
 
 If your Windows is on a dedicated disk, start the VM, search "Disk management" and either:
 
-* expand the C: drive (Not possible with Windows 11 in **normal** mode).
+* expand the C: drive (Not possible with Windows 11 in **normal** mode)
 * or create another partition called "DATA" for example which will be mounted on `D:`.
+
+### Install Bluetooth driver
+
+In case you wanted to passthrough your Bluetooth card, you will have to manually install the driver after starting your VM. Example for Intel Bluetooth card: Go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver in the VM.

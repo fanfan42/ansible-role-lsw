@@ -192,9 +192,6 @@
       <source>
         <address domain="0x0000" bus="0x{{ (lsw_passthrough_gpu_pci_base_addr | split(':'))[0] }}" slot="0x{{ (lsw_passthrough_gpu_pci_base_addr | split(':'))[1] }}" function="0x{{ idx }}"/>
       </source>
-{% if lsw_config_gpu_nvidia_gtx and idx == 0 %}
-      <rom file="{{ role_path }}/files/patched-bios.rom"/>
-{% endif %}
       <address type="pci" domain="0x0000" bus="0x1{{ idx + 5 }}" slot="0x00" function="0x0"/>
     </hostdev>
 {% endfor %}

@@ -22,7 +22,6 @@
     lsw_windows_version: 10
     lsw_windows_img_size: 100G
     lsw_windows_install_template: private
-    lsw_windows_install_app_from_ninite: true
     lsw_install_looking_glass: true
     lsw_config_add_bluetooth: true
     # lsw_config_bluetooth_address: 8087:0033

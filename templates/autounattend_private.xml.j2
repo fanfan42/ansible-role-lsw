@@ -873,15 +873,22 @@ Start-Process -FilePath "diskpart.exe" -ArgumentList "/s `"$scriptPath`"" -Wait 
 Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
 {% endif %}
 
+foreach( $letter in 'DEF'.ToCharArray() ) {
+    $exe = "${letter}:\extra_packages\gpudriver.exe";
+    if( Test-Path -LiteralPath $exe ) {
 {% if lsw_windows_gpu_driver == 'intel' %}
-winget install --accept-package-agreements --accept-source-agreements --silent --id Microsoft.DotNet.AspNetCore.10
+		Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
 {% endif %}
-
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
 {% if lsw_install_looking_glass %}
-winget install --accept-package-agreements --accept-source-agreements --silent --id gnif.LookingGlass --version {{ lsw_lg_version }}
+        Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
 {% endif %}
-
+        return;
+    }
+}
+		</File>
 {% if lsw_windows_app_to_add | default([]) | length > 0 %}
+		<File path="C:\Windows\Setup\Scripts\Install-Winget.ps1">
 $packages = @(
 {% for app in lsw_windows_app_to_add %}
     @{
@@ -893,18 +900,19 @@ $packages = @(
 
 foreach ($pkg in $packages) {
     try {
-        $cmd = "winget install --accept-package-agreements --accept-source-agreements --silent --id $($pkg.id)"
+        $exe = "winget install -e --source winget --accept-package-agreements --accept-source-agreements --silent --id $($pkg.id)"
         if ($pkg.version) {
-            $cmd += " --version $($pkg.version)"
+            $exe += " --version $($pkg.version)"
         }
-        Invoke-Expression $cmd
+        Invoke-Expression $exe
+		Write-Warning "Package $($pkg.id) installed successfully"
     }
     catch {
-        Write-Warning "Package $($pkg.id) failed to install, continuing..."
+        Write-Warning"Package $($pkg.id) failed to install: $_"
     }
 }
-{% endif %}
 		</File>
+{% endif %}
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(
 	{
@@ -1149,6 +1157,11 @@ $scripts = @(
 			$_.SessionId -eq ( Get-Process -Id $PID ).SessionId;
 		} | Stop-Process -Force;
 	};
+{% if lsw_windows_access_host_files %}
+	{
+		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
+	};
+{% endif %}
 );
 
 &amp; {
@@ -1271,6 +1284,11 @@ $scripts = @(
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\RunOnce" /v "UnattendedSetup" /t REG_SZ /d "powershell.exe -WindowStyle Hidden -NoProfile -Command \""Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\UserOnce.ps1' -Raw | Invoke-Expression;\""" /f;
 	};
+{% if lsw_windows_app_to_add | default([]) | length > 0 %}
+	{
+    	reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\RunOnce" /v "InstallWingetApps" /t REG_SZ /d "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Setup\Scripts\Install-Winget.ps1" /f;
+	};
+{% endif %}
 );
 
 &amp; {
@@ -1306,11 +1324,6 @@ $scripts = @(
 	{
 		cmd.exe /c "rmdir C:\Windows.old";
 	};
-{% if lsw_windows_access_host_files %}
-	{
-		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
-	};
-{% endif %}
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-03.ps1' -Raw | Invoke-Expression;
 	};

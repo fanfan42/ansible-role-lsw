@@ -6,7 +6,6 @@
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance.
 # Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
-# Ninite programs are also installed.
 # Adjust the variables with files/documentation/VARIABLES.md
 
 - name: A man needs a name
@@ -21,7 +20,6 @@
     lsw_windows_img_size: 30G
     lsw_windows_disk_device_path: '/dev/sda'
     lsw_config_pass_disk_controller: false
-    lsw_windows_install_app_from_ninite: true
     lsw_install_looking_glass: true
   roles:
     - ansible-role-lsw

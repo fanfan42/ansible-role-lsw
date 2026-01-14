@@ -14,10 +14,10 @@ VM_STATE=$(LC_ALL=C virsh --connect qemu:///system domstate "{{ lsw_windows_vm_n
 
 if [[ "$1" == "LG" ]]; then
     if [[ "${VM_STATE}" == "shut off" ]]; then
-        systemd-run --user --on-active=15s "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
+        systemd-run --user --on-active=20s "/usr/local/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
 
     else
-        systemd-run --user "/usr/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
+        systemd-run --user "/usr/local/bin/looking-glass-client" "-m" "97" "-F" {% if lsw_config_usb_mouse == '' %}"input:rawMouse"{% endif %} {% if lsw_config_usb_kbd == '' %}"input:grabKeyboardOnFocus"{% endif %} {% if lsw_config_usb_kbd != '' and lsw_config_usb_mouse != '' %}"-s"{% endif %}
 
     fi
 fi

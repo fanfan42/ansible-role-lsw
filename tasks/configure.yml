@@ -274,6 +274,7 @@
       ansible.builtin.command: pdbedit -L {{ lsw_windows_user }}
       register: _lsw_user_check
       changed_when: false
+      failed_when: false
     - name: Add password if samba user does not exist
       ansible.builtin.shell: |
         printf "%s\n%s\n" "{{ lsw_windows_access_host_files_pass }}" "{{ lsw_windows_access_host_files_pass }}" \

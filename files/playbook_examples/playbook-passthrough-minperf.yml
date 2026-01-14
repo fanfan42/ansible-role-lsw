@@ -20,7 +20,6 @@
     lsw_windows_gpu_driver: nvidia
     lsw_passthrough_gpu_pci_base_addr: 01:00
     lsw_install_looking_glass: true
-    # lsw_config_gpu_nvidia_gtx: true
     # lsw_config_is_laptop: true
     lsw_config_add_bluetooth: true
     # lsw_config_bluetooth_address: 8087:0033
