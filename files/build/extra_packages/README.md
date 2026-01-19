@@ -47,12 +47,6 @@ Click on continue, choose the Windows version you want according to your Windows
 * an "auto detect and install", don't download it.
 * Something like "AMD Software: Adrenalin Edition", the file is ~800MB, download this one.
 
-# Dotnet Runtime
-
-Only when **lsw_windows_gpu_driver** is set to intel (the default). Since Windows 11 25H2, the Intel driver needs .NET Desktop Runtime.
-
-Go [here](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) and download the latest **.NET Desktop Runtime** x64 installer. Copy the file in this folder and rename it to **dotnetruntime.exe**.
-
 # Looking Glass
 
 If you want to install Looking Glass, go to [https://looking-glass.io/downloads](https://looking-glass.io/downloads), download the latest Official/Stable version (ex: B7) host file (the green button with Windows logo). Unzip the file, go in the directory, copy the exe file in this folder and rename it to **looking_glass_host_setup.exe**. Version of the client on your Linux musts be the same than the one for host (Windows).

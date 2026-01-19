@@ -177,6 +177,14 @@
   changed_when: false
   when: lsw_distro_boot_loader == 'grub'
 
+- name: Get current screen resolution
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      xrandr | grep -m1 '*+'| gawk '{print $1}'
+  register: _lsw_screen_res
+  changed_when: false
+
 - name: Get the PCI disk controller address
   ansible.builtin.shell:
     cmd: |

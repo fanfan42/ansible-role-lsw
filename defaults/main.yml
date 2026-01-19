@@ -8,6 +8,7 @@ lsw_virt_mode: passthrough
 
 # Get this var by running this command: lspci | grep VGA
 lsw_passthrough_gpu_pci_base_addr: 01:00
+lsw_passthrough_force_sound: false
 
 # Build Windows VM vars
 lsw_windows_iso: windows10.iso
@@ -128,25 +129,21 @@ lsw_windows_feature_to_remove:
   - Recall
   - Microsoft-SnippingTool
 
-# Full list of 10K+ packages available here: https://github.com/svrooij/winget-pkgs-index/blob/main/index.v2.csv
+# Search your package on https://community.chocolatey.org/packages
 lsw_windows_app_to_add:
-  - ['Microsoft.VCRedist.2005.x64', null]
-  - ['Microsoft.VCRedist.2008.x64', null]
-  - ['Microsoft.VCRedist.2010.x64', null]
-  - ['Microsoft.VCRedist.2012.x64', null]
-  - ['Microsoft.VCRedist.2013.x64', null]
-  - ['Microsoft.VCRedist.2015+.x64', null]
-  - ['7zip.7zip', null]
-  - ['RARLab.WinRAR', null]
-  - ['Notepad++.Notepad++', null]
-  - ['Mozilla.Firefox', null]
-  # - ['Brave.Brave', null]
-  # - ['Google.Chrome', null]
-  # - ['Opera.Opera', null]
-  # - ['Valve.Steam', null]
-  # - ['ClamWin.ClamWin', null]
-  # Note: Dotnet runtime is automatically installed when Intel driver musts be installed
-  # - ['Microsoft.DotNet.AspNetCore.10', null]
+  - vcredist-all
+  - 7zip
+  - winrar
+  - notepadplusplus
+  - firefox
+  # - brave
+  # - googlechrome
+  # - opera
+  # - sumatrapdf
+  # - steam
+  # - avastfreeantivirus
+# Note: dotnet runtime is automatically installed when installing intel driver
+  # - dotnet-10.0-runtime
 
 # Configure an access to host files from the VM
 lsw_windows_access_host_files: false

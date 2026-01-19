@@ -873,46 +873,38 @@ Start-Process -FilePath "diskpart.exe" -ArgumentList "/s `"$scriptPath`"" -Wait 
 Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
 {% endif %}
 
+{% if lsw_windows_gpu_driver == 'intel' %}
+	choco install -y --no-progress dotnet-10.0-runtime
+{% endif %}
+
 foreach( $letter in 'DEF'.ToCharArray() ) {
     $exe = "${letter}:\extra_packages\gpudriver.exe";
     if( Test-Path -LiteralPath $exe ) {
-{% if lsw_windows_gpu_driver == 'intel' %}
-		Start-Process -FilePath "${letter}:\extra_packages\dotnetruntime.exe" -ArgumentList '/install /quiet /norestart' -Wait;
-{% endif %}
-        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
 {% if lsw_install_looking_glass %}
         Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
 {% endif %}
-        return;
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
     }
 }
-		</File>
+
 {% if lsw_windows_app_to_add | default([]) | length > 0 %}
-		<File path="C:\Windows\Setup\Scripts\Install-Winget.ps1">
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+
+Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+$env:Path += ';C:\ProgramData\chocolatey\bin'
 $packages = @(
 {% for app in lsw_windows_app_to_add %}
-    @{
-        id = "{{ app[0] }}";
-        version = {% if app[1] is not none %}"{{ app[1] }}"{% else %}$null{% endif %}
-    }{% if not loop.last %},{% endif %}
+    '{{ app }}'{% if not loop.last %},{% endif %}
 {% endfor %}
 )
 
 foreach ($pkg in $packages) {
-    try {
-        $exe = "winget install -e --source winget --accept-package-agreements --accept-source-agreements --silent --id $($pkg.id)"
-        if ($pkg.version) {
-            $exe += " --version $($pkg.version)"
-        }
-        Invoke-Expression $exe
-		Write-Warning "Package $($pkg.id) installed successfully"
-    }
-    catch {
-        Write-Warning"Package $($pkg.id) failed to install: $_"
-    }
+    choco install $pkg -y --no-progress
 }
-		</File>
 {% endif %}
+		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(
 	{
@@ -1284,11 +1276,6 @@ $scripts = @(
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\RunOnce" /v "UnattendedSetup" /t REG_SZ /d "powershell.exe -WindowStyle Hidden -NoProfile -Command \""Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\UserOnce.ps1' -Raw | Invoke-Expression;\""" /f;
 	};
-{% if lsw_windows_app_to_add | default([]) | length > 0 %}
-	{
-    	reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\RunOnce" /v "InstallWingetApps" /t REG_SZ /d "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Setup\Scripts\Install-Winget.ps1" /f;
-	};
-{% endif %}
 );
 
 &amp; {

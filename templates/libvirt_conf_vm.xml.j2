@@ -174,7 +174,7 @@
       <model type="none"/>
     </video>
 {% endif %}
-{% if _lsw_lg %}
+{% if _lsw_lg or lsw_passthrough_force_sound %}
     <sound model="ich9">
       <audio id="1"/>
       <address type="pci" domain="0x0000" bus="0x11" slot="0x00" function="0x0"/>
@@ -183,7 +183,7 @@
       <input mixingEngine="no"/>
       <output mixingEngine="no"/>
     </audio>
-{% elif lsw_virt_mode == 'passthrough' %}
+{% elif lsw_virt_mode == 'passthrough' and not lsw_passthrough_force_sound %}
     <audio id="1" type="none"/>
 {% endif %}
 {% if lsw_virt_mode == 'passthrough' %}
