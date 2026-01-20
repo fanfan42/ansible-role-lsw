@@ -25,56 +25,6 @@
     state: absent
   become: true
 
-- name: Start and enable libvirtd
-  ansible.builtin.systemd:
-    name: libvirtd
-    enabled: true
-    state: started
-  become: true
-
-# BUG on Debian, VM doesn't start with no errors in logs
-# https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
-- name: Stop and disable dnsmasq for Debian
-  ansible.builtin.systemd:
-    name: dnsmasq
-    enabled: false
-    state: stopped
-  become: true
-  when: ansible_facts.lsb.id == 'Debian'
-
-# Nobara has a special service for managing network in VMs
-- name: Nobara - load special services for network
-  ansible.builtin.systemd:
-    name: '{{ item }}'
-    enabled: true
-    state: started
-  loop:
-    - virtnetworkd
-    - virtqemud
-  become: true
-  when: ansible_facts.lsb.id == 'NobaraLinux'
-
-# Bug: delete default network before adding it
-- name: Disable and stop default network
-  community.libvirt.virt_net:
-    name: default
-    state: absent
-    autostart: false
-  become: true
-
-- name: Enable and start default network
-  community.libvirt.virt_net:
-    name: default
-    state: present
-    autostart: true
-    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
-  become: true
-
-- name: Enable and start default network (force)
-  ansible.builtin.shell: virsh net-start default && virsh net-autostart default
-  become: true
-  changed_when: true
-
 - name: Prepare build for passthrough mode
   when: lsw_virt_mode == "passthrough"
   become: true

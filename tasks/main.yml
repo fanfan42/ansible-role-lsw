@@ -22,6 +22,10 @@
     - never
     - install
 
+- name: Prepare network configuration
+  ansible.builtin.import_tasks: network.yml
+  tags: always
+
 - name: Build VM image
   ansible.builtin.include_tasks:
     file: build.yml

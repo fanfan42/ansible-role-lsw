@@ -83,7 +83,7 @@ After the reboot, play again the same command as above, the role starts installi
 $ ansible-playbook passthrough.yml -t build,config,create -v --ask-become-pass
 ```
 
-During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. When entering the last build step in case you added some packages in **lsw_windows_app_to_add** variable, you may be asked to click "yes" on windows popping in order to install all packages you want. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
+During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. When entering the last build step in case you added some packages in **lsw_windows_app_to_add** variable, you may have to interact with possible failed install but normally, just wait until the VM shutdowns automatically. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
 **Note 1:** If you need to exit focus during the window's build: `Ctrl + Alt + g`.
 
@@ -95,15 +95,15 @@ At last, the **create** stage creates the Passthrough VM, maybe RDP if you set i
 
 ## Launch the VM
 
-#### Automatic way
+### Automatic way
 
 Click on **LSW Passthrough** launcher in **System** category in your application menu. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. If you also have Looking Glass VM, click on **LSW LG** launcher in **System** category in your application menu. Like for Passthrough launcher, DM restarts. Looking Glass screen appears ~10 seconds after the restart. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
 
 In any case, when you shutdown the VM, DM restarts again.
 
-#### Manual way
+### Manual way
 
-Note: This way is only for debugging problems. In case you passthrough keyboard and mouse, these devices will be unavailable by launching the VM this way.
+Note: This way is only for debugging problems.
 
 By opening virt-manager, you can see the VM created, start it. Your Display Manager (DM) will stop, some scripts are executed and DM starts again. The VM displays on the second screen. For seeing the Windows VM on 1st screen with Looking Glass, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F input:rawMouse input:GrabKeyboardOnFocus`. When the VM stops, DM also restarts.
 
@@ -118,4 +118,4 @@ If your Windows is on a dedicated disk, start the VM, search "Disk management" a
 
 ### Install Bluetooth driver
 
-In case you wanted to passthrough your Bluetooth card, you will have to manually install the driver after starting your VM. Example for Intel Bluetooth card: In your VM, go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver.
+In case you wanted to passthrough your Bluetooth card, you may have to manually install the driver after starting your VM. Example for Intel Bluetooth card: In your VM, go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver.

@@ -68,11 +68,6 @@
     path: '{{ role_path }}/files/build/virtio/virtio-win.iso'
   register: _lsw_virtio_win
 
-- name: Check Dotnet Runtime file exists
-  ansible.builtin.stat:
-    path: '{{ role_path }}/files/build/extra_packages/dotnetruntime.exe'
-  register: _lsw_dotnetruntime_file
-
 - name: Check Looking Glass file exists
   ansible.builtin.stat:
     path: '{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe'
