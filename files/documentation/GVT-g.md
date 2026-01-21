@@ -7,9 +7,8 @@ This virtualization mode is abandoned by Intel since 2020. I don't know how much
 ## Troubleshooting
 
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* When building on GVT-g, if you want to install Ninite packages, the display doesn't work really well, windows (not Windows) dont display. You have to follow progress by hovering the mouse on the Ninite window installer, you will see progress. When it's finished, right click and close the window, VM will shutdown and Ansible play continues as well.
-* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
-* Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
+* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down in virt-manager and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
+* ~~Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.~~
 * On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
 
 ## Requirements and recommendations
@@ -43,7 +42,7 @@ Start from a working Debian/Nobara/EndeavourOS desktop with Internet working and
 
 ```shell
 $ su
-# apt update && apt install ansible ansible-core git sudo gawk
+# apt update && apt install ansible ansible-core git sudo gawk linux-headers-amd64
 # /sbin/usermod -aG sudo <your_username>
 # /sbin/reboot
 ```
@@ -89,7 +88,7 @@ After the reboot, play again the same command as above the role starts installin
 $ ansible-playbook gvtg.yml -t build,config,create -v --ask-become-pass
 ```
 
-During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "Done" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
+During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. When entering the last build step in case you added some packages in **lsw_windows_app_to_add** variable, you may have to interact with possible failed install but normally, just wait until the VM shutdowns automatically. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
 **Note:** If you need to exit focus during the window's build: `Ctrl + Alt + g`.
 
@@ -99,13 +98,13 @@ At last, the **create** stage creates the Looking Glass VM, maybe RDP if you set
 
 ## Launch the VM
 
-#### Automatic way
+### Automatic way
 
-Click on **LSW LG** launcher in **System** category in your application menu. You will see Looking Glass appear after ~10 seconds. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
+Click on **LSW LG** launcher in **System** category in your application menu. You will see Looking Glass appear after ~20 seconds. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
 
-#### Manual or debug way
+### Manual or debug way
 
-Note: This way is only for debugging problems. In case you passthrough keyboard and mouse, these devices will be unavailable by launching the VM this way.
+Note: This way is only for debugging problems.
 
 By opening virt-manager, you can see the VM created, start it. For seeing the Windows VM on screen, check the [VARIABLES](VARIABLES.md) file and pick the best looking glass command for your need. You will find multiple examples on the **lsw_config_usb_mouse** variable. Example: `looking-glass-client -m 97 -F input:rawMouse input:GrabKeyboardOnFocus`.
 
@@ -120,4 +119,4 @@ If your Windows is on a dedicated disk, start the VM, search "Disk management" a
 
 ### Install Bluetooth driver
 
-In case you wanted to passthrough your Bluetooth card, you will have to manually install the driver after starting your VM. Example for Intel Bluetooth card: Go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver in the VM.
+In case you wanted to passthrough your Bluetooth card, you may have to manually install the driver after starting your VM. Example for Intel Bluetooth card: Go [here](https://www.intel.com/content/www/us/en/download/18649/intel-wireless-bluetooth-drivers-for-windows-10-and-windows-11.html) and install the latest available driver in the VM.

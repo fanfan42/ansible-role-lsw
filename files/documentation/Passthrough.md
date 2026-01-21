@@ -3,7 +3,7 @@
 ## Troubleshooting
 
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
+* When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down in virt-manager and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
 * Nobara with sddm or sddm DM: for still unknown reasons, sometimes, you have to write again your password when the VM shutdowns and sddm restarts as well (sddm issue).
 * The passthrough VM may have not any sound. It's because your GPU doesn't support the software reset on its sound card part but sometimes it works, don't ask me why (at least it worked in October 2025 so maybe try with a GPU driver of that time). You have two solutions, either you set **lsw_config_add_bluetooth** to **true** and don't forget to set **lsw_config_bluetooth_address** with the correct USB address (use lsusb to find the bluetooth device in a terminal). Either, you set **lsw_passthrough_force_sound** to **true**. You will have the sound from your host internal sound card but not on your second screen.
 * On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
@@ -37,7 +37,7 @@ Note: For Nvidia on Debian, in order to have the latest driver, use this [guide]
 
 ```shell
 $ su
-# apt update && apt install ansible ansible-core git sudo gawk
+# apt update && apt install ansible ansible-core git sudo gawk linux-headers-amd64
 # /sbin/usermod -aG sudo <your_username>
 # /sbin/reboot
 ```

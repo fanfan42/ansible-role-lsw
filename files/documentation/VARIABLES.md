@@ -221,6 +221,8 @@ Default to **/home/<your_user>** (**your_user** is set in [lsw_windows_user](#ls
 
 Default to an unsecured password. Give a password to access your files from the VM to your host.
 
+Note: For unknown reason, everytime you reboot your VM, the password is asked again when you want to access the share.
+
 ### lsw_config_vm_memory
 
 The memory (RAM) allocated to Windows VM in MB. The default is **8192**. The role will fail if the memory allocated for the VM exceeds 4/5 of the total memory on your Linux host. This variable is different from **lsw_windows_build_mem** because this variable only affects memory allocated for the build stage.
