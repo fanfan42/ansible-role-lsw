@@ -82,7 +82,7 @@ $ ansible-playbook gvtg.yml -t install -v --ask-become-pass
 
 You will be asked your sudo password, enter it. For the very first install, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, play again the same command as above the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag at the next step.
+After the reboot, play again the same command as above the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again (except if you don't install Zen kernel like in Nobara). Remove the **install** tag at the next step.
 
 ```shell
 $ ansible-playbook gvtg.yml -t build,config,create -v --ask-become-pass
