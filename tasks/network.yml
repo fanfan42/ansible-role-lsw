@@ -11,7 +11,7 @@
   when: ansible_facts.lsb.id == 'Debian'
 
 # Nobara has a special service for managing network in VMs
-- name: Nobara - load special services for network
+- name: Nobara and EndeavourOS - load special services for network
   ansible.builtin.systemd:
     name: '{{ item }}'
     enabled: true
@@ -20,7 +20,7 @@
     - virtnetworkd
     - virtqemud
   become: true
-  when: ansible_facts.lsb.id == 'NobaraLinux'
+  when: ansible_facts.lsb.id in ['NobaraLinux', 'EndeavourOS']
 
 # Bug: delete default network before adding it
 - name: Disable and stop default network

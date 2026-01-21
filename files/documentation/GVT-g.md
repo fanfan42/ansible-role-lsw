@@ -10,6 +10,7 @@ This virtualization mode is abandoned by Intel since 2020. I don't know how much
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down in virt-manager and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
 * ~~Debian Only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.~~
 * On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
+* Sometimes in EndeavourOS, the zen kernel package doesn't install. Manually run `sudo downgrade linux-zen linux-zen-headers` and choose the latest 6.1 kernel and headers available in the list, normally: 6.1.12.
 
 ## Requirements and recommendations
 

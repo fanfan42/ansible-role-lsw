@@ -30,8 +30,8 @@ lsw_packages:
   - qemu-ui-gtk
 
 lsw_zen_packages:
-  - 'linux-zen=6.18.5.zen1'
-  - 'linux-zen-headers=6.18.5.zen1'
+  - 'linux-zen=6.18.6.zen1'
+  - 'linux-zen-headers=6.18.6.zen1'
 lsw_zen_gvtg_packages:
   - 'linux-zen=6.1.12.zen1'
   - 'linux-zen-headers=6.1.12.zen1'
