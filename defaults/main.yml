@@ -142,8 +142,6 @@ lsw_windows_app_to_add:
   # - sumatrapdf
   # - steam
   # - avastfreeantivirus
-# Note: dotnet runtime is automatically installed when installing intel driver
-  # - dotnet-10.0-runtime
 
 # Configure an access to host files from the VM
 lsw_windows_access_host_files: false

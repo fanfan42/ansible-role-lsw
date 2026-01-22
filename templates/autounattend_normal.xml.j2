@@ -261,7 +261,7 @@ try {
     foreach ($cert in $certificates) {
         $certFilePath = Join-Path -Path $certsFolder -ChildPath "$($cert.Thumbprint).cer"
         $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert) | Set-Content -Path $certFilePath -Encoding Byte
-        Start-Process -FilePath "certutil.exe" -ArgumentList "-addstore TrustedPublisher `"$certFilePath`"" -Wait -WindowStyle Hidden
+        Start-Process -FilePath "certutil.exe" -ArgumentList "-addstore -f -machine TrustedPublisher `"$certFilePath`"" -Wait -WindowStyle Hidden
     }
 
 	$check = &amp; $devconExe find "Root\MttVDD"
@@ -294,7 +294,7 @@ exit /b 0
 Get-NetConnectionProfile -InterfaceAlias 'Ethernet*' | Set-NetConnectionProfile -NetworkCategory 'Private';
 
 {% if lsw_windows_gpu_driver == 'intel' %}
-	choco install -y --no-progress dotnet-10.0-runtime
+choco install -y --no-progress dotnet-9.0-desktopruntime
 {% endif %}
 
 foreach( $letter in 'DEF'.ToCharArray() ) {

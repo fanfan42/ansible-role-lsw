@@ -68,7 +68,7 @@
     - name: Create remmina VM conf
       ansible.builtin.template:
         src: group_rdp_template.j2
-        dest: "/home/ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+        dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
         mode: "0600"
         owner: "{{ ansible_facts.env.LOGNAME }}"
         group: "{{ ansible_facts.env.LOGNAME }}"
@@ -122,6 +122,7 @@
 - name: Create LSW passthrough launcher
   vars:
     _lsw_type: Passthrough
+    _lsw_launcher_suffix: ""
   ansible.builtin.template:
     src: launcher.desktop.j2
     dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswPassthrough.desktop"
@@ -133,6 +134,7 @@
 - name: Create LSW Looking Glass launcher
   vars:
     _lsw_type: LG
+    _lsw_launcher_suffix: "lg"
   ansible.builtin.template:
     src: launcher.desktop.j2
     dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswLG.desktop"
@@ -144,6 +146,7 @@
 - name: Create LSW RDP launcher
   vars:
     _lsw_type: RDP
+    _lsw_launcher_suffix: "{{ 'lg' if lsw_install_looking_glass else '' }}"
   ansible.builtin.template:
     src: launcher.desktop.j2
     dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswRDP.desktop"

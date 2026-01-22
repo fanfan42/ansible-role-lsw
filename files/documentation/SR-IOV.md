@@ -4,22 +4,23 @@
 
 This mode is highly experimental and has many problems:
 
-* It doesn't work well with Wayland (at least with Debian with GNOME).
+* It doesn't work well with Wayland (at least with Debian on GNOME).
 * Intel has decided since August 2025 that ony Pro dGPU will be supported. So, in order for this role to work, it depends on the community.
 * Despite more recent CPU with iGPU, performance is a little bit less than GVT-g. using screen refresh with more than 30 FPS can be complicated.
+* Intel is currently (january 2026) launching Panther Lake CPU, in addition of P-Cores and E-cores, they now have LPE-cores (Low Power Efficiency). Because I don't have tried these CPU, I don't guarantee that this will work on these latest CPU.
 
 ## Troubleshooting
+
+* Debian only with the official kernel (6.12 for Debian Trixie) which has apparmor activated : Boot the VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/vm-name.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
-* Debian only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.
-* Intel 12th and 13th: ~~For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.~~ Found 2nd driver (september 2025) that can do the trick, see SR-IOV [VARIABLES](./VARIABLES.md) and GPU driver [README](../build/extra_packages/README.md).
+* ~~Debian only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.~~
+* Intel 12th and 13th: ~~For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.~~ Found 2nd driver (september 2025) that can do the trick, see SR-IOV [VARIABLES](./VARIABLES.md) and GPU driver [README](../build/extra_packages/README.md), on Intel part.
 * Debian with GNOME: Display Manager resets when creating the Virtual Function (VF) when using Wayland in your Desktop Environment. Use X11/X.org instead when login to your distro when on Debian GNOME (the wheel at bottom right of the login screen when asking your password).
-* Intel 12th and 13th: ~~On EndeavourOS, same problem as wayland above. The display will freeze around 58% of windows installation, just after the Intel driver installation. The installation has not failed but you don't see anything working. Press `Ctrl+Alt+F2`, enter your login and passsword in the console. Put a timer, set it to 10-13 minutes. Try to check with `ps aux | grep qemu` and `ps aux | grep playbook` if it's still running. If qemu is still working, `kill -9 process_number_of_qemu`. Wait for ansible to finish (`watch -n2 "ps aux | grep playbook"`). `sudo systemctl restart display-manager`. **Note:** It's also easier to not install apps from Ninite, this way, the VM shutdowns automatically and ansible continues without intervention but you still have to press `Ctrl+Alt+F2` when the screen starts freezing and wait for ansible to finish. You can still install apps from Ninite in the VM after. When you start the VM and access it with Remmina, the VM shutdowns. Restart it and access it again with Remmina (maybe multiple times until it connects). The system is really slow. Update the Intel driver quickly as explained above.~~ Virtual Display Driver may not install, it's random but not too much often. You have to install it yourself on the VM by downloading, for example, this version of [VDD Control](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/tag/25.7.23).
+* Virtual Display Driver may not install, it's random but not too much often. You have to install it yourself on the VM by downloading, for example, this version of [VDD Control](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/tag/25.7.23).
 * On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM. Going on the OS via RDP (Remmina) first can also help especially to correctly initiate the first install of Virtual Display Driver.
 
-**Note 1:** For now, Intel Core i7-1255U (12th generation Alder Lake), Intel Core i7-13650HX (13th generation Raptor Lake) and Intel Core Ultra i7-155U (14th generation Meteor Lake) didn't need any ROM file for the Vitual Function to work in the VM, as documented in Strongtz i915-sriov-dkms repository.
-
-**Note 2:** Intel Core Ultra 155U works really well. No freeze during the build, no need to update the Intel driver after installation. It's pretty good in fact. ~~And finally, the oldest SR-IOV CPU generation tested (12th for me), the highest the pain~~.
+**Note :** As documented in strongtz repository on Github, 11th generation Tiger Lake CPU may not work and this role has never been tested on them. For now, Intel Core i7-1255U (12th generation Alder Lake), Intel Core i7-13650HX (13th generation Raptor Lake) and Intel Core Ultra i7-155U (14th generation Meteor Lake) work well.
 
 ## Requirements and recommendations
 
@@ -48,7 +49,7 @@ Start from a working Debian/Nobara/EndeavourOS desktop with Internet working and
 
 ```shell
 $ su
-# apt update && apt install ansible ansible-core git sudo gawk
+# apt update && apt install ansible ansible-core git sudo gawk linux-headers-amd64
 # /sbin/usermod -aG sudo <your_username>
 # /sbin/reboot
 ```
@@ -88,31 +89,31 @@ $ ansible-playbook sriov.yml -t install -v --ask-become-pass
 
 You will be asked your sudo password, enter it. For the very first install, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, play again the same command as above, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag at the next step.
+After the reboot, play again the same command as above, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again (except if you don't install Zen kernel like in Nobara). Remove the **install** tag at the next step.
 
 ```shell
 $ ansible-playbook sriov.yml -t build,config,create -v --ask-become-pass
 ```
 
-During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. You have nothing to do except if you install programs with Ninite, Windows will automatically shutdown. In case of Ninite's programs installation, you will have to click on the button "Done" when Ninite has finished, Windows will shutdown just after. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
+During the **build** stage, a window appears with a text asking if you want to boot from the CD/DVD. Please focus on the window by clicking on it, then, press "Enter" in order to boot on the CD/DVD. You will see Windows installing. When entering the last build step in case you added some packages in **lsw_windows_app_to_add** variable, you may have to interact with possible failed install but normally, just wait until the VM shutdowns automatically. If you pass a dedicated disk for the VM, the image will be copied an it. Each time you use the **build** tag, the Windows image is ERASED so consider using it only if you really want to reinstall everything from scratch.
 
 **Note:** If you need to exit focus during the window's build: `Ctrl + Alt + g`.
 
 The **config** stage configures Libvirt and scripts dedicated to the VM when starting or shutdown. Consider using the **config** tag everytime you just want to reset VM configuration alonside with the **create** tag.
 
-At last, the **create** stage creates the VM. If you make changes by hand on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
+At last, the **create** stage creates the Looking Glass VM, maybe RDP if you set its variable and creates the launchers. If you make changes by hand on this VM on virt-manager and run again the playbook with **create** tag, all user added configurations will be removed.
 
 ## Launch the VM
 
 ### Automatic way
 
-For the very first launch (or troubleshooting issue), click on **LSW RDP** launcher in **System** category in your application menu. You will see RDP connection after ~10 seconds. Check that everything is installed correctly (Looking Glass and Virtual Display Driver). If not, see the **Troubleshooting** section in this README. Stop the VM.
+For the very first launch (or troubleshooting issue), click on **LSW RDP** launcher in **System** category in your application menu. You will see RDP connection after ~20 seconds. Check that everything is installed correctly (Looking Glass and Virtual Display Driver). If not, see the **Troubleshooting** section in this README. Stop the VM.
 
 Click on **LSW LG** launcher in **System** category in your application menu. You will see Looking Glass appear after ~10 seconds. If you need to quit Looking Glass without shutting down the VM to go back to your Linux Host, the shortcut is `Right-Ctrl + q`. Want to go back in the VM ? Click again on **LSW LG** launcher, the window should appear after ~1 second.
 
 ### Manual way
 
-Note: This way is only for debugging problems. In case you passthrough keyboard and mouse, these devices will be unavailable by launching the VM this way.
+Note: This way is only for debugging problems.
 
 By opening virt-manager, you can see the VM created, start it. To access the VM, open Remmina and double click on your VM name to open a RDP connection to the VM. If everything worked well, including Troubleshooting, stop the VM and start it againg, Looking Glass should now work (Best performance). Examples for using Looking Glass are in [variables](./VARIABLES.md) documentation, search for the variable **lsw_config_usb_mouse**. Example: `looking-glass-client -m 97 -F input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`.
 

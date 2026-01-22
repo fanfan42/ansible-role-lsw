@@ -2,6 +2,7 @@
 
 ## Troubleshooting
 
+* Debian only with the official kernel (6.12 for Debian Trixie) which has apparmor activated : Boot the Passthrough VM, it won't work, you have errors 'Permission denied' on some files in the log file: /var/log/libvirt/qemu/vm-name.log. Run this command: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-94d6959d-b1ae-4ba9-8a9f-4aa60563e40f`. If you also have the VM with Looking Glass, boot the VM once and, after failure, run: `sudo aa-complain /etc/apparmor.d/libvirt/libvirt-fca46f9a-f8f6-45f6-8d73-28a7b7e8684f`.
 * If booting on Windows from grub/systemd-boot with a dedicated disk for the VM, Windows takes the lead to boot at each reboot. You have to manually reset the boot order in your BIOS in order to boot on Linux again.
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down in virt-manager and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM.
 * Nobara with sddm or sddm DM: for still unknown reasons, sometimes, you have to write again your password when the VM shutdowns and sddm restarts as well (sddm issue).
