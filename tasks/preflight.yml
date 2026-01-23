@@ -3,7 +3,7 @@
 - name: Fail when Distro is not supported
   ansible.builtin.fail:
     msg: "Distribution not supported !!!"
-  when: ansible_facts['lsb']['id'] not in ['EndeavourOS','Debian','NobaraLinux']
+  when: ansible_facts.lsb.id not in ['EndeavourOS','Debian','NobaraLinux']
 
 - name: Fail when Virtualization mode is wrong
   ansible.builtin.fail:
@@ -18,17 +18,17 @@
 - name: Fail when Ansible runs with root user
   ansible.builtin.fail:
     msg: "Don't run Ansible with root user, use your personal user !!!"
-  when: ansible_user_uid == 0
+  when: ansible_facts.user_uid == 0
 
 - name: Fail when driver not Nvidia, Intel or AMD
   ansible.builtin.fail:
     msg: "Driver not supported, it musts be intel (the default even for gvtg or sriov virtualization mode), amd or nvidia !!!"
   when: lsw_windows_gpu_driver not in ['intel','nvidia','amd']
 
-- name: Fail when VM memory exceeds 3/4 of total memory available on Host
+- name: Fail when VM memory exceeds 4/5 of total memory available on Host
   ansible.builtin.fail:
     msg: "VM memory (RAM) too high, host also needs memory !!!"
-  when: lsw_config_vm_memory > ( ansible_memtotal_mb * 3 / 4 )
+  when: lsw_config_vm_memory > ( ansible_facts.memtotal_mb * 4 / 5 )
 
 - name: Fail when path to second mouse doesnt exist
   ansible.builtin.fail:
@@ -60,16 +60,6 @@
     msg: "{{ role_path }}/files/build/virtio/virtio-win.iso doesn't exist, read {{ role_path }}/files/build/virtio/README.md !!!"
   when: "'build' in ansible_run_tags and not _lsw_virtio_win.stat.exists"
 
-- name: Fail when missing Ninite Installer file for building
-  ansible.builtin.fail:
-    msg: "{{ role_path }}/files/build/extra_packages/NiniteInstaller.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
-  when: "lsw_windows_install_app_from_ninite and 'build' in ansible_run_tags and not _lsw_ninite_file.stat.exists"
-
-- name: Fail when missing Dotnet Runtime file for building
-  ansible.builtin.fail:
-    msg: "{{ role_path }}/files/build/extra_packages/dotnetruntime.exe doesn't exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
-  when: "'build' in ansible_run_tags and not _lsw_dotnetruntime_file.stat.exists and lsw_windows_gpu_driver == 'intel'"
-
 - name: Fail when missing Looking Glass driver file for building
   ansible.builtin.fail:
     msg: "{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe dont exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
@@ -83,7 +73,16 @@
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
-    content: "{{ ((_lsw_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __lsw_iommu_param + ' iommu=pt') | trim }}"
+    content: >-
+      {{
+        (
+          (_lsw_krnl_file.content | b64decode).splitlines() | join(' ')
+          + ' '
+          + __lsw_iommu_param
+          + ' iommu=pt'
+          + (' pci=noaer' if lsw_virt_mode == 'passthrough' else '')
+        ) | trim
+      }}
     mode: "0644"
   when: lsw_distro_initramfs_binary == 'dracut' and __lsw_iommu_param not in (_lsw_krnl_file.content | b64decode)
   become: true
@@ -97,7 +96,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=[\"'](.*)[\"']"
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __lsw_iommu_param }} iommu=pt"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 {{ __lsw_iommu_param }} iommu=pt{% if lsw_virt_mode == "passthrough" %} pci=noaer{% endif %}"'
     backrefs: true
   when: lsw_distro_boot_loader == 'grub' and _lsw_grub_check.stdout == 'absent'
   become: true

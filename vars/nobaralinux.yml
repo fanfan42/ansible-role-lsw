@@ -48,7 +48,7 @@ lsw_lg_dependencies:
   - libsamplerate-devel
   - pulseaudio-libs-devel
 
-lsw_packer_version: 1.13.1
+lsw_packer_version: 1.14.3
 lsw_packer_url: 'https://releases.hashicorp.com/packer/{{ lsw_packer_version }}/packer_{{ lsw_packer_version }}'
 
 lsw_windows_ovmf_code_path: /usr/share/edk2/ovmf/OVMF_CODE_4M.qcow2
@@ -60,5 +60,8 @@ lsw_sriov_rdp_packages:
   - remmina
   - remmina-plugins-rdp
 
-lsw_sriov_pkg_version: '2025.10.10'
+lsw_config_samba_packages:
+  - samba
+
+lsw_sriov_pkg_version: '2025.12.10'
 lsw_sriov_pkg_url: 'https://github.com/strongtz/i915-sriov-dkms/archive/refs/tags/{{ lsw_sriov_pkg_version }}'

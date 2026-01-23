@@ -1,5 +1,11 @@
 # ansible-role-lsw
 
+## Important notice
+
+Even if this Ansible role installs Linux Sub Windows, you don't need to have knowledge with Ansible. Step-by-steps are available in the files/documentation directory, and everything is explained to help you customize your own Windows virtual machine.
+
+
+
 LSW stands for Linux Sub Windows, the reverse application of Windows Sub Linux (WSL). The goal of this role is to allow the automatic installation of a full Windows 10/11 Pro Virtual Machine (VM) on a Linux host. The VM is customized to allow maximum performance at the price of security "features" and can be built with these virtualization technologies :
 
 * Passthrough

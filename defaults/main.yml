@@ -8,10 +8,11 @@ lsw_virt_mode: passthrough
 
 # Get this var by running this command: lspci | grep VGA
 lsw_passthrough_gpu_pci_base_addr: 01:00
+lsw_passthrough_force_sound: false
 
 # Build Windows VM vars
 lsw_windows_iso: windows10.iso
-lsw_windows_vm_name: 'vm-{{ ansible_hostname }}'
+lsw_windows_vm_name: 'vm-{{ ansible_facts.hostname }}'
 # Can be raw or qcow2
 lsw_windows_img_format: raw
 lsw_windows_img_size: 50G
@@ -19,8 +20,8 @@ lsw_windows_img_size: 50G
 # WARNING: the disk is wiped
 # Ex: /dev/sda or /dev/nvme0n1
 lsw_windows_disk_device_path: ''
-lsw_windows_build_mem: '{{ (ansible_memtotal_mb / 2) | int }}'
-lsw_windows_build_num_cpu: '{{ (ansible_processor_vcpus / 2) | int }}'
+lsw_windows_build_mem: '{{ (ansible_facts.memtotal_mb / 2) | int }}'
+lsw_windows_build_num_cpu: '{{ (ansible_facts.processor_vcpus / 2) | int }}'
 lsw_windows_build_timeout_minutes: 30
 # Can be normal or private
 # WARNING: using the private mode improves performance at the cost of losing Microsoft support as explained in their EULA
@@ -42,7 +43,7 @@ lsw_windows_keyboard: 040c:00000409
 # Note: autounattend template (normal or private) installs a Windows based on your licence key, generic or valid.
 # Other versions of Windows haven't been tested
 lsw_windows_licence_key: VK7JG-NPHTM-C97JM-9MPGT-3V66T
-lsw_windows_user: "{{ ansible_env['LOGNAME'] }}"
+lsw_windows_user: "{{ ansible_facts.env.LOGNAME }}"
 lsw_windows_password: ''
 # Can be nvidia or amd or intel (the default if using gvtg or sriov)
 lsw_windows_gpu_driver: intel
@@ -128,9 +129,28 @@ lsw_windows_feature_to_remove:
   - Recall
   - Microsoft-SnippingTool
 
+# Search your package on https://community.chocolatey.org/packages
+lsw_windows_app_to_add:
+  - vcredist-all
+  - 7zip
+  - winrar
+  - notepadplusplus
+  - firefox
+  # - brave
+  # - googlechrome
+  # - opera
+  # - sumatrapdf
+  # - steam
+  # - avastfreeantivirus
+
+# Configure an access to host files from the VM
+lsw_windows_access_host_files: false
+lsw_windows_access_host_files_dir: '/home/{{ ansible_facts.env.LOGNAME }}'
+lsw_windows_access_host_files_pass: S3cretP4ssw0rd
+
 # Configuration vars
 lsw_config_is_laptop: false
-# In MB, cannot exceed 3/4 of Host memory or this role will fail
+# In MB, cannot exceed 4/5 of Host memory or this role will fail
 lsw_config_vm_memory: 8192
 # You need 2 keyboards to set this variable, one for the VM, one for the system/host
 # found in /dev/input/by-id/usb-?-event-kbd
@@ -145,9 +165,15 @@ lsw_config_gpu_nvidia_gtx: false
 # If set to true, the PCI controller is passed to the VM. It gives bare-metal performance
 # For SATA controller, it gives all the SATA disks to the VM
 lsw_config_pass_disk_controller: false
+# Add Bluetooth USB controller to VM
+lsw_config_add_bluetooth: false
+# Get this address with using "lsusb | grep -i Bluetooth"
+# Example:
+# lsusb | grep -i bluetooth
+# Bus 001 Device 006: ID 8087:0033 Intel Corp. AX211 Bluetooth
+lsw_config_bluetooth_address: 8087:0033
 
 # Other vars
-lsw_windows_install_app_from_ninite: false
 
 lsw_install_looking_glass: false
 lsw_lg_version: B7
@@ -159,19 +185,12 @@ lsw_rm_lg_dependencies: false
 lsw_looking_glass_memory: 64
 
 # Highly recommended to install to have better performance for a desktop Linux
-# If this var is set to false when using virtualization mode to sriov, I don't guarantee any result
 # Only Nobara won't have zen kernels, they use their own kernel for specific Gaming PC
 lsw_install_zen: true
 
 # Virtual Display Driver - vdd
 lsw_vdd_version: '25.7.23'
-# Sha of Windows 11 23H2: 6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8
-# Sha of Windows 10 and 11 22H2: C3816F79DEAC8E26C4A5C5791FE3F1F8104392D077D16941E7CCB6418FB3467A
-# See https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json
-lsw_vdd_devcon_sha_windows: '6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8'
-# Use devcon when lsw_windows_install_template is set to normal
-# See https://github.com/Drawbackz/DevCon-Installer/releases
-lsw_vdd_devcon_version: '1.4-rc'
+
 # Use nefcon when lsw_windows_install_template is set to private
 # See https://github.com/nefarius/nefcon/releases
 lsw_vdd_nefcon_version: 'v1.14.0'

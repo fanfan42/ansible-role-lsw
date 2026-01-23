@@ -1,6 +1,6 @@
 # GPU driver
 
-In all case, once the driver is downloaded, copy it in this folder and rename it **gpudriver.exe** .
+In all case, once the driver is downloaded, copy it in this folder and rename it **gpudriver.exe**.
 
 ## Nvidia
 
@@ -18,7 +18,7 @@ The Language, do I really have to help you choose ?
 
 ## Intel
 
-Go to [Intel download page](https://www.intel.com/content/www/us/en/search.html#sort=relevancy&f:@tabfilter=[Downloads]&f:@stm_10385_en=[Graphics]) for all case except SR-IOV virtualization mode.
+Go to [Intel download page](https://www.intel.com/content/www/us/en/search.html#sort=relevancy&f:@tabfilter=[Downloads]&f:@stm_10385_en=[Graphics]).
 
 ### Passthrough with Intel dGPU
 
@@ -30,12 +30,7 @@ Choose a link like "Intel 7th-10th Gen Processor Graphics - Windows", click on i
 
 ### SR-IOV
 
-Old [Link](https://www.driverscloud.com/fr/services/GetInformationDriver/76514-0/intel-gfx-win-1016460-1016259exe) for SR-IOV virtualization mode (not recommended anymore, only if the ones below don't work).
-
-New links (32.0.101.7076 version):
-
-* [Intel](https://www.intel.com/content/www/us/en/download/864990/intel-11th-14th-gen-processor-graphics-windows.html), the official one but may disappears in the future.
-* [TLD](https://www.touslesdrivers.com/index.php?v_page=23&v_code=83122), Unofficial, just in case the Intel one doesn't work anymore. In French, search for "Téléchargement" and click the image below to download the file.
+Choose a link like "Intel 11th – 14th Gen Processor Graphics - Windows", click on it and download the latest version.
 
 ## AMD
 
@@ -52,22 +47,6 @@ Click on continue, choose the Windows version you want according to your Windows
 * an "auto detect and install", don't download it.
 * Something like "AMD Software: Adrenalin Edition", the file is ~800MB, download this one.
 
-# Dotnet Runtime 9
-
-Only when **lsw_windows_gpu_driver** is set to intel (the default). Since Windows 11 25H2, the Intel driver needs .NET Desktop Runtime 9.
-
-Go [here](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) and download the latest **.NET Desktop Runtime** x64 installer. Copy the file in this folder and rename it to **dotnetruntime.exe**.
-
-# Ninite
-
-If you want to install apps with Ninite, go to [https://ninite.com/](https://ninite.com), choose the apps wanted and download the file. Copy the file in this folder and rename it to **NiniteInstaller.exe**. I highly recommend these packages:
-
-* a web browser (Chrome, Opera, Firefox, Brave).
-* .NET Destktop Runtime x64 9.
-* an anti virus (Malwarebytes, Avast, AVG, Spybot 2, Avira, SUPERAntiSpyware) if security is your top priority.
-* 7-Zip and WinRAR.
-* All the VC++ Redistributables.
-
 # Looking Glass
 
-If you want to install Looking Glass, go to [https://looking-glass.io/downloads](https://looking-glass.io/downloads) choose the latest Official/Stable version (ex: B7) host exe file (the green button with Windows logo). Copy this file in this folder and rename it (if necessary) to **looking_glass_host_setup.exe** . Version of the client on your Linux musts be the same than the one for host (Windows). For all distros, version is fixed in the defaults folder.
+If you want to install Looking Glass, go to [https://looking-glass.io/downloads](https://looking-glass.io/downloads), download the latest Official/Stable version (ex: B7) host file (the green button with Windows logo). Unzip the file, go in the directory, copy the exe file in this folder and rename it to **looking_glass_host_setup.exe**. Version of the client on your Linux musts be the same than the one for host (Windows).

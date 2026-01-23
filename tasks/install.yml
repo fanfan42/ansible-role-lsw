@@ -1,7 +1,7 @@
 ---
 
 - name: Install specific keys and repositories for Debian
-  when: ansible_facts['lsb']['id'] == 'Debian'
+  when: ansible_facts.lsb.id == 'Debian'
   become: true
   block:
     - name: Import keys
@@ -23,7 +23,7 @@
   become: true
 
 - name: Install Packer on Debian or Nobara
-  when: ansible_facts['lsb']['id'] in ['Debian', 'NobaraLinux'] and not _lsw_pkr_bin.stat.exists
+  when: ansible_facts.lsb.id in ['Debian', 'NobaraLinux'] and not _lsw_pkr_bin.stat.exists
   block:
     - name: Get checksum list
       ansible.builtin.set_fact:
@@ -55,7 +55,7 @@
       become: true
 
 - name: Install pycdlib on EndeavourOS
-  when: "ansible_facts['lsb']['id'] == 'EndeavourOS' and 'python-pycdlib-git' not in _lsw_pacman_pkg.stdout"
+  when: "ansible_facts.lsb.id == 'EndeavourOS' and 'python-pycdlib-git' not in _lsw_pacman_pkg.stdout"
   block:
     - name: Install requirements
       ansible.builtin.package:
@@ -141,7 +141,7 @@
   register: _lsw_install_eos_zen
   changed_when: "'install' in _lsw_install_eos_zen.stdout.lower()"
   loop: "{{ lsw_zen_packages }}"
-  when: ansible_facts['lsb']['id'] == 'EndeavourOS' and lsw_install_zen and lsw_virt_mode != 'gvtg'
+  when: ansible_facts.lsb.id == 'EndeavourOS' and lsw_install_zen and lsw_virt_mode != 'gvtg'
   notify:
     - Reboot
     - Pause
@@ -152,17 +152,27 @@
   register: _lsw_install_eos_zen
   changed_when: "'install' in _lsw_install_eos_zen.stdout.lower()"
   loop: "{{ lsw_zen_gvtg_packages }}"
-  when: ansible_facts['lsb']['id'] == 'EndeavourOS' and lsw_install_zen and lsw_virt_mode == 'gvtg'
+  when: ansible_facts.lsb.id == 'EndeavourOS' and lsw_install_zen and lsw_virt_mode == 'gvtg'
   notify:
     - Reboot
     - Pause
   become: true
 
-- name: Install Zen Kernel on Debian
+- name: Install Liquorix Kernel on Debian
   ansible.builtin.package:
     name: '{{ lsw_zen_packages }}'
     state: present
-  when: ansible_facts['lsb']['id'] == 'Debian' and lsw_install_zen
+  when: ansible_facts.lsb.id == 'Debian' and lsw_install_zen and lsw_virt_mode != 'sriov'
+  notify:
+    - Reboot
+    - Pause
+  become: true
+
+- name: Install XanMod Kernel on Debian when SR-IOV
+  ansible.builtin.package:
+    name: '{{ lsw_zen_sriov_packages }}'
+    state: present
+  when: ansible_facts.lsb.id == 'Debian' and lsw_install_zen and lsw_virt_mode == 'sriov'
   notify:
     - Reboot
     - Pause
@@ -175,9 +185,16 @@
   when: lsw_windows_activate_rdp
   become: true
 
+- name: Install Samba server packages
+  ansible.builtin.package:
+    name: '{{ lsw_config_samba_packages }}'
+    state: present
+  when: lsw_windows_access_host_files
+  become: true
+
 - name: Install SR-IOV module on Debian or EndeavourOS
   become: true
-  when: ansible_facts['lsb']['id'] in ['Debian', 'EndeavourOS'] and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
+  when: ansible_facts.lsb.id in ['Debian', 'EndeavourOS'] and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
   notify:
     - Reload Boot Loader
     - Reload initramfs
@@ -193,14 +210,14 @@
     - name: Install SR-IOV package with pacman
       ansible.builtin.command: pacman -U --noconfirm /tmp/{{ lsw_sriov_i915_pkg }}
       changed_when: true
-      when: ansible_facts['lsb']['id'] == 'EndeavourOS'
+      when: ansible_facts.lsb.id == 'EndeavourOS'
     - name: Install SR-IOV package with dpkg
       ansible.builtin.command: dpkg -i /tmp/{{ lsw_sriov_i915_pkg }}
       changed_when: true
-      when: ansible_facts['lsb']['id'] == 'Debian'
+      when: ansible_facts.lsb.id == 'Debian'
 
 - name: Install SR-IOV module and dependencies on Nobara
-  when: ansible_facts['lsb']['id'] == 'NobaraLinux' and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
+  when: ansible_facts.lsb.id == 'NobaraLinux' and lsw_virt_mode == 'sriov' and not _lsw_sriov_conf.stat.exists
   notify:
     - Reload Boot Loader
     - Reload initramfs

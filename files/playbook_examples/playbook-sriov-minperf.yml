@@ -1,10 +1,11 @@
 ---
 
-# The minperf playbook stands for "minimal performance"
+# The minperf playbook stands for "minimal performance".
 # The Windows VM is on an image file with no disk dedicated to the VM. It gives decent performance.
-# Please take your time to adjust the size for "lsw_windows_img_size" you can give to your image depending
+# Please take your time to adjust the size for "lsw_windows_img_size" you can give to your image depending.
 # on the size you have on your only disk.
-# Adjust the variables with documentation/VARIABLES.md.
+# Bluetooth controller is passthroughed to the VM.
+# Adjust the variables with files/documentation/VARIABLES.md.
 # Note 1: RDP musts be activated because it's the only way to access the VM at least for the first time.
 # Note 3: Looking Glass musts be installed because it's a requirement for this virtualization mode.
 
@@ -21,6 +22,7 @@
     lsw_windows_activate_rdp: true
     lsw_windows_password: 'secret_password'
     lsw_install_looking_glass: true
-    lsw_vdd_devcon_sha_windows: "C3816F79DEAC8E26C4A5C5791FE3F1F8104392D077D16941E7CCB6418FB3467A"
+    lsw_config_add_bluetooth: true
+    # lsw_config_bluetooth_address: 8087:0033
   roles:
     - ansible-role-lsw

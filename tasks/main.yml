@@ -2,7 +2,7 @@
 
 - name: Gather variables for each operating system
   ansible.builtin.include_vars:
-    file: "{{ lookup('ansible.builtin.fileglob', role_path + '/vars/' + ansible_facts['lsb']['id'] | lower + '.yml') }}"
+    file: "{{ lookup('ansible.builtin.fileglob', role_path + '/vars/' + ansible_facts.lsb.id | lower + '.yml') }}"
   tags: always
 
 - name: Set facts
@@ -21,6 +21,10 @@
   tags:
     - never
     - install
+
+- name: Prepare network configuration
+  ansible.builtin.import_tasks: network.yml
+  tags: always
 
 - name: Build VM image
   ansible.builtin.include_tasks:

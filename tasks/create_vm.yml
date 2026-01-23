@@ -12,7 +12,7 @@
   ansible.builtin.file:
     path: "{{ role_path }}/files/build/windows_img_dir/{{ item }}"
     mode: "0600"
-    owner: "{{ ansible_env['LOGNAME'] }}"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
     group: kvm
   loop:
     - efivars.fd
@@ -49,26 +49,108 @@
   block:
     - name: Create remmina conf directories
       ansible.builtin.file:
-        path: "/home/{{ ansible_env['LOGNAME'] }}/{{ item }}"
+        path: "/home/{{ ansible_facts.env.LOGNAME }}/{{ item }}"
         state: directory
         recurse: true
         mode: "0755"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"
       loop:
         - .config/remmina/plugins
         - .local/share/remmina
     - name: Create remmina preferences
       ansible.builtin.template:
         src: remmina.pref.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.config/remmina/remmina.pref"
+        dest: "/home/{{ ansible_facts.env.LOGNAME }}/.config/remmina/remmina.pref"
         mode: "0600"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"
     - name: Create remmina VM conf
       ansible.builtin.template:
         src: group_rdp_template.j2
-        dest: "/home/{{ ansible_env['LOGNAME'] }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
+        dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/remmina/group_rdp_{{ lsw_windows_vm_name }}.remmina"
         mode: "0600"
-        owner: "{{ ansible_env['LOGNAME'] }}"
-        group: "{{ ansible_env['LOGNAME'] }}"
+        owner: "{{ ansible_facts.env.LOGNAME }}"
+        group: "{{ ansible_facts.env.LOGNAME }}"
+
+- name: Create launchers directories
+  ansible.builtin.file:
+    path: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/{{ item }}"
+    state: directory
+    recurse: true
+    mode: "0755"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  loop:
+    - icons/hicolor/256x256/emblems
+    - applications
+
+- name: Copy logos to launcher image directory
+  ansible.builtin.copy:
+    src: "logos/{{ item }}"
+    dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/icons/hicolor/256x256/emblems/{{ item }}"
+    mode: preserve
+  loop:
+    - lswPassthrough.png
+    - lswLG.png
+    - lswRDP.png
+
+- name: Create LSW script launcher for Passthrough VM
+  vars:
+    _lsw_lg: false
+  become: true
+  ansible.builtin.template:
+    src: launcher.sh.j2
+    dest: "/usr/local/bin/lsw-launcher-{{ ansible_facts.env.LOGNAME }}.sh"
+    mode: "0700"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  when: lsw_virt_mode == 'passthrough'
+
+- name: Create LSW script launcher for Looking Glass VM
+  vars:
+    _lsw_lg: true
+  become: true
+  ansible.builtin.template:
+    src: launcher.sh.j2
+    dest: "/usr/local/bin/lsw-launcherlg-{{ ansible_facts.env.LOGNAME }}.sh"
+    mode: "0700"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  when: lsw_install_looking_glass
+
+- name: Create LSW passthrough launcher
+  vars:
+    _lsw_type: Passthrough
+    _lsw_launcher_suffix: ""
+  ansible.builtin.template:
+    src: launcher.desktop.j2
+    dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswPassthrough.desktop"
+    mode: "0755"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  when: lsw_virt_mode == 'passthrough'
+
+- name: Create LSW Looking Glass launcher
+  vars:
+    _lsw_type: LG
+    _lsw_launcher_suffix: "lg"
+  ansible.builtin.template:
+    src: launcher.desktop.j2
+    dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswLG.desktop"
+    mode: "0755"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  when: lsw_install_looking_glass
+
+- name: Create LSW RDP launcher
+  vars:
+    _lsw_type: RDP
+    _lsw_launcher_suffix: "{{ 'lg' if lsw_install_looking_glass else '' }}"
+  ansible.builtin.template:
+    src: launcher.desktop.j2
+    dest: "/home/{{ ansible_facts.env.LOGNAME }}/.local/share/applications/lswRDP.desktop"
+    mode: "0755"
+    owner: "{{ ansible_facts.env.LOGNAME }}"
+    group: "{{ ansible_facts.env.LOGNAME }}"
+  when: lsw_windows_activate_rdp
