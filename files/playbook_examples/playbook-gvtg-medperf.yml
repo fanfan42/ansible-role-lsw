@@ -1,12 +1,13 @@
 ---
 
-# The medperf playbook stands for "medium performance"
+# The medperf playbook stands for "medium performance".
 # The Windows VM is on a dedicated disk for the VM but the PCI controller is "emulated".
 # lsw_windows_img_size don't have to be too high. You will expand your drive directly on Windows after installation.
 # It gives you a dual boot system with Windows and Linux at boot.
 # It gives good performance.
+# An example list of chocolatey packages (https://community.chocolatey.org/packages) is given to help you customize your Windows image.
 # Note: Looking Glass musts be installed because it's a requirement for this virtualization mode.
-# Adjust the variables with files/documentation/VARIABLES.md
+# Adjust the variables with files/documentation/VARIABLES.md.
 
 - name: A man needs a name
   hosts: localhost
@@ -21,5 +22,8 @@
     lsw_windows_disk_device_path: '/dev/sda'
     lsw_config_pass_disk_controller: false
     lsw_install_looking_glass: true
+    lsw_windows_app_to_add:
+      - notepadplusplus
+      - firefox
   roles:
     - ansible-role-lsw

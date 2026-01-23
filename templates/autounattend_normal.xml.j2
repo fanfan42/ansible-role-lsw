@@ -228,22 +228,20 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 }
 		</File>
 {% if lsw_virt_mode == 'sriov' %}
-		<File path="C:\Windows\Setup\Scripts\SystemDriverInstall.ps1">
-Start-Transcript -Path "C:\SystemDriverInstall.log" -Force
+		<File path="C:\Windows\Setup\Scripts\VDDInstallDriver.ps1">
 $ErrorActionPreference = "Stop"
 
 try {
-	schtasks /Delete /TN "SystemDriverInstall" /F
-
     $tempDir = "C:\VDDInstall"
-    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+    New-Item -ItemType Directory -Path $tempDir -Force
 
-    $devconPath = Join-Path $tempDir "Devcon.Installer.exe"
-    Invoke-WebRequest -Uri "https://github.com/Drawbackz/DevCon-Installer/releases/download/{{ lsw_vdd_devcon_version }}/Devcon.Installer.exe" -OutFile $devconPath -UseBasicParsing -ErrorAction Stop
-	Start-Process -FilePath $devconPath -ArgumentList "install -hash {{ lsw_vdd_devcon_sha_windows }} -update -dir `"$tempDir`"" -Wait -WindowStyle Hidden
-	$devconExe = Join-Path $tempDir "devcon.exe"
+	$nefconUrl = "https://github.com/nefarius/nefcon/releases/download/{{ lsw_vdd_nefcon_version }}/nefcon_{{ lsw_vdd_nefcon_version }}.zip"
+	$nefconZipPath = Join-Path $tempDir "nefcon.zip";
+	Invoke-WebRequest -Uri $nefconUrl -OutFile $nefconZipPath -UseBasicParsing -ErrorAction Stop
+	Expand-Archive -Path $nefconZipPath -DestinationPath $tempDir -Force -ErrorAction Stop
+	$nefconExe = Join-Path $tempDir "x64\nefconw.exe"
 
-    $downloadUrl = "https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/download/{{ lsw_vdd_version }}/VirtualDisplayDriver-x86.Driver.Only.zip"
+    $downloadUrl = "https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/download/{{ lsw_vdd_version }}/VirtualDisplayDriver-x86.Driver.Only.zip";
     $driverZipPath = Join-Path $tempDir "driver.zip"
     Invoke-WebRequest -Uri $downloadUrl -OutFile $driverZipPath -UseBasicParsing -ErrorAction Stop
     Expand-Archive -Path $driverZipPath -DestinationPath $tempDir -Force -ErrorAction Stop
@@ -256,20 +254,16 @@ try {
     $certificates.Import($catBytes)
 
     $certsFolder = Join-Path $tempDir "ExportedCerts"
-    New-Item -ItemType Directory -Path $certsFolder -Force | Out-Null
+    New-Item -ItemType Directory -Path $certsFolder -Force
 
     foreach ($cert in $certificates) {
         $certFilePath = Join-Path -Path $certsFolder -ChildPath "$($cert.Thumbprint).cer"
         $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert) | Set-Content -Path $certFilePath -Encoding Byte
-        Start-Process -FilePath "certutil.exe" -ArgumentList "-addstore -f -machine TrustedPublisher `"$certFilePath`"" -Wait -WindowStyle Hidden
+        Start-Process -FilePath "certutil.exe" -ArgumentList "-addstore TrustedPublisher `"$certFilePath`"" -Wait -WindowStyle Hidden
     }
 
-	$check = &amp; $devconExe find "Root\MttVDD"
-	if ($check -match "Root\\MttVDD") {
-    	Write-Output "Virtual Display Driver already present. No installation."
-	} else {
-    	&amp; $devconExe install .\VirtualDisplayDriver\MttVDD.inf "Root\MttVDD"
-	}
+    &amp; $nefconExe install .\VirtualDisplayDriver\MttVDD.inf "Root\MttVDD"
+	Start-Sleep -Seconds 10
 
     Pop-Location
 }
@@ -277,17 +271,9 @@ catch {
     Write-Error "Error in SystemDriverInstall.ps1 : $_"
 }
 finally {
-    Stop-Transcript
     Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 exit 0
-		</File>
-		<File path="C:\Windows\Setup\Scripts\SetupComplete.cmd">
-@echo off
-echo [%date% %time%] Starting SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
-schtasks /Create /TN "SystemDriverInstall" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Setup\Scripts\SystemDriverInstall.ps1" /SC ONSTART /RU SYSTEM /RL HIGHEST /F &gt;&gt; C:\setupcomplete.log 2&gt;&amp;1
-echo [%date% %time%] End of SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
-exit /b 0
 		</File>
 {% endif %}
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
@@ -378,6 +364,36 @@ $scripts = @(
 		<File path="C:\Windows\Setup\Scripts\UserOnce.ps1">
 $scripts = @(
 	{
+		New-Item -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Force;
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{5399e694-6ce5-4d6c-8fce-1d8870fdcba0}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{b4bfcc3a-db2c-424c-b029-7fe99a87c641}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{a8cdff1c-4878-43be-b5fd-f8091c1c60d0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{374de290-123f-4565-9164-39c4925e467b}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
+		New-Item -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Force;
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{5399e694-6ce5-4d6c-8fce-1d8870fdcba0}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{b4bfcc3a-db2c-424c-b029-7fe99a87c641}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{a8cdff1c-4878-43be-b5fd-f8091c1c60d0}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{374de290-123f-4565-9164-39c4925e467b}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{f874310e-b6b7-47dc-bc84-b9e6b38f5903}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
+	};
+	{
 		Set-ItemProperty -LiteralPath 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Search' -Name 'SearchboxTaskbarMode' -Type 'DWord' -Value 1;
 	};
 	{
@@ -466,6 +482,11 @@ $scripts = @(
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-03.ps1' -Raw | Invoke-Expression;
 	};
+{% if lsw_virt_mode == 'sriov' %}
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\VDDInstallDriver.ps1' -Raw | Invoke-Expression;
+	};
+{% endif %}
 );
 
 &amp; {

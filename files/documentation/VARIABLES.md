@@ -52,8 +52,6 @@
 [**SR-IOV variables**](#sr-iov-variables)
 
 * [lsw_vdd_version](#lsw_vdd_version)
-* [lsw_vdd_devcon_sha_windows](#lsw_vdd_devcon_sha_windows)
-* [lsw_vdd_devcon_version](#lsw_vdd_devcon_version)
 * [lsw_vdd_nefcon_version](#lsw_vdd_nefcon_version)
 
 [**OS specific variables**](#os-specific-variables)
@@ -313,17 +311,9 @@ Default to **false**. If you don't have any sound with the sound card included i
 
 Virtual Display Driver version from [Virtual Display Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases) release page.
 
-### lsw_vdd_devcon_sha_windows
-
-A sha256 signature for the version of Windows 11 used (Remember, Windows 10 doesn't work with SR-IOV). Default to 23H2 sha256, more information [here](https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json). Devcon is needed to install the Virtual Display Driver but it needs to know with which version of Windows 11 it "talks".
-
-### lsw_vdd_devcon_version
-
-Devcon still works better when lsw_windows_install_template is set to normal. Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
-
 ### lsw_vdd_nefcon_version
 
-Nevcon works better when lsw_windows_install_template is set to private. Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
+Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page. Nefcon is used to install Virtual Display Driver.
 
 ## OS specific variables
 

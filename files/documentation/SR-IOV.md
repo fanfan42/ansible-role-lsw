@@ -16,7 +16,7 @@ This mode is highly experimental and has many problems:
 * ~~Debian only: Liquorix kernel is not the first kernel to boot every time. You have to manually boot it from grub when booting your computer.~~
 * Intel 12th and 13th: ~~For now, only one Intel driver allows the build part working but the VM is really slow. When connected with RDP on the VM, find the **Intel Graphics Software** installed in the VM packages and install the update. Everything works fine after.~~ Found 2nd driver (september 2025) that can do the trick, see SR-IOV [VARIABLES](./VARIABLES.md) and GPU driver [README](../build/extra_packages/README.md), on Intel part.
 * Debian with GNOME: Display Manager resets when creating the Virtual Function (VF) when using Wayland in your Desktop Environment. Use X11/X.org instead when login to your distro when on Debian GNOME (the wheel at bottom right of the login screen when asking your password).
-* Virtual Display Driver may not install, it's random but not too much often. You have to install it yourself on the VM by downloading, for example, this version of [VDD Control](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/tag/25.7.23).
+* ~~Virtual Display Driver may not install, it's random but not too much often. You have to install it yourself on the VM by downloading, for example, this version of [VDD Control](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases/tag/25.7.23).~~
 * On Nobara, when activating the RDP for VM and launching the connection to the VM, I have "your libfreerdp does not support h264". Edit the connection in Remmina, change the value in "Color Depth" field to make it work (True Color (32bpp) for example). Try open again the VM via RDP.
 * When using Looking Glass, at the very first boot, LG doesn't connect to Windows, the VM musts be shut down and restarted. At the really first boot, Windows makes some updates on its peripherals, take 2 minutes before stop and start the VM. Going on the OS via RDP (Remmina) first can also help especially to correctly initiate the first install of Virtual Display Driver.
 
@@ -89,7 +89,7 @@ $ ansible-playbook sriov.yml -t install -v --ask-become-pass
 
 You will be asked your sudo password, enter it. For the very first install, the system reboots once. An Ansible task warns you that this action is OK and to execute again the playbook after the reboot.
 
-After the reboot, play again the same command as above, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again (except if you don't install Zen kernel like in Nobara). Remove the **install** tag at the next step.
+After the reboot, play again the same command as above, the role starts installing all the needed packages. The **install** tag is only used once. You know everything is installed when the host reboots again. Remove the **install** tag at the next step.
 
 ```shell
 $ ansible-playbook sriov.yml -t build,config,create -v --ask-become-pass
