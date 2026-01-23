@@ -798,13 +798,10 @@ if( $out -match '\s([a-f0-9-]{36})\s' ) {
 }
 		</File>
 {% if lsw_virt_mode == 'sriov' %}
-		<File path="C:\Windows\Setup\Scripts\SystemDriverInstall.ps1">
-Start-Transcript -Path "C:\SystemDriverInstall.log" -Force
+		<File path="C:\Windows\Setup\Scripts\VDDInstallDriver.ps1">
 $ErrorActionPreference = "Stop"
 
 try {
-	schtasks /Delete /TN "SystemDriverInstall" /F
-
     $tempDir = "C:\VDDInstall"
     New-Item -ItemType Directory -Path $tempDir -Force
 
@@ -836,6 +833,7 @@ try {
     }
 
     &amp; $nefconExe install .\VirtualDisplayDriver\MttVDD.inf "Root\MttVDD"
+	Start-Sleep -Seconds 10
 
     Pop-Location
 }
@@ -843,17 +841,9 @@ catch {
     Write-Error "Error in SystemDriverInstall.ps1 : $_"
 }
 finally {
-    Stop-Transcript
-	Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 exit 0
-		</File>
-		<File path="C:\Windows\Setup\Scripts\SetupComplete.cmd">
-@echo off
-echo [%date% %time%] Starting SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
-schtasks /Create /TN "SystemDriverInstall" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Setup\Scripts\SystemDriverInstall.ps1" /SC ONSTART /RU SYSTEM /RL HIGHEST /F &gt;&gt; C:\setupcomplete.log 2&gt;&amp;1
-echo [%date% %time%] End of SetupComplete.cmd &gt;&gt; C:\setupcomplete.log
-exit /b 0
 		</File>
 {% endif %}
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
@@ -874,34 +864,34 @@ Remove-Item $scriptPath -Force -ErrorAction SilentlyContinue
 {% endif %}
 
 {% if lsw_windows_gpu_driver == 'intel' %}
-winget install --accept-package-agreements --accept-source-agreements --silent --id Microsoft.DotNet.AspNetCore.10
+choco install -y --no-progress dotnet-9.0-desktopruntime
 {% endif %}
 
+foreach( $letter in 'DEF'.ToCharArray() ) {
+    $exe = "${letter}:\extra_packages\gpudriver.exe";
+    if( Test-Path -LiteralPath $exe ) {
 {% if lsw_install_looking_glass %}
-winget install --accept-package-agreements --accept-source-agreements --silent --id gnif.LookingGlass --version {{ lsw_lg_version }}
+        Start-Process -FilePath "${letter}:\extra_packages\looking_glass_host_setup.exe" -ArgumentList '/S' -Wait;
 {% endif %}
+        Start-Process -FilePath $exe -ArgumentList '{{ lsw_windows_gpu_install_options[lsw_windows_gpu_driver] }}' -Wait;
+    }
+}
 
 {% if lsw_windows_app_to_add | default([]) | length > 0 %}
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+
+Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+$env:Path += ';C:\ProgramData\chocolatey\bin'
 $packages = @(
 {% for app in lsw_windows_app_to_add %}
-    @{
-        id = "{{ app[0] }}";
-        version = {% if app[1] is not none %}"{{ app[1] }}"{% else %}$null{% endif %}
-    }{% if not loop.last %},{% endif %}
+    '{{ app }}'{% if not loop.last %},{% endif %}
 {% endfor %}
 )
 
 foreach ($pkg in $packages) {
-    try {
-        $cmd = "winget install --accept-package-agreements --accept-source-agreements --silent --id $($pkg.id)"
-        if ($pkg.version) {
-            $cmd += " --version $($pkg.version)"
-        }
-        Invoke-Expression $cmd
-    }
-    catch {
-        Write-Warning "Package $($pkg.id) failed to install, continuing..."
-    }
+    choco install $pkg -y --no-progress
 }
 {% endif %}
 		</File>
@@ -1119,7 +1109,7 @@ $scripts = @(
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
-		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\ClassicStartMenu' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
@@ -1133,7 +1123,7 @@ $scripts = @(
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{1cf1260c-4dd0-4ebb-811f-33c572699fde}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{f02c1a0d-be21-4350-88b0-7367fc96ef3c}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{3add1653-eb32-4cb0-bbd7-dfa0abb5acca}' -Value 1 -Type 'DWord';
-		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 1 -Type 'DWord';
+		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{645ff040-5081-101b-9f08-00aa002f954e}' -Value 0 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{20d04fe0-3aea-1069-a2d8-08002b30309d}' -Value 0 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value 1 -Type 'DWord';
 		Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel' -Name '{a0953c92-50dc-43bf-be83-3742fed03c9c}' -Value 1 -Type 'DWord';
@@ -1149,6 +1139,11 @@ $scripts = @(
 			$_.SessionId -eq ( Get-Process -Id $PID ).SessionId;
 		} | Stop-Process -Force;
 	};
+{% if lsw_windows_access_host_files %}
+	{
+		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
+	};
+{% endif %}
 );
 
 &amp; {
@@ -1306,14 +1301,14 @@ $scripts = @(
 	{
 		cmd.exe /c "rmdir C:\Windows.old";
 	};
-{% if lsw_windows_access_host_files %}
-	{
-		cmd.exe /c "net use Z: \\{{ lsw_windows_vm_private_ip.split('.')[:3] | join('.') }}.1\{{ ansible_facts.hostname }} /user:WORKGROUP\{{ lsw_windows_user }} {{ lsw_windows_access_host_files_pass }} /persistent:yes";
-	};
-{% endif %}
 	{
 		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\unattend-03.ps1' -Raw | Invoke-Expression;
 	};
+{% if lsw_virt_mode == 'sriov' %}
+	{
+		Get-Content -LiteralPath 'C:\Windows\Setup\Scripts\VDDInstallDriver.ps1' -Raw | Invoke-Expression;
+	};
+{% endif %}
 );
 
 &amp; {

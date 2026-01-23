@@ -48,13 +48,10 @@
 
 - [lsw_passthrough_gpu_pci_base_addr](#lsw_passthrough_gpu_pci_base_addr)
 - [lsw_config_is_laptop](#lsw_config_is_laptop)
-- [lsw_config_gpu_nvidia_gtx](#lsw_config_gpu_nvidia_gtx)
 
 [**SR-IOV variables**](#sr-iov-variables)
 
 * [lsw_vdd_version](#lsw_vdd_version)
-* [lsw_vdd_devcon_sha_windows](#lsw_vdd_devcon_sha_windows)
-* [lsw_vdd_devcon_version](#lsw_vdd_devcon_version)
 * [lsw_vdd_nefcon_version](#lsw_vdd_nefcon_version)
 
 [**OS specific variables**](#os-specific-variables)
@@ -206,11 +203,13 @@ See **lsw_windows_app_to_remove**.
 
 ### lsw_windows_app_to_add
 
-Default to a list of useful packages to install to not rely on Windows Update. Everything is installed via winget during build time. A complete list of supported packages is available [here](https://github.com/svrooij/winget-pkgs-index/blob/main/index.v2.csv).
+Default to a list of useful packages to install to not rely on Windows Update. Everything is installed via chocolatey during build time. Choose your packages [here](https://community.chocolatey.org/packages).
 
 ### lsw_windows_access_host_files
 
 Default to **false**. If you set it to **true**, the VM created can access to some files on your computer (host). Useful when you want to share files between the host and the VM.
+
+Note: At least on Nobara, firewall (firewalld) is active, disable it (`sudo sytemctl disable --now firewalld`) or create a rule to allow VM to access the samba share on the host.
 
 ### lsw_windows_access_host_files_dir
 
@@ -219,6 +218,8 @@ Default to **/home/<your_user>** (**your_user** is set in [lsw_windows_user](#ls
 ### lsw_windows_access_host_files_pass
 
 Default to an unsecured password. Give a password to access your files from the VM to your host.
+
+Note: For unknown reason, everytime you reboot your VM, the password is asked again when you want to access the share.
 
 ### lsw_config_vm_memory
 
@@ -230,7 +231,7 @@ Default to empty. This role creates a VM with nearly bare performance including 
 
 
 |              | 2nd mouse | 2nd keyboard | Result                                                                                                                                                                                                                                                                                                                                                                |
-| :----------- | --------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| :------------- | ----------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GVT-g/SR-IOV | no        | no           | OK. SPICE is used to connect via network 1st mouse and keyboard.`looking-glass-client -m 97 -F win:size=1920x1080 input:rawMouse input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                                                                         |
 | GVT-g/SR-IOV | yes       | no           | OK. SPICE is used to connect via network 1st keyboard. 2nd mouse is linked via EVDEV to the VM. Linux host cannot use the 2nd mouse.`looking-glass-client -m 97 -F win:size=1920x1080 input:GrabKeyboardOnFocus input:autoCapture`                                                                                                                                    |
 | GVT-g/SR-IOV | yes       | yes          | OK. SPICE is not used. 2nd mouse and keyboard are managed via EVDEV and not working on Linux Host.`looking-glass-client -m 97 -F win:size=1920x1080 -s`                                                                                                                                                                                                               |
@@ -300,9 +301,9 @@ In this example, the VGA compatible controller needed for a pasthrough virtualiz
 
 If your computer is a laptop, dGPU cards like Nvidia need to "see" a battery in the system. A file called "acpitable.bin" is [here](../files/acpitable.bin). This file is needed for Nvidia works on laptop VM. The case of AMD and Intel dGPU are not tested if this is a need. Default value is **false**. Set it to **true** if you use this Ansible role on a laptop with Nvidia dGPU.
 
-### lsw_config_gpu_nvidia_gtx
+### lsw_passthrough_force_sound
 
-Default to **false**. This variable is only for Nvidia GTX dGPU. No need to set it to **true** when you have a Nvidia RTX dGPU. Follow the guide [here](PATCH_NVIDIA_FW.md) to create a patched firmware.
+Default to **false**. If you don't have any sound with the sound card included in your GPU because software reset is not supported, set it to **true** so the sound will be served on your host sound card. Sadly, your second screen won't have the sound, just the host like when using Looking Glass.
 
 ## SR-IOV variables
 
@@ -310,17 +311,9 @@ Default to **false**. This variable is only for Nvidia GTX dGPU. No need to set 
 
 Virtual Display Driver version from [Virtual Display Driver](https://github.com/VirtualDrivers/Virtual-Display-Driver/releases) release page.
 
-### lsw_vdd_devcon_sha_windows
-
-A sha256 signature for the version of Windows 11 used (Remember, Windows 10 doesn't work with SR-IOV). Default to 23H2 sha256, more information [here](https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json). Devcon is needed to install the Virtual Display Driver but it needs to know with which version of Windows 11 it "talks".
-
-### lsw_vdd_devcon_version
-
-Devcon still works better when lsw_windows_install_template is set to normal. Devcon version from [Devcon-Installer](https://github.com/Drawbackz/DevCon-Installer/releases) release page.
-
 ### lsw_vdd_nefcon_version
 
-Nevcon works better when lsw_windows_install_template is set to private. Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page.
+Nefcon version from [Nefarius](https://github.com/nefarius/nefcon/releases) release page. Nefcon is used to install Virtual Display Driver.
 
 ## OS specific variables
 

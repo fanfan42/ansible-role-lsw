@@ -1,6 +1,12 @@
 {% if lsw_windows_gpu_driver != 'nvidia' %}
 softdep drm pre: vfio-pci
 {% else %}
+blacklist nouveau
+blacklist nvidia_drm
+blacklist nvidia_modeset
+blacklist nvidia_uvm
+blacklist i2c_nvidia_gpu
+blacklist nvidia
 softdep nvidia pre: vfio-pci
 {% endif %}
 options vfio-pci ids={{ _lsw_pci_ids.stdout }}

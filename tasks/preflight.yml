@@ -60,6 +60,11 @@
     msg: "{{ role_path }}/files/build/virtio/virtio-win.iso doesn't exist, read {{ role_path }}/files/build/virtio/README.md !!!"
   when: "'build' in ansible_run_tags and not _lsw_virtio_win.stat.exists"
 
+- name: Fail when missing Looking Glass driver file for building
+  ansible.builtin.fail:
+    msg: "{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe dont exist, read {{ role_path }}/files/build/extra_packages/README.md !!!"
+  when: "lsw_install_looking_glass and 'build' in ansible_run_tags and not _lsw_lg_driver.stat.exists"
+
 - name: Fail when password for the VM not set with RDP activated
   ansible.builtin.fail:
     msg: "Windows VM password cannot be empty !!!"
@@ -68,7 +73,16 @@
 - name: Configure IOMMU for dracut
   ansible.builtin.copy:
     dest: /etc/kernel/cmdline
-    content: "{{ ((_lsw_krnl_file.content | b64decode).splitlines() | join(' ') + ' ' + __lsw_iommu_param + ' iommu=pt' {% if lsw_virt_mode == 'passthrough' %} + ' pci=noaer'{% endif %}) | trim }}"
+    content: >-
+      {{
+        (
+          (_lsw_krnl_file.content | b64decode).splitlines() | join(' ')
+          + ' '
+          + __lsw_iommu_param
+          + ' iommu=pt'
+          + (' pci=noaer' if lsw_virt_mode == 'passthrough' else '')
+        ) | trim
+      }}
     mode: "0644"
   when: lsw_distro_initramfs_binary == 'dracut' and __lsw_iommu_param not in (_lsw_krnl_file.content | b64decode)
   become: true

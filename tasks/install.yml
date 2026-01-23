@@ -158,11 +158,21 @@
     - Pause
   become: true
 
-- name: Install Zen Kernel on Debian
+- name: Install Liquorix Kernel on Debian
   ansible.builtin.package:
     name: '{{ lsw_zen_packages }}'
     state: present
-  when: ansible_facts.lsb.id == 'Debian' and lsw_install_zen
+  when: ansible_facts.lsb.id == 'Debian' and lsw_install_zen and lsw_virt_mode != 'sriov'
+  notify:
+    - Reboot
+    - Pause
+  become: true
+
+- name: Install XanMod Kernel on Debian when SR-IOV
+  ansible.builtin.package:
+    name: '{{ lsw_zen_sriov_packages }}'
+    state: present
+  when: ansible_facts.lsb.id == 'Debian' and lsw_install_zen and lsw_virt_mode == 'sriov'
   notify:
     - Reboot
     - Pause

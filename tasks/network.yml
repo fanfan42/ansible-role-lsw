@@ -1,0 +1,75 @@
+---
+
+# BUG on Debian, VM doesn't start with no errors in logs
+# https://wiki.libvirt.org/Virtual_network_default_has_not_been_started.html
+- name: Stop and disable dnsmasq for Debian
+  ansible.builtin.systemd:
+    name: dnsmasq
+    enabled: false
+    state: stopped
+  become: true
+  when: ansible_facts.lsb.id == 'Debian'
+
+# Nobara has a special service for managing network in VMs
+- name: Nobara and EndeavourOS - load special services for network
+  ansible.builtin.systemd:
+    name: '{{ item }}'
+    enabled: true
+    state: started
+  loop:
+    - virtnetworkd
+    - virtqemud
+  become: true
+  when: ansible_facts.lsb.id in ['NobaraLinux', 'EndeavourOS']
+
+# Bug: delete default network before adding it
+- name: Disable and stop default network
+  community.libvirt.virt_net:
+    name: default
+    state: absent
+    autostart: false
+  become: true
+
+- name: Enable and start default network
+  community.libvirt.virt_net:
+    name: default
+    state: present
+    autostart: true
+    xml: "{{ lookup('ansible.builtin.template', 'libvirt_conf_net.xml.j2') }}"
+  become: true
+
+- name: Enable and start default network (force)
+  ansible.builtin.shell: virsh net-start default && virsh net-autostart default
+  become: true
+  changed_when: true
+
+- name: Configure Host file share for VM
+  become: true
+  when: lsw_windows_access_host_files
+  block:
+    - name: Copy samba configuration
+      ansible.builtin.template:
+        src: smb.conf.j2
+        dest: /etc/samba/smb.conf
+        mode: "0640"
+        owner: root
+        group: root
+    - name: Enable and activate samba standalone server
+      ansible.builtin.systemd:
+        name: smb
+        enabled: true
+        state: started
+    - name: Check if samba user exists
+      ansible.builtin.command: pdbedit -L {{ lsw_windows_user }}
+      register: _lsw_user_check
+      changed_when: false
+      failed_when: false
+    - name: Add password if samba user does not exist
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          printf "%s\n%s\n" "{{ lsw_windows_access_host_files_pass }}" "{{ lsw_windows_access_host_files_pass }}" \
+          | smbpasswd -a -s {{ lsw_windows_user }}
+      when: _lsw_user_check.rc != 0
+      changed_when: true
+      no_log: true

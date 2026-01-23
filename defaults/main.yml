@@ -8,6 +8,7 @@ lsw_virt_mode: passthrough
 
 # Get this var by running this command: lspci | grep VGA
 lsw_passthrough_gpu_pci_base_addr: 01:00
+lsw_passthrough_force_sound: false
 
 # Build Windows VM vars
 lsw_windows_iso: windows10.iso
@@ -128,25 +129,19 @@ lsw_windows_feature_to_remove:
   - Recall
   - Microsoft-SnippingTool
 
-# Full list of 10K+ packages available here: https://github.com/svrooij/winget-pkgs-index/blob/main/index.v2.csv
+# Search your package on https://community.chocolatey.org/packages
 lsw_windows_app_to_add:
-  - ['Microsoft.VCRedist.2005.x64', null]
-  - ['Microsoft.VCRedist.2008.x64', null]
-  - ['Microsoft.VCRedist.2010.x64', null]
-  - ['Microsoft.VCRedist.2012.x64', null]
-  - ['Microsoft.VCRedist.2013.x64', null]
-  - ['Microsoft.VCRedist.2015+.x64', null]
-  - ['7zip.7zip', null]
-  - ['RARLab.Winrar', null]
-  - ['Notepad++.Notepad++', null]
-  - ['Mozilla.Firefox.fr', null]
-  # - ['Brave.Brave', null]
-  # - ['Google.Chrome', null]
-  # - ['Opera.Opera', null]
-  # - ['Valve.Steam', null]
-  # - ['ClamWin.ClamWin', null]
-  # Note: Dotnet runtime is automatically installed when Intel driver musts be installed
-  # - ['Microsoft.DotNet.AspNetCore.10', null]
+  - vcredist-all
+  - 7zip
+  - winrar
+  - notepadplusplus
+  - firefox
+  # - brave
+  # - googlechrome
+  # - opera
+  # - sumatrapdf
+  # - steam
+  # - avastfreeantivirus
 
 # Configure an access to host files from the VM
 lsw_windows_access_host_files: false
@@ -195,13 +190,7 @@ lsw_install_zen: true
 
 # Virtual Display Driver - vdd
 lsw_vdd_version: '25.7.23'
-# Sha of Windows 11 23H2: 6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8
-# Sha of Windows 10 and 11 22H2: C3816F79DEAC8E26C4A5C5791FE3F1F8104392D077D16941E7CCB6418FB3467A
-# See https://github.com/Drawbackz/DevCon-Installer/blob/master/devcon_sources.json
-lsw_vdd_devcon_sha_windows: '6ECFAF7042C525DDB6C0BF0501BECFBCE85CBDF2A33B1BCA67734FEA567AF3B8'
-# Use devcon when lsw_windows_install_template is set to normal
-# See https://github.com/Drawbackz/DevCon-Installer/releases
-lsw_vdd_devcon_version: '1.4-rc'
+
 # Use nefcon when lsw_windows_install_template is set to private
 # See https://github.com/nefarius/nefcon/releases
 lsw_vdd_nefcon_version: 'v1.14.0'

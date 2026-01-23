@@ -68,6 +68,11 @@
     path: '{{ role_path }}/files/build/virtio/virtio-win.iso'
   register: _lsw_virtio_win
 
+- name: Check Looking Glass file exists
+  ansible.builtin.stat:
+    path: '{{ role_path }}/files/build/extra_packages/looking_glass_host_setup.exe'
+  register: _lsw_lg_driver
+
 - name: Check 2nd mouse exists
   ansible.builtin.stat:
     path: '{{ lsw_config_usb_mouse }}'
@@ -166,6 +171,14 @@
   register: _lsw_grub_check
   changed_when: false
   when: lsw_distro_boot_loader == 'grub'
+
+- name: Get current screen resolution
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      xrandr | grep -m1 '*+'| gawk '{print $1}'
+  register: _lsw_screen_res
+  changed_when: false
 
 - name: Get the PCI disk controller address
   ansible.builtin.shell:
